@@ -1,2 +1,0 @@
-controller
--DCATKIN_DEVEL_PREFIX=/home/kerim/modular_robots/modular_ws/devel -DCMAKE_INSTALL_PREFIX=/home/kerim/modular_robots/modular_ws/install -G Unix Makefiles
