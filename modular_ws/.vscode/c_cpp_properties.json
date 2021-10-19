@@ -1,0 +1,31 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/kerim/kontrolyer/devel/include/**",
+        "/home/kerim/ardupilot_ws/catkin_ws/devel_isolated/state_machine/include/**",
+        "/home/kerim/ardupilot_ws/catkin_ws/install_isolated/include/**",
+        "/home/kerim/catkin_ws/devel/include/**",
+        "/home/kerim/catkin2/install/include/**",
+        "/home/kerim/visuan_ws/devel/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/kerim/modular_robots/modular_ws/src/controller/include/**",
+        "/home/kerim/visuan_ws/src/find_object_2d/include/**",
+        "/home/kerim/visuan_ws/src/gscam/include/**",
+        "/home/kerim/kontrolyer/src/kontrolyer1/include/**",
+        "/home/kerim/catkin_ws/src/mavros/libmavconn/include/**",
+        "/home/kerim/catkin_ws/src/mavros/mavros/include/**",
+        "/home/kerim/catkin_ws/src/mavros/mavros_msgs/include/**",
+        "/home/kerim/ardupilot_ws/catkin_ws/src/state_machine/include/**",
+        "/home/kerim/catkin_ws/src/mavros/test_mavros/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS"
+    }
+  ],
+  "version": 4
+}

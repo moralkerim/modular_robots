@@ -1,0 +1,20 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/kerim/kontrolyer/devel/lib/python2.7/dist-packages",
+        "/home/kerim/ardupilot_ws/catkin_ws/devel_isolated/state_machine/lib/python2.7/dist-packages",
+        "/home/kerim/ardupilot_ws/catkin_ws/install_isolated/lib/python2.7/dist-packages",
+        "/home/kerim/catkin_ws/devel/lib/python2.7/dist-packages",
+        "/home/kerim/catkin2/install/lib/python2.7/dist-packages",
+        "/home/kerim/visuan_ws/devel/lib/python2.7/dist-packages",
+        "/opt/ros/melodic/lib/python2.7/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/kerim/kontrolyer/devel/lib/python2.7/dist-packages",
+        "/home/kerim/ardupilot_ws/catkin_ws/devel_isolated/state_machine/lib/python2.7/dist-packages",
+        "/home/kerim/ardupilot_ws/catkin_ws/install_isolated/lib/python2.7/dist-packages",
+        "/home/kerim/catkin_ws/devel/lib/python2.7/dist-packages",
+        "/home/kerim/catkin2/install/lib/python2.7/dist-packages",
+        "/home/kerim/visuan_ws/devel/lib/python2.7/dist-packages",
+        "/opt/ros/melodic/lib/python2.7/dist-packages"
+    ]
+}
