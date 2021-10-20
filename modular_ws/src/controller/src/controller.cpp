@@ -68,7 +68,7 @@ double roll_des, pitch_des, yaw_des;
 double roll_rate, pitch_rate, yaw_rate;
 double roll_rate_des, pitch_rate_des, yaw_rate_des;
 float w1, w2, w3, w4; //Motor hizlari
-const float pwm_trim = 1600;
+const float pwm_trim = 1800;
 const float rad2deg = 180/3.14;
 float S11_m, S12_m, S21_m, S22_m;
 float S11_p, S12_p, S21_p, S22_p;
@@ -81,10 +81,10 @@ float e, e_eski; //PID hatalari
 const unsigned int f = 40;
 const float st = 1/(float)f;
 //PD Katsayilari
-float Kp = 5;
-float Kd =  0.1/st;
+float Kp = 1.2;
+float Kd =  1.5*f;
 
-float Kp_angle = 1;
+float Kp_angle = 0.03;
 int timer;
 unsigned short int IC_val1, IC_val2, pwm_input;
 unsigned short int pwm1, pwm2;
@@ -100,7 +100,7 @@ void Kalman_Filtresi(void);
 void PWMYaz(unsigned short int pwm1, unsigned short int pwm2);
 double P_Angle(double alpha_des, double alpha);
 double PD_Rate(double alpha_dot_des, double alpha_dot);
-unsigned short int Sat(unsigned short int pwm);
+int Sat(int pwm, int max, int min);
 float pwm2ang(unsigned short int pwm);
 void MotorBaslat(void);
 void Kontrolcu(void);
@@ -167,7 +167,7 @@ int main(int argc, char **argv) {
 
     /* USER CODE BEGIN 3 */
 
-    roll_des = 20;
+    roll_des = 30;
     pitch_des = 0;
     roll_rate_des = P_Angle(roll_des,roll);
     pitch_rate_des = P_Angle(pitch_des,pitch);
@@ -181,19 +181,23 @@ int main(int argc, char **argv) {
     double pd_pitch = PD_Rate(pitch_rate_des,pitch_rate);
     double pd_yaw   = PD_Rate(yaw_rate_des,yaw_rate);
 
+    pd_roll  = Sat(pd_roll,  400, -400);
+    pd_pitch = Sat(pd_pitch, 400, -400);
+    pd_yaw   = Sat(pd_yaw,   400, -400);
+
     ROS_INFO("pd_roll: %.2f",pd_roll);
     ROS_INFO("pd_pitch: %.2f",pd_pitch);
     ROS_INFO("pd_yaw: %.2f",pd_yaw);
 
     ROS_INFO("st: %.3f",st);
 
-    unsigned int pwm1 = pwm_trim + pd_roll + pd_pitch;// + pd_yaw;
-    unsigned int pwm2 = pwm_trim - pd_roll - pd_pitch;// + pd_yaw;
-    unsigned int pwm3 = pwm_trim - pd_roll + pd_pitch;// - pd_yaw;
-    unsigned int pwm4 = pwm_trim + pd_roll - pd_pitch;// - pd_yaw;
+    unsigned int pwm1 = pwm_trim - pd_roll + pd_pitch;// + pd_yaw;
+    unsigned int pwm2 = pwm_trim + pd_roll - pd_pitch;// + pd_yaw;
+    unsigned int pwm3 = pwm_trim + pd_roll + pd_pitch;// - pd_yaw;
+    unsigned int pwm4 = pwm_trim - pd_roll - pd_pitch;// - pd_yaw;
 
     //Saturate pwm values
-    pwm1 = Sat(pwm1); pwm2 = Sat(pwm2); pwm3 = Sat(pwm3); pwm4 = Sat(pwm4);
+    pwm1 = Sat(pwm1,PWM_UPPER,PWM_LOWER); pwm2 = Sat(pwm2,PWM_UPPER,PWM_LOWER); pwm3 = Sat(pwm3,PWM_UPPER,PWM_LOWER); pwm4 = Sat(pwm4,PWM_UPPER,PWM_LOWER);
 
     //Convert pwm to motor speed 
     w1 = pwm2mot(pwm1, 1);
@@ -276,7 +280,7 @@ void Kalman_Filtresi(void) {
     tf::Matrix3x3 m(q);
     m.getRPY(roll, pitch, yaw);
     roll  =   rad2deg*roll;
-    pitch =   rad2deg*pitch;
+    pitch =   -1*rad2deg*pitch;
     yaw   =   rad2deg*yaw;
     
     ROS_INFO("roll: %.2f",roll);
@@ -287,6 +291,15 @@ void Kalman_Filtresi(void) {
     roll_rate = sensor_data.twist[1].angular.x;
     pitch_rate = sensor_data.twist[1].angular.y;
     yaw_rate = sensor_data.twist[1].angular.z;
+
+    roll_rate  = rad2deg*roll_rate;
+    pitch_rate = rad2deg*pitch_rate;
+    yaw_rate   = rad2deg*yaw_rate;
+
+    ROS_INFO("roll_rate: %.2f",roll_rate);
+    ROS_INFO("pitch_rate: %.2f",pitch_rate);
+    ROS_INFO("yaw_rate: %.2f",yaw_rate);
+
     //==============
 }
 
@@ -309,6 +322,9 @@ double PD_Rate(double alpha_dot_des, double alpha_dot) {
 	double P, D, pd,de;
 	e_eski = e;
 	e = alpha_dot_des - alpha_dot;
+  ROS_INFO("alpha_dot_des: %.2f",alpha_dot_des);
+  ROS_INFO("alpha_dot: %.2f",alpha_dot);
+  ROS_INFO("Rate error: %.2f",e);
 	de = e - e_eski;
 	P = Kp*e; D = Kd*de;
 	pd = P + D;
@@ -316,14 +332,14 @@ double PD_Rate(double alpha_dot_des, double alpha_dot) {
 
 }
 
-unsigned short int Sat(unsigned short int pwm) {
-	unsigned short int pwm_out;
-	if(pwm > PWM_UPPER) {
-		pwm_out = PWM_UPPER;
+ int Sat(int pwm, int max, int min) {
+	int pwm_out;
+	if(pwm > max) {
+		pwm_out = max;
 	}
 
-	else if (pwm < PWM_LOWER) {
-		pwm_out = PWM_LOWER;
+	else if (pwm < min) {
+		pwm_out = min;
 	}
 
 	else {
@@ -347,7 +363,7 @@ float pwm2mot(unsigned short int pwm, int dir) {
 	float in_min  = 1000;
 	float in_max  = 2000;
 	float out_min = 0;
-	float out_max  = 2300;
+	float out_max  = 1300;
 
 	return (float)(dir) * ((float)pwm - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
