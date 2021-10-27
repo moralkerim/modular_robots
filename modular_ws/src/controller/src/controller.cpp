@@ -26,13 +26,14 @@
 #include "std_msgs/String.h"
 #include "controller/attitude.h"
 #include "nav_msgs/Odometry.h"
+#include "mav_msgs/Actuators.h"
 #include <tf/tf.h>
 #include "gazebo_msgs/ModelStates.h"
 #include "gazebo_msgs/LinkState.h"
 #include <math.h>
 #include "string.h"
 #include <stdio.h>
-
+#include <vector>  
 
 /* USER CODE END Includes */
 
@@ -58,7 +59,7 @@
 /* USER CODE BEGIN PV */
 //SIM
 nav_msgs::Odometry sensor_data;
-gazebo_msgs::LinkState motors;
+mav_msgs::Actuators motors;
 controller::attitude attitude;
 
 float gyroX, gyroY, gyroZ, gyro_e_x, gyroX_a,gyroX_a_x, accX, accY, accZ;
@@ -71,7 +72,7 @@ double roll_des, pitch_des, yaw_des;
 double roll_rate, pitch_rate, yaw_rate;
 double roll_rate_des, pitch_rate_des, yaw_rate_des;
 float w1, w2, w3, w4; //Motor hizlari
-float pwm_trim = 1800;
+float pwm_trim = 1500;
 const float rad2deg = 180/3.14;
 float S11_m, S12_m, S21_m, S22_m;
 float S11_p, S12_p, S21_p, S22_p;
@@ -87,8 +88,8 @@ unsigned int start;
 const unsigned int f = 40;
 const float st = 1/(float)f;
 //PD Katsayilari
-float Kp = 0.5;
-float Kd =  0.1*f;
+float Kp = 5;
+float Kd =  0.00*f;
 
 float Kp_angle = 0.03*f;
 int timer;
@@ -129,7 +130,7 @@ int main(int argc, char **argv) {
   ros::init(argc, argv, "controller");
   ros::NodeHandle n;
   ros::Subscriber sub = n.subscribe("iris/odometry_sensor1/odometry", 1000, sensorCallback);
-  ros::Publisher motor_pub = n.advertise<gazebo_msgs::LinkState>("gazebo/set_link_state", 1000);
+  ros::Publisher motor_pub = n.advertise<mav_msgs::Actuators>("iris/command/motor_speed", 1000);
   att_pub   = n.advertise<controller::attitude>("controller/attitude", 1000);
   ros::Rate loop_rate(f);
 
@@ -228,29 +229,15 @@ int main(int argc, char **argv) {
     ROS_INFO("w3: %.2f", w3);
     ROS_INFO("w4: %.2f", w4);
 
-    //motor1
-    motors.link_name = "iris::iris_demo::iris::rotor_0";
-    motors.twist.angular.z = w1;
-    motors.reference_frame = "world";
-    //motor_pub.publish(motors);
-    //motor2
-    motors.link_name = "iris::iris_demo::iris::rotor_1";
-    motors.twist.angular.z = w2;
-    motors.reference_frame = "world";
-    //motor_pub.publish(motors);
-    //motor3
-    motors.link_name = "iris::iris_demo::iris::rotor_2";
-    motors.reference_frame = "world";
-    motors.twist.angular.z = w3;
-    //motor_pub.publish(motors);
-    //motor4
-    motors.link_name = "iris::iris_demo::iris::rotor_3";
-    motors.reference_frame = "world";
-    motors.twist.angular.z = w4;
-    //motor_pub.publish(motors);
+    std::vector<double> motor_speeds {abs(w1),abs(w2),abs(w3),abs(w4)};
+    motors.angular_velocities = motor_speeds;
+    motor_pub.publish(motors);
+
+    /*
     if(start > 100) {
       pwm_trim = 1700;
     }
+    */
     
     loop_rate.sleep();
     ros::spinOnce();
@@ -402,7 +389,7 @@ float pwm2mot(unsigned short int pwm, int dir) {
 	float in_min  = 1000;
 	float in_max  = 2000;
 	float out_min = 0;
-	float out_max  = 1100;
+	float out_max  = 1326;
 
 	return (float)(dir) * ((float)pwm - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
