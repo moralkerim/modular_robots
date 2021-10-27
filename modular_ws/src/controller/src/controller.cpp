@@ -72,7 +72,7 @@ double roll_des, pitch_des, yaw_des;
 double roll_rate, pitch_rate, yaw_rate;
 double roll_rate_des, pitch_rate_des, yaw_rate_des;
 float w1, w2, w3, w4; //Motor hizlari
-float pwm_trim = 1500;
+float pwm_trim = 1550;
 const float rad2deg = 180/3.14;
 float S11_m, S12_m, S21_m, S22_m;
 float S11_p, S12_p, S21_p, S22_p;
@@ -85,11 +85,12 @@ float e, e_eski; //PID hatalari
 unsigned int start;
 
 
-const unsigned int f = 40;
+const int f = 40;
 const float st = 1/(float)f;
 //PD Katsayilari
-float Kp = 5;
-float Kd =  0.00*f;
+float Kp_pitch = 1.7;
+float Kp_roll = 0.9;
+float Kd =  0.0*f;
 
 float Kp_angle = 0.03*f;
 int timer;
@@ -108,7 +109,7 @@ void MPU6050_Baslat(void);
 void Kalman_Filtresi(void);
 void PWMYaz(unsigned short int pwm1, unsigned short int pwm2);
 double P_Angle(double alpha_des, double alpha);
-double PD_Rate(double alpha_dot_des, double alpha_dot);
+double PD_Rate(double alpha_dot_des, double alpha_dot, double Kp);
 int Sat(int pwm, int max, int min);
 float pwm2ang(unsigned short int pwm);
 void MotorBaslat(void);
@@ -129,9 +130,9 @@ int main(int argc, char **argv) {
   /* USER CODE BEGIN 1 */
   ros::init(argc, argv, "controller");
   ros::NodeHandle n;
-  ros::Subscriber sub = n.subscribe("iris/odometry_sensor1/odometry", 1000, sensorCallback);
-  ros::Publisher motor_pub = n.advertise<mav_msgs::Actuators>("iris/command/motor_speed", 1000);
-  att_pub   = n.advertise<controller::attitude>("controller/attitude", 1000);
+  ros::Subscriber sub = n.subscribe("iris/ground_truth/odometry", 100, sensorCallback);
+  ros::Publisher motor_pub = n.advertise<mav_msgs::Actuators>("iris/command/motor_speed", 100);
+  att_pub   = n.advertise<controller::attitude>("controller/attitude", 100);
   ros::Rate loop_rate(f);
 
   /* USER CODE END 1 */
@@ -177,11 +178,11 @@ int main(int argc, char **argv) {
 
     /* USER CODE BEGIN 3 */
 
-    roll_des = 0;
-    pitch_des = 15;
+    roll_des = 20;
+    pitch_des = 20;
+    yaw_rate_des = 0;
     roll_rate_des = P_Angle(roll_des,roll);
     pitch_rate_des = P_Angle(pitch_des,pitch);
-    yaw_rate_des = P_Angle(yaw_des,yaw);
 
     attitude.roll_des = roll_des;
     attitude.pitch_des = pitch_des;
@@ -196,13 +197,13 @@ int main(int argc, char **argv) {
     ROS_INFO("pitch_rate_des: %.2f",pitch_rate_des);
     ROS_INFO("yaw_rate_des: %.2f",yaw_rate_des);
 */
-    double pd_roll  = PD_Rate(roll_rate_des,roll_rate);
-    double pd_pitch = PD_Rate(pitch_rate_des,pitch_rate);
-    double pd_yaw   = PD_Rate(yaw_rate_des,yaw_rate);
+    double pd_roll  = PD_Rate(roll_rate_des,roll_rate,Kp_roll);
+    double pd_pitch = PD_Rate(pitch_rate_des,pitch_rate,Kp_pitch);
+    double pd_yaw   = PD_Rate(yaw_rate_des,yaw_rate,Kp_pitch);
 
-    pd_roll  = Sat(pd_roll,  200, -200);
-    pd_pitch = Sat(pd_pitch, 200, -200);
-    pd_yaw   = Sat(pd_yaw,   200, -200);
+    pd_roll  = Sat(pd_roll,  300, -300);
+    pd_pitch = Sat(pd_pitch, 300, -300);
+    pd_yaw   = Sat(pd_yaw,   300, -300);
 
     ROS_INFO("pd_roll: %.2f",pd_roll);
     ROS_INFO("pd_pitch: %.2f",pd_pitch);
@@ -210,10 +211,10 @@ int main(int argc, char **argv) {
 
     //ROS_INFO("st: %.3f",st);
 
-    unsigned int pwm1 = pwm_trim + pd_pitch - pd_roll ;// + pd_yaw;
-    unsigned int pwm2 = pwm_trim - pd_pitch + pd_roll ;// + pd_yaw;
-    unsigned int pwm3 = pwm_trim + pd_pitch + pd_roll ;// - pd_yaw;
-    unsigned int pwm4 = pwm_trim - pd_pitch - pd_roll ;// - pd_yaw;
+    unsigned int pwm1 = pwm_trim + pd_pitch - pd_roll  - pd_yaw;
+    unsigned int pwm2 = pwm_trim - pd_pitch + pd_roll  - pd_yaw;
+    unsigned int pwm3 = pwm_trim + pd_pitch + pd_roll  + pd_yaw;
+    unsigned int pwm4 = pwm_trim - pd_pitch - pd_roll  + pd_yaw;
 
     //Saturate pwm values
     pwm1 = Sat(pwm1,PWM_UPPER,PWM_LOWER); pwm2 = Sat(pwm2,PWM_UPPER,PWM_LOWER); pwm3 = Sat(pwm3,PWM_UPPER,PWM_LOWER); pwm4 = Sat(pwm4,PWM_UPPER,PWM_LOWER);
@@ -233,11 +234,11 @@ int main(int argc, char **argv) {
     motors.angular_velocities = motor_speeds;
     motor_pub.publish(motors);
 
-    /*
+    
     if(start > 100) {
-      pwm_trim = 1700;
+      pwm_trim = 1500;
     }
-    */
+    
     
     loop_rate.sleep();
     ros::spinOnce();
@@ -245,6 +246,11 @@ int main(int argc, char **argv) {
     start++;
 
   }
+      /*
+      std::vector<double> motor_stop {0,0,0,0};
+      motors.angular_velocities = motor_stop;
+      motor_pub.publish(motors);
+      */
       return 0;
   /* USER CODE END 3 */
 }
@@ -288,7 +294,7 @@ void Kalman_Filtresi(void) {
                      sensor_data.pose.pose.orientation.z,
                      sensor_data.pose.pose.orientation.w); 
     tf::Matrix3x3 m(q);
-    m.getRPY(roll, pitch, yaw);
+    m.getRPY(roll, pitch, yaw,1);
     roll  =   rad2deg*roll;
     pitch =   -1*rad2deg*pitch;
     yaw   =   rad2deg*yaw;
@@ -307,7 +313,7 @@ void Kalman_Filtresi(void) {
     pitch_rate = sensor_data.twist.twist.angular.y;
     yaw_rate = sensor_data.twist.twist.angular.z;
 
-    roll_rate  = -1*rad2deg*roll_rate;
+    roll_rate  = rad2deg*roll_rate;
     pitch_rate = -1*rad2deg*pitch_rate;
     yaw_rate   = rad2deg*yaw_rate;
 
@@ -341,7 +347,7 @@ double P_Angle(double alpha_des, double alpha) {
 }
 
 
-double PD_Rate(double alpha_dot_des, double alpha_dot) {
+double PD_Rate(double alpha_dot_des, double alpha_dot, double Kp) {
 	double P, D, pd,de;
 	e_eski = e;
 	e = alpha_dot_des - alpha_dot;
