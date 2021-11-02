@@ -66,7 +66,7 @@ float gyroX, gyroY, gyroZ, gyro_e_x, gyroX_a,gyroX_a_x, accX, accY, accZ;
 float pitch_acc;
 float gyroa_x, gyroa_y, gyroa_z;
 float alpha, alpha_dot, bias;
-float alpha_des, alpha_dot_des;
+double alpha_des, alpha_dot_des;
 double roll, pitch, yaw;
 double roll_des, pitch_des, yaw_des;
 double roll_rate, pitch_rate, yaw_rate;
@@ -79,7 +79,8 @@ float S11_p, S12_p, S21_p, S22_p;
 float Kt11, Kt21;
 float sa = 0.001; float sb = 0.001;
 float Q = 1; //0.5 -- onceki deger.
-float e, e_eski; //PID hatalari
+float e_roll, e_pitch, e_eski_roll, e_eski_pitch, ie_roll, ie_pitch; //PID hatalari
+float imax=120, imin=-120;
 
 //SIM
 unsigned int start;
@@ -87,10 +88,14 @@ unsigned int start;
 
 const int f = 40;
 const float st = 1/(float)f;
-//PD Katsayilari
-float Kp_pitch = 1.7;
-float Kp_roll = 0.9;
-float Kd =  0.0*f;
+//PID Katsayilari
+double Kp_pitch = 1.2;
+double Ki_pitch = 0.00;
+double Kd_pitch = 0.000*f;
+
+double Kp_roll = 0.7;
+double Ki_roll = 0.00;
+double Kd_roll = 0.0*f;
 
 float Kp_angle = 0.03*f;
 int timer;
@@ -109,7 +114,8 @@ void MPU6050_Baslat(void);
 void Kalman_Filtresi(void);
 void PWMYaz(unsigned short int pwm1, unsigned short int pwm2);
 double P_Angle(double alpha_des, double alpha);
-double PD_Rate(double alpha_dot_des, double alpha_dot, double Kp);
+double PD_Rate_Roll(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd);
+double PD_Rate_Pitch(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd);
 int Sat(int pwm, int max, int min);
 float pwm2ang(unsigned short int pwm);
 void MotorBaslat(void);
@@ -178,8 +184,8 @@ int main(int argc, char **argv) {
 
     /* USER CODE BEGIN 3 */
 
-    roll_des = 20;
-    pitch_des = 20;
+    roll_des = 0;
+    pitch_des = 10;
     yaw_rate_des = 0;
     roll_rate_des = P_Angle(roll_des,roll);
     pitch_rate_des = P_Angle(pitch_des,pitch);
@@ -196,25 +202,26 @@ int main(int argc, char **argv) {
     ROS_INFO("roll_rate_des: %.2f",roll_rate_des);
     ROS_INFO("pitch_rate_des: %.2f",pitch_rate_des);
     ROS_INFO("yaw_rate_des: %.2f",yaw_rate_des);
-*/
-    double pd_roll  = PD_Rate(roll_rate_des,roll_rate,Kp_roll);
-    double pd_pitch = PD_Rate(pitch_rate_des,pitch_rate,Kp_pitch);
-    double pd_yaw   = PD_Rate(yaw_rate_des,yaw_rate,Kp_pitch);
+*/  ROS_INFO("roll_rate_des: %.2f",roll_rate_des);
+    double pd_roll  = PD_Rate_Roll(roll_rate_des,roll_rate, Kp_roll, Ki_roll, Kd_roll);
+    ROS_INFO("pitch_rate_des: %.2f",pitch_rate_des);
+    double pd_pitch = PD_Rate_Pitch(pitch_rate_des,pitch_rate,Kp_pitch,Ki_pitch,Kd_pitch);
+    //double pd_yaw   = PD_Rate_Pitch(yaw_rate_des,yaw_rate,Kp_pitch);
 
     pd_roll  = Sat(pd_roll,  300, -300);
     pd_pitch = Sat(pd_pitch, 300, -300);
-    pd_yaw   = Sat(pd_yaw,   300, -300);
+    //pd_yaw   = Sat(pd_yaw,   300, -300);
 
     ROS_INFO("pd_roll: %.2f",pd_roll);
     ROS_INFO("pd_pitch: %.2f",pd_pitch);
-    ROS_INFO("pd_yaw: %.2f",pd_yaw);
+    //ROS_INFO("pd_yaw: %.2f",pd_yaw);
 
     //ROS_INFO("st: %.3f",st);
 
-    unsigned int pwm1 = pwm_trim + pd_pitch - pd_roll  - pd_yaw;
-    unsigned int pwm2 = pwm_trim - pd_pitch + pd_roll  - pd_yaw;
-    unsigned int pwm3 = pwm_trim + pd_pitch + pd_roll  + pd_yaw;
-    unsigned int pwm4 = pwm_trim - pd_pitch - pd_roll  + pd_yaw;
+    unsigned int pwm1 = pwm_trim + pd_pitch - pd_roll;//  - pd_yaw;
+    unsigned int pwm2 = pwm_trim - pd_pitch + pd_roll;//  - pd_yaw;
+    unsigned int pwm3 = pwm_trim + pd_pitch + pd_roll;//  + pd_yaw;
+    unsigned int pwm4 = pwm_trim - pd_pitch - pd_roll;//  + pd_yaw;
 
     //Saturate pwm values
     pwm1 = Sat(pwm1,PWM_UPPER,PWM_LOWER); pwm2 = Sat(pwm2,PWM_UPPER,PWM_LOWER); pwm3 = Sat(pwm3,PWM_UPPER,PWM_LOWER); pwm4 = Sat(pwm4,PWM_UPPER,PWM_LOWER);
@@ -347,19 +354,75 @@ double P_Angle(double alpha_des, double alpha) {
 }
 
 
-double PD_Rate(double alpha_dot_des, double alpha_dot, double Kp) {
-	double P, D, pd,de;
-	e_eski = e;
-	e = alpha_dot_des - alpha_dot;
+double PD_Rate_Roll(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd) {
+	double P, I, D, pd,de;
+	e_eski_roll = e_roll;
+	e_roll = alpha_dot_des - alpha_dot;
   ROS_INFO("alpha_dot_des: %.2f",alpha_dot_des);
   ROS_INFO("alpha_dot: %.2f",alpha_dot);
-  ROS_INFO("Rate error: %.2f",e);
-	de = e - e_eski;
+  ROS_INFO("Rate error: %.2f",e_roll);
+	de = e_roll - e_eski_roll;
   ROS_INFO("de error:     %.2f",de);
-  ROS_INFO("e error:      %.2f",e);
-  ROS_INFO("e_eski error: %.2f",e_eski);
-	P = Kp*e; D = Kd*de;
-	pd = P + D;
+  ROS_INFO("e error:      %.2f",e_roll);
+  ROS_INFO("e_eski error: %.2f",e_eski_pitch);
+  ie_roll = ie_roll + e_roll;
+			if (ie_roll>imax)
+			{
+				ie_roll=imax;
+			}
+			
+			else if (ie_roll<imin)
+			{
+				ie_roll=imin;						//I kontrolcu icin doyma blogu
+			}
+
+    /*
+      if(abs(e_roll) < 1) {
+        ie_roll = 0;
+      }
+      */
+
+	ROS_INFO("ie_roll: %.2f",ie_roll);		
+
+	P = Kp*e_roll; D = Kd*de; I = Ki * ie_roll;
+
+	pd = P + I + D;
+    return pd;
+
+}
+
+double PD_Rate_Pitch(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd) {
+	double P, I, D, pd,de;
+	e_eski_pitch = e_pitch;
+	e_pitch = alpha_dot_des - alpha_dot;
+  ROS_INFO("alpha_dot_des: %.2f",alpha_dot_des);
+  ROS_INFO("alpha_dot: %.2f",alpha_dot);
+  ROS_INFO("Rate error: %.2f",e_pitch);
+	de = e_pitch - e_eski_pitch;
+  ROS_INFO("de error:     %.2f",de);
+  ROS_INFO("e error:      %.2f",e_pitch);
+  ROS_INFO("e_eski error: %.2f",e_eski_pitch);
+  ie_pitch = ie_pitch + e_pitch;
+			if (ie_pitch>imax)
+			{
+				ie_pitch=imax;
+			}
+			
+			else if (ie_pitch<imin)
+			{
+				ie_pitch=imin;						//I kontrolcu icin doyma blogu
+			}
+      
+			if(abs(e_pitch) < 1) {
+        ie_pitch = 0;
+      }
+      
+  ROS_INFO("ie_pitch: %.2f",ie_pitch);	
+	P = Kp*e_pitch; D = Kd*de; I = Ki * ie_pitch;
+
+  
+
+	pd = P + I + D;
     return pd;
 
 }
