@@ -189,8 +189,8 @@ int main(int argc, char **argv) {
 
     /* USER CODE BEGIN 3 */
 
-    roll_des = 10;
-    pitch_des = 0;
+    roll_des = 0;
+    pitch_des = 20;
     yaw_rate_des = 0;
     roll_rate_des = P_Angle(roll_des,roll);
     pitch_rate_des = P_Angle(pitch_des,pitch);
@@ -384,23 +384,6 @@ double PD_Rate_Roll(double alpha_dot_des, double alpha_dot, double Kp, double Ki
   ROS_INFO("e_eski error: %.2f",e_eski_pitch);
   ie_roll = ie_roll + e_roll_int;
   ie_roll_sat = ie_roll;
-			if (ie_roll>imax)
-			{
-				ie_roll_sat=imax;
-			}
-			
-			else if (ie_roll<imin)
-			{
-				ie_roll_sat=imin;						//I kontrolcu icin doyma blogu
-			}
-
-
-
-    /*
-      if(abs(e_roll) < 1) {
-        ie_roll = 0;
-      }
-      */
 
 	ROS_INFO("ie_roll: %.2f",ie_roll);		
 
@@ -433,15 +416,7 @@ double PD_Rate_Pitch(double alpha_dot_des, double alpha_dot, double Kp, double K
   ROS_INFO("e_eski error: %.2f",e_eski_pitch);
   ie_pitch = ie_pitch + e_pitch_int;
   ie_pitch_sat = ie_pitch;
-			if (ie_pitch>imax)
-			{
-				ie_pitch_sat=imax;
-			}
-			
-			else if (ie_pitch<imin)
-			{
-				ie_pitch_sat=imin;						//I kontrolcu icin doyma blogu
-			}
+
       
   ROS_INFO("ie_pitch_sat: %.2f",ie_pitch_sat);	
 	P = Kp*e_pitch; D = Kd*de; I = Ki * ie_pitch_sat;
