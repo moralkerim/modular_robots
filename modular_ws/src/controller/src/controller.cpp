@@ -90,14 +90,18 @@ const int f = 40;
 const float st = 1/(float)f;
 //PID Katsayilari
 double Kp_pitch = 1.2;
-double Ki_pitch = 0.00;
+double Ki_pitch = 0.08;
 double Kd_pitch = 0.000*f;
 
-double Kp_roll = 0.7;
-double Ki_roll = 0.00;
+double Kp_roll = 0.5;
+double Ki_roll = 0.05;
 double Kd_roll = 0.0*f;
 
 float Kp_angle = 0.03*f;
+float pd_roll_buf, pd_pitch_buf;
+float pd_roll_sat_buf, pd_pitch_sat_buf;
+float ie_roll_sat, ie_pitch_sat;
+
 int timer;
 unsigned short int IC_val1, IC_val2, pwm_input;
 unsigned short int pwm1, pwm2;
@@ -122,6 +126,7 @@ void MotorBaslat(void);
 void Kontrolcu(void);
 void sensorCallback(const nav_msgs::Odometry::ConstPtr& sensor_msg);
 float pwm2mot(unsigned short int pwm, int dir);
+double sgn(double v);
 
 /* USER CODE END PFP */
 
@@ -184,8 +189,8 @@ int main(int argc, char **argv) {
 
     /* USER CODE BEGIN 3 */
 
-    roll_des = 0;
-    pitch_des = 10;
+    roll_des = 10;
+    pitch_des = 0;
     yaw_rate_des = 0;
     roll_rate_des = P_Angle(roll_des,roll);
     pitch_rate_des = P_Angle(pitch_des,pitch);
@@ -210,6 +215,10 @@ int main(int argc, char **argv) {
 
     pd_roll  = Sat(pd_roll,  300, -300);
     pd_pitch = Sat(pd_pitch, 300, -300);
+
+    pd_roll_sat_buf = pd_roll;
+    pd_pitch_sat_buf = pd_pitch;
+
     //pd_yaw   = Sat(pd_yaw,   300, -300);
 
     ROS_INFO("pd_roll: %.2f",pd_roll);
@@ -358,6 +367,14 @@ double PD_Rate_Roll(double alpha_dot_des, double alpha_dot, double Kp, double Ki
 	double P, I, D, pd,de;
 	e_eski_roll = e_roll;
 	e_roll = alpha_dot_des - alpha_dot;
+  double e_roll_int = e_roll;
+
+  if((int)pd_roll_buf != (int)pd_roll_sat_buf) {
+    if(sgn(e_roll) == sgn(pd_roll_sat_buf)) {
+      e_roll_int = 0;
+    }
+  }
+
   ROS_INFO("alpha_dot_des: %.2f",alpha_dot_des);
   ROS_INFO("alpha_dot: %.2f",alpha_dot);
   ROS_INFO("Rate error: %.2f",e_roll);
@@ -365,16 +382,19 @@ double PD_Rate_Roll(double alpha_dot_des, double alpha_dot, double Kp, double Ki
   ROS_INFO("de error:     %.2f",de);
   ROS_INFO("e error:      %.2f",e_roll);
   ROS_INFO("e_eski error: %.2f",e_eski_pitch);
-  ie_roll = ie_roll + e_roll;
+  ie_roll = ie_roll + e_roll_int;
+  ie_roll_sat = ie_roll;
 			if (ie_roll>imax)
 			{
-				ie_roll=imax;
+				ie_roll_sat=imax;
 			}
 			
 			else if (ie_roll<imin)
 			{
-				ie_roll=imin;						//I kontrolcu icin doyma blogu
+				ie_roll_sat=imin;						//I kontrolcu icin doyma blogu
 			}
+
+
 
     /*
       if(abs(e_roll) < 1) {
@@ -384,9 +404,10 @@ double PD_Rate_Roll(double alpha_dot_des, double alpha_dot, double Kp, double Ki
 
 	ROS_INFO("ie_roll: %.2f",ie_roll);		
 
-	P = Kp*e_roll; D = Kd*de; I = Ki * ie_roll;
+	P = Kp*e_roll; D = Kd*de; I = Ki * ie_roll_sat;
 
 	pd = P + I + D;
+  pd_roll_buf = pd;
     return pd;
 
 }
@@ -395,6 +416,14 @@ double PD_Rate_Pitch(double alpha_dot_des, double alpha_dot, double Kp, double K
 	double P, I, D, pd,de;
 	e_eski_pitch = e_pitch;
 	e_pitch = alpha_dot_des - alpha_dot;
+  double e_pitch_int = e_pitch;
+  
+    if((int)pd_pitch_buf != (int)pd_pitch_sat_buf) {
+    if(sgn(e_pitch) == sgn(pd_pitch_sat_buf)) {
+      e_pitch_int = 0;
+    }
+  }
+
   ROS_INFO("alpha_dot_des: %.2f",alpha_dot_des);
   ROS_INFO("alpha_dot: %.2f",alpha_dot);
   ROS_INFO("Rate error: %.2f",e_pitch);
@@ -402,29 +431,33 @@ double PD_Rate_Pitch(double alpha_dot_des, double alpha_dot, double Kp, double K
   ROS_INFO("de error:     %.2f",de);
   ROS_INFO("e error:      %.2f",e_pitch);
   ROS_INFO("e_eski error: %.2f",e_eski_pitch);
-  ie_pitch = ie_pitch + e_pitch;
+  ie_pitch = ie_pitch + e_pitch_int;
+  ie_pitch_sat = ie_pitch;
 			if (ie_pitch>imax)
 			{
-				ie_pitch=imax;
+				ie_pitch_sat=imax;
 			}
 			
 			else if (ie_pitch<imin)
 			{
-				ie_pitch=imin;						//I kontrolcu icin doyma blogu
+				ie_pitch_sat=imin;						//I kontrolcu icin doyma blogu
 			}
       
-			if(abs(e_pitch) < 1) {
-        ie_pitch = 0;
-      }
-      
-  ROS_INFO("ie_pitch: %.2f",ie_pitch);	
-	P = Kp*e_pitch; D = Kd*de; I = Ki * ie_pitch;
+  ROS_INFO("ie_pitch_sat: %.2f",ie_pitch_sat);	
+	P = Kp*e_pitch; D = Kd*de; I = Ki * ie_pitch_sat;
 
   
 
 	pd = P + I + D;
+  pd_pitch_buf = pd;
     return pd;
 
+}
+
+double sgn(double v) {
+  if (v < 0) return -1;
+  if (v > 0) return 1;
+  return 0;
 }
 
  int Sat(int pwm, int max, int min) {
