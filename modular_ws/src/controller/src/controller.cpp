@@ -89,13 +89,13 @@ unsigned int start;
 const int f = 40;
 const float st = 1/(float)f;
 //PID Katsayilari
-double Kp_pitch = 1.3;
-double Ki_pitch = 0.08;
+double Kp_pitch = 1.5;
+double Ki_pitch = 0.1;
 double Kd_pitch = 0.05*f;
 
 double Kp_roll = 0.5;
 double Ki_roll = 0.05;
-double Kd_roll = 0.0*f;
+double Kd_roll = 0.05*f;
 
 float Kp_angle = 0.03*f;
 float pd_roll_buf, pd_pitch_buf;
@@ -189,8 +189,8 @@ int main(int argc, char **argv) {
 
     /* USER CODE BEGIN 3 */
 
-    roll_des = 0;
-    pitch_des = 20;
+    roll_des = 10;
+    pitch_des = 0;
     yaw_rate_des = 0;
     roll_rate_des = P_Angle(roll_des,roll);
     pitch_rate_des = P_Angle(pitch_des,pitch);
