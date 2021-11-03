@@ -90,12 +90,14 @@ const int f = 40;
 const float st = 1/(float)f;
 //PID Katsayilari
 double Kp_pitch = 1.5;
-double Ki_pitch = 0.1;
+double Ki_pitch = 0.3;
 double Kd_pitch = 0.05*f;
 
 double Kp_roll = 0.5;
 double Ki_roll = 0.05;
 double Kd_roll = 0.05*f;
+
+double Kp_yaw = 0.1;
 
 float Kp_angle = 0.03*f;
 float pd_roll_buf, pd_pitch_buf;
@@ -120,7 +122,8 @@ void PWMYaz(unsigned short int pwm1, unsigned short int pwm2);
 double P_Angle(double alpha_des, double alpha);
 double PD_Rate_Roll(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd);
 double PD_Rate_Pitch(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd);
-int Sat(int pwm, int max, int min);
+double P_Rate_Yaw(double alpha_dot_des, double alpha_dot, double Kp);
+double Sat(double pwm, int max, int min);
 float pwm2ang(unsigned short int pwm);
 void MotorBaslat(void);
 void Kontrolcu(void);
@@ -190,7 +193,7 @@ int main(int argc, char **argv) {
     /* USER CODE BEGIN 3 */
 
     roll_des = 10;
-    pitch_des = 0;
+    pitch_des = 10;
     yaw_rate_des = 0;
     roll_rate_des = P_Angle(roll_des,roll);
     pitch_rate_des = P_Angle(pitch_des,pitch);
@@ -211,29 +214,32 @@ int main(int argc, char **argv) {
     double pd_roll  = PD_Rate_Roll(roll_rate_des,roll_rate, Kp_roll, Ki_roll, Kd_roll);
     ROS_INFO("pitch_rate_des: %.2f",pitch_rate_des);
     double pd_pitch = PD_Rate_Pitch(pitch_rate_des,pitch_rate,Kp_pitch,Ki_pitch,Kd_pitch);
-    //double pd_yaw   = PD_Rate_Pitch(yaw_rate_des,yaw_rate,Kp_pitch);
+    double p_yaw   = P_Rate_Yaw(yaw_rate_des,yaw_rate,Kp_yaw);
 
-    pd_roll  = Sat((int)pd_roll,  300, -300);
-    pd_pitch = Sat((int)pd_pitch, 300, -300);
+    pd_roll  = Sat(pd_roll,  300, -300);
+    pd_pitch = Sat(pd_pitch, 300, -300);
+    p_yaw    = Sat(p_yaw,    300, -300);
 
     pd_roll_sat_buf = pd_roll;
     pd_pitch_sat_buf = pd_pitch;
 
-    //pd_yaw   = Sat(pd_yaw,   300, -300);
 
     ROS_INFO("pd_roll: %.2f",pd_roll);
     ROS_INFO("pd_pitch: %.2f",pd_pitch);
-    //ROS_INFO("pd_yaw: %.2f",pd_yaw);
+    ROS_INFO("p_yaw: %.2f",p_yaw);
 
     //ROS_INFO("st: %.3f",st);
 
-    unsigned int pwm1 = pwm_trim + pd_pitch - pd_roll;//  - pd_yaw;
-    unsigned int pwm2 = pwm_trim - pd_pitch + pd_roll;//  - pd_yaw;
-    unsigned int pwm3 = pwm_trim + pd_pitch + pd_roll;//  + pd_yaw;
-    unsigned int pwm4 = pwm_trim - pd_pitch - pd_roll;//  + pd_yaw;
+    unsigned int pwm1 = pwm_trim + pd_pitch - pd_roll  - p_yaw;
+    unsigned int pwm2 = pwm_trim - pd_pitch + pd_roll  - p_yaw;
+    unsigned int pwm3 = pwm_trim + pd_pitch + pd_roll  + p_yaw;
+    unsigned int pwm4 = pwm_trim - pd_pitch - pd_roll  + p_yaw;
 
     //Saturate pwm values
-    pwm1 = Sat(pwm1,PWM_UPPER,PWM_LOWER); pwm2 = Sat(pwm2,PWM_UPPER,PWM_LOWER); pwm3 = Sat(pwm3,PWM_UPPER,PWM_LOWER); pwm4 = Sat(pwm4,PWM_UPPER,PWM_LOWER);
+    pwm1 = (int)Sat(pwm1,PWM_UPPER,PWM_LOWER); 
+    pwm2 = (int)Sat(pwm2,PWM_UPPER,PWM_LOWER); 
+    pwm3 = (int)Sat(pwm3,PWM_UPPER,PWM_LOWER); 
+    pwm4 = (int)Sat(pwm4,PWM_UPPER,PWM_LOWER);
 
     //Convert pwm to motor speed 
     w1 = pwm2mot(pwm1, 1);
@@ -357,7 +363,9 @@ double P_Angle(double alpha_des, double alpha) {
 	double P;
 	double e = alpha_des - alpha;
 	P = Kp_angle*e;
-    //ROS_INFO("P OUT: %.2f",P);
+    ROS_INFO("alpha_des: %.2f",alpha_des);
+    ROS_INFO("alpha: %.2f",alpha);
+    ROS_INFO("P OUT: %.2f",P);
     return P;
 
 }
@@ -429,14 +437,22 @@ double PD_Rate_Pitch(double alpha_dot_des, double alpha_dot, double Kp, double K
 
 }
 
+double P_Rate_Yaw(double alpha_dot_des, double alpha_dot, double Kp) {
+	double P;
+	double e_yaw = alpha_dot_des - alpha_dot;	
+	P = Kp*e_yaw;
+    return P;
+
+}
+
 double sgn(double v) {
   if (v < 0) return -1;
   if (v > 0) return 1;
   return 0;
 }
 
- int Sat(int pwm, int max, int min) {
-	int pwm_out;
+ double Sat(double pwm, int max, int min) {
+	double pwm_out;
 	if(pwm > max) {
 		pwm_out = max;
 	}
