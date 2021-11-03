@@ -11,3 +11,11 @@ float64 yaw_des
 float64 roll_rate_des
 float64 pitch_rate_des
 float64 yaw_rate_des
+
+float64 roll_acc
+float64 pitch_acc
+float64 yaw_acc
+
+float64 roll_real
+float64 pitch_real
+float64 yaw_real
