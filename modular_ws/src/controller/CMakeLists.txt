@@ -212,11 +212,11 @@ include_directories(
 # catkin_add_nosetests(test)
 add_library(PID include/controller/PID.cpp)
 add_library(kalman_library include/controller/Kalman.cpp)
+add_library(Controller_lib include/controller/Controller.cpp)
 
-add_executable(controller src/controller.cpp)
-target_link_libraries(controller PID kalman_library)
+add_executable(controller src/simulator.cpp)
+target_link_libraries(Controller_lib PID kalman_library )
+target_link_libraries(controller PID kalman_library Controller_lib)
 target_link_libraries(controller ${catkin_LIBRARIES})
 add_dependencies(controller controller_generate_messages_cpp)
 
-#add_executable(controller_functions include/controller/controller_functions.cpp)
-#target_link_libraries(controller controller_functions)

@@ -9,7 +9,7 @@ float pitch_bias, roll_bias, yaw_bias;
 float S11_m_pitch, S12_m_pitch, S21_m_pitch, S22_m_pitch;
 float S11_p_pitch, S12_p_pitch, S21_p_pitch, S22_p_pitch;
 float Kt11_pitch, Kt21_pitch;
-double sa = 0.001; double sb = 0.001;
+double sa = 0.01; double sb = 0.01;
 
 float S11_m_roll, S12_m_roll, S21_m_roll, S22_m_roll;
 float S11_p_roll, S12_p_roll, S21_p_roll, S22_p_roll;
@@ -43,7 +43,8 @@ struct state Kalman_Filtresi(float gyro[3], float acc[3]) {
     //---IMU KİSMİ----
     //=================================
   float acctop=sqrt(accX*accX+accY*accY+accZ*accZ);
-  double st = 1/(float)270;
+  const int f = 270;
+  const double st = 1/(float)f;
   pitch_acc =  asin(accX/acctop)*rad2deg;
   roll_acc  =  asin(accY/acctop)*rad2deg;
   yaw_acc   =  asin(accZ/acctop)*rad2deg;
