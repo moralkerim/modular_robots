@@ -210,9 +210,9 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-add_library(PID include/controller/PID.cpp)
-add_library(kalman_library include/controller/Kalman.cpp)
-add_library(Controller_lib include/controller/Controller.cpp)
+add_library(PID src/PID.cpp)
+add_library(kalman_library src/Kalman.cpp)
+add_library(Controller_lib src/Controller.cpp)
 
 add_executable(controller src/simulator.cpp)
 target_link_libraries(Controller_lib PID kalman_library )
