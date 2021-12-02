@@ -121,7 +121,8 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
- include
+ include 
+ include/controller
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -209,7 +210,13 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+add_library(PID include/controller/PID.cpp)
+add_library(kalman_library include/controller/Kalman.cpp)
+add_library(Controller_lib include/controller/Controller.cpp)
 
-add_executable(controller src/controller.cpp)
+add_executable(controller src/simulator.cpp)
+target_link_libraries(Controller_lib PID kalman_library )
+target_link_libraries(controller PID kalman_library Controller_lib)
 target_link_libraries(controller ${catkin_LIBRARIES})
 add_dependencies(controller controller_generate_messages_cpp)
+
