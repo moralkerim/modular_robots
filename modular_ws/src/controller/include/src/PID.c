@@ -1,13 +1,13 @@
 #include "PID.h"
 
-float e_roll, e_pitch, e_eski_roll, e_eski_pitch, ie_roll, ie_pitch; //PID hatalari
-float imax=120, imin=-120;
-const int f = 40;
-const float st = 1/(float)f;
+static float e_roll, e_pitch, e_eski_roll, e_eski_pitch, ie_roll, ie_pitch; //PID hatalari
+static float imax=120, imin=-120;
+static const int f = 40;
+static const float st = 1/(float)f;
 
-float ie_roll_sat, ie_pitch_sat;
-float pd_roll_buf, pd_pitch_buf;
-float pd_roll_sat_buf, pd_pitch_sat_buf;
+static float ie_roll_sat, ie_pitch_sat;
+static float pd_roll_buf, pd_pitch_buf;
+static float pd_roll_sat_buf, pd_pitch_sat_buf;
 
 
 double P_Angle(double alpha_des, double alpha, double Kp_angle) {

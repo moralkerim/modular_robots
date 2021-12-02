@@ -1,31 +1,30 @@
 #include "Controller.h"
 
-
 #define PWM_UPPER 2000
 #define PWM_LOWER 1050
 
-float pitch_bias, roll_bias, yaw_bias;
-double roll, pitch, yaw;
-double roll_rate, pitch_rate, yaw_rate;
+static float pitch_bias, roll_bias, yaw_bias;
+static double roll, pitch, yaw;
+static double roll_rate, pitch_rate, yaw_rate;
 
-float w1, w2, w3, w4; //Motor hizlari
-float pwm_trim = 1550;
-const float rad2deg = 180/3.14;
+static float w1, w2, w3, w4; //Motor hizlari
+static float pwm_trim = 1550;
+static const float rad2deg = 180/3.14;
 
-const int f = 40;
-const float st = 1/(float)f;
+static const int f = 40;
+static const float st = 1/(float)f;
 //PID Katsayilari
-double Kp_pitch = 1.5;
-double Ki_pitch = 0.3;
-double Kd_pitch = 0.05*f;
+static double Kp_pitch = 1.5;
+static double Ki_pitch = 0.3;
+static double Kd_pitch = 0.05*f;
 
-double Kp_roll = 0.5;
-double Ki_roll = 0.05;
-double Kd_roll = 0.05*f;
+static double Kp_roll = 0.5;
+static double Ki_roll = 0.05;
+static double Kd_roll = 0.05*f;
 
-double Kp_yaw = 0.1;
+static double Kp_yaw = 0.1;
 
-float Kp_angle = 0.03*f;
+static float Kp_angle = 0.03*f;
 
 struct state {
     float angles[3];
