@@ -1,4 +1,4 @@
-#include "Kalman.h"
+#include "Kalman.hpp"
 
 #include <math.h>
 
@@ -81,8 +81,8 @@ struct state Kalman_Filtresi(float gyro[3], float acc[3]) {
   //Roll angle
 	//**Tahmin**
 	roll = roll - roll_bias*st + gyroX*st;
-	S11_m_roll = 2*sa+st*st*sb; S12_m_pitch=-st*sb;
-	S21_m_roll = -st*sb; 	   S22_m_pitch=2*sb;
+	S11_m_roll = 2*sa+st*st*sb; S12_m_roll=-st*sb;
+	S21_m_roll = -st*sb; 	   S22_m_roll=2*sb;
 
 	//**Düzeltme**
 	Kt11_roll = S11_m_roll / (S11_m_roll+Q);
@@ -101,8 +101,8 @@ struct state Kalman_Filtresi(float gyro[3], float acc[3]) {
    //Yaw angle
 	//**Tahmin**
 	yaw = yaw - yaw_bias*st + gyroZ*st;
-	S11_m_yaw = 2*sa+st*st*sb; S12_m_pitch=-st*sb;
-	S21_m_yaw = -st*sb; 	   S22_m_pitch=2*sb;
+	S11_m_yaw = 2*sa+st*st*sb; S12_m_yaw=-st*sb;
+	S21_m_yaw = -st*sb; 	   S22_m_yaw=2*sb;
 
 	//**Düzeltme**
 	Kt11_yaw = S11_m_yaw / (S11_m_yaw+Q);
