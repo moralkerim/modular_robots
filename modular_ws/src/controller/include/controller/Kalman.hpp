@@ -1,6 +1,11 @@
 #include <math.h>
 #include <stdio.h>
 
+struct state {
+    float angles[3];
+    float rates[3];
+    float bias[3];
+};
 class Kalman_Filtresi {
     private:
         double roll, pitch, yaw;
@@ -30,8 +35,11 @@ class Kalman_Filtresi {
         const double st = 1/(float)f;
 
     public:
+        struct state state;
+
+    public:
         Kalman_Filtresi();
-        struct state Run(float gyro[3], float acc[3]);
+        void Run(float gyro[3], float acc[3]);
         ~Kalman_Filtresi();
 
 

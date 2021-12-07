@@ -87,16 +87,7 @@ float pwm_trim = 1550;
 float gyro[3];
 float acc[3];
 
-struct state {
-    float angles[3];
-    float rates[3];
-    float bias[3];
-};
 
-struct controller_output {
-    float w[4];
-};
-struct state state;
 //SIM
 unsigned int start;
 Kalman_Filtresi EKF;
@@ -134,8 +125,7 @@ char buf[32];
   acc[1] = accY;
   acc[2] = accZ;
 
-  state = EKF.Run(gyro,acc);
-
+  EKF.Run(gyro,acc);
   //printf("\nsensor: %.2f",sensor_data.pose[1].position.x);
 }
 
@@ -276,7 +266,7 @@ int main(int argc, char **argv) {
     roll_des = 0;
     pitch_des = 10;
     yaw_rate_des = 0;
-    std::vector<double> controller_output = ctrller.Run(state, roll_des, pitch_des, yaw_rate_des, gyro, acc);
+    std::vector<double> controller_output = ctrller.Run(EKF.state, roll_des, pitch_des, yaw_rate_des, gyro, acc);
 
  
     //printf("\nw1: %.2f", controller_output.w[0]);
@@ -284,11 +274,13 @@ int main(int argc, char **argv) {
     //printf("\nw3: %.2f", controller_output.w[2]);
     //printf("\nw4: %.2f", controller_output.w[3]); 
 
-    float roll =  state.angles[0];
-    float pitch = state.angles[1];
-    float yaw =   state.angles[2];
+    float roll =  EKF.state.angles[0];
+    float pitch = EKF.state.angles[1];
+    float yaw =   EKF.state.angles[2];
 
-  
+
+    //ROS_INFO("pitch: %.2f", pitch);
+    
     attitude.roll = roll;
     attitude.pitch = pitch;
     attitude.yaw = yaw;

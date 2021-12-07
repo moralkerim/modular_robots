@@ -1,16 +1,10 @@
 #include "Kalman.hpp"
-
 #include <math.h>
-struct state {
-    float angles[3];
-    float rates[3];
-    float bias[3];
-};
+
 
 Kalman_Filtresi::Kalman_Filtresi() {};
 
-struct state Kalman_Filtresi::Run(float gyro[3], float acc[3]) {
-  struct state state;
+void Kalman_Filtresi::Run(float gyro[3], float acc[3]) {
   float accX = acc[0]; 
   float accY = acc[1];
   float accZ = acc[2];
@@ -106,10 +100,6 @@ struct state Kalman_Filtresi::Run(float gyro[3], float acc[3]) {
     state.bias[0] = roll_bias;
     state.bias[1] = pitch_bias;
     state.bias[2] = yaw_bias;
-
-    return state;
-
-
 
 }
 
