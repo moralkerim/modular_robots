@@ -1,16 +1,8 @@
 #include "PID.hpp"
 
-static float e_roll, e_pitch, e_eski_roll, e_eski_pitch, ie_roll, ie_pitch; //PID hatalari
-static float imax=120, imin=-120;
-static const int f = 40;
-static const float st = 1/(float)f;
+PID::PID() {};
 
-static float ie_roll_sat, ie_pitch_sat;
-static float pd_roll_buf, pd_pitch_buf;
-static float pd_roll_sat_buf, pd_pitch_sat_buf;
-
-
-double P_Angle(double alpha_des, double alpha, double Kp_angle) {
+double PID::P_Angle(double alpha_des, double alpha, double Kp_angle) {
 	double P;
 	double e = alpha_des - alpha;
 	P = Kp_angle*e;
@@ -19,7 +11,7 @@ double P_Angle(double alpha_des, double alpha, double Kp_angle) {
 }
 
 
-double PD_Rate_Roll(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd) {
+double PID::PD_Rate_Roll(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd) {
 	double P, I, D, pd,de;
 	e_eski_roll = e_roll;
 	e_roll = alpha_dot_des - alpha_dot;
@@ -47,7 +39,7 @@ double PD_Rate_Roll(double alpha_dot_des, double alpha_dot, double Kp, double Ki
 
 }
 
-double PD_Rate_Pitch(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd) {
+double PID::PD_Rate_Pitch(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd) {
 	double P, I, D, pd,de;
 	e_eski_pitch = e_pitch;
 	e_pitch = alpha_dot_des - alpha_dot;
@@ -78,7 +70,7 @@ double PD_Rate_Pitch(double alpha_dot_des, double alpha_dot, double Kp, double K
 
 }
 
-double P_Rate_Yaw(double alpha_dot_des, double alpha_dot, double Kp) {
+double PID::P_Rate_Yaw(double alpha_dot_des, double alpha_dot, double Kp) {
 	double P;
 	double e_yaw = alpha_dot_des - alpha_dot;	
 	P = Kp*e_yaw;
@@ -88,13 +80,13 @@ double P_Rate_Yaw(double alpha_dot_des, double alpha_dot, double Kp) {
 
 }
 
-double sgn(double v) {
+double PID::sgn(double v) {
   if (v < 0) return -1;
   if (v > 0) return 1;
   return 0;
 }
 
- double Sat(double pwm, int max, int min) {
+ double PID::Sat(double pwm, int max, int min) {
 	double pwm_out;
 	if(pwm > max) {
 		pwm_out = max;
@@ -111,7 +103,7 @@ double sgn(double v) {
 	return pwm_out;
 }
 
-float pwm2ang(unsigned short int pwm) {
+float PID::pwm2ang(unsigned short int pwm) {
 	int in_min  = 1000;
 	int in_max  = 2000;
 	int out_min = -30;
@@ -121,7 +113,7 @@ float pwm2ang(unsigned short int pwm) {
 }
 
 //Convert pwm to motor speed for simulation
-float pwm2mot(unsigned short int pwm, int dir) {
+float PID::pwm2mot(unsigned short int pwm, int dir) {
 	float in_min  = 1000;
 	float in_max  = 2000;
 	float out_min = 0;
@@ -129,3 +121,5 @@ float pwm2mot(unsigned short int pwm, int dir) {
 
 	return (float)(dir) * ((float)pwm - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
+
+PID::~PID() {};

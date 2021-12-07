@@ -38,9 +38,8 @@
 #endif
 
 
-#include "PID.h"
-#include "Kalman.h"
-#include "Controller.h"
+#include "Kalman.hpp"
+#include "Controller.hpp"
 #include <math.h>
 #include "string.h"
 #include <stdio.h>
@@ -100,7 +99,8 @@ struct controller_output {
 struct state state;
 //SIM
 unsigned int start;
-
+Kalman_Filtresi EKF;
+Controller ctrller;
 
 
 int timer;
@@ -134,8 +134,7 @@ char buf[32];
   acc[1] = accY;
   acc[2] = accZ;
 
-  state = Kalman_Filtresi(gyro, acc);
-
+  state = EKF.Run(gyro,acc);
 
   //printf("\nsensor: %.2f",sensor_data.pose[1].position.x);
 }
@@ -277,13 +276,13 @@ int main(int argc, char **argv) {
     roll_des = 0;
     pitch_des = 10;
     yaw_rate_des = 0;
-    struct controller_output controller_output = Controller(state, roll_des, pitch_des, yaw_rate_des, gyro, acc);
+    std::vector<double> controller_output = ctrller.Run(state, roll_des, pitch_des, yaw_rate_des, gyro, acc);
 
  
-    printf("\nw1: %.2f", controller_output.w[0]);
-    printf("\nw2: %.2f", controller_output.w[1]);
-    printf("\nw3: %.2f", controller_output.w[2]);
-    printf("\nw4: %.2f", controller_output.w[3]); 
+    //printf("\nw1: %.2f", controller_output.w[0]);
+    //printf("\nw2: %.2f", controller_output.w[1]);
+    //printf("\nw3: %.2f", controller_output.w[2]);
+    //printf("\nw4: %.2f", controller_output.w[3]); 
 
     float roll =  state.angles[0];
     float pitch = state.angles[1];
@@ -306,8 +305,15 @@ int main(int argc, char **argv) {
 
 
 
+    std::vector<double> motor_speeds;
+    motor_speeds = controller_output;
 
-    std::vector<double> motor_speeds {abs(w1),abs(w2),abs(w3),abs(w4)};
+
+    for(int i=0; i<motor_speeds.size(); i++) {
+      motor_speeds[i] = abs(motor_speeds[i]);
+      
+    }
+
     motors.angular_velocities = motor_speeds;
     motor_pub.publish(motors);
   

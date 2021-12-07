@@ -1,37 +1,15 @@
 #include "Kalman.hpp"
 
 #include <math.h>
-
-static double roll, pitch, yaw;
-static double roll_rate, pitch_rate, yaw_rate;
-
-static float pitch_bias, roll_bias, yaw_bias;
-
-static float S11_m_pitch, S12_m_pitch, S21_m_pitch, S22_m_pitch;
-static float S11_p_pitch, S12_p_pitch, S21_p_pitch, S22_p_pitch;
-static float Kt11_pitch, Kt21_pitch;
-static double sa = 0.01; static double sb = 0.01;
-
-static float S11_m_roll, S12_m_roll, S21_m_roll, S22_m_roll;
-static float S11_p_roll, S12_p_roll, S21_p_roll, S22_p_roll;
-static float Kt11_roll, Kt21_roll;
-
-static float S11_m_yaw, S12_m_yaw, S21_m_yaw, S22_m_yaw;
-static float S11_p_yaw, S12_p_yaw, S21_p_yaw, S22_p_yaw;
-static float Kt11_yaw, Kt21_yaw;
-
-static double Q = 1; //0.5 -- onceki deger.
-
-static float pitch_acc, roll_acc, yaw_acc;
-static const float rad2deg = 180/3.14;
-
 struct state {
     float angles[3];
     float rates[3];
     float bias[3];
 };
 
-struct state Kalman_Filtresi(float gyro[3], float acc[3]) {
+Kalman_Filtresi::Kalman_Filtresi() {};
+
+struct state Kalman_Filtresi::Run(float gyro[3], float acc[3]) {
   struct state state;
   float accX = acc[0]; 
   float accY = acc[1];
@@ -44,8 +22,7 @@ struct state Kalman_Filtresi(float gyro[3], float acc[3]) {
     //---IMU KİSMİ----
     //=================================
   float acctop=sqrt(accX*accX+accY*accY+accZ*accZ);
-  const int f = 270;
-  const double st = 1/(float)f;
+
   pitch_acc =  asin(accX/acctop)*rad2deg;
   roll_acc  =  asin(accY/acctop)*rad2deg;
   yaw_acc   =  asin(accZ/acctop)*rad2deg;
@@ -135,3 +112,5 @@ struct state Kalman_Filtresi(float gyro[3], float acc[3]) {
 
 
 }
+
+Kalman_Filtresi::~Kalman_Filtresi() {};
