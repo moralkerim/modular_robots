@@ -9,7 +9,7 @@ struct state {
 
 Controller::Controller() {}
 
-std::vector<double> Controller::Run (struct state state, float roll_des, float pitch_des, float yaw_rate_des,float gyro[3], float acc[3]) {
+std::vector<double> Controller::Run (struct state state, struct state state_des) {
         //printf("\ngyroX: %.2f",gyro[0]);
         //printf("\naccX: %.2f",acc[0]);
         
@@ -27,6 +27,10 @@ std::vector<double> Controller::Run (struct state state, float roll_des, float p
         pitch_bias = state.bias[1];
         yaw_bias = state.bias[2];
         
+        float roll_des     = state_des.angles[0];
+        float pitch_des 	 = state_des.angles[1];
+        float yaw_rate_des = state_des.rates[2];
+
     float roll_rate_des = pid.P_Angle(roll_des,roll, Kp_angle);
     float pitch_rate_des = pid.P_Angle(pitch_des,pitch, Kp_angle);
 /*
@@ -63,8 +67,8 @@ std::vector<double> Controller::Run (struct state state, float roll_des, float p
     w3 = pid.pwm2mot(pwm3,-1);
     w4 = pid.pwm2mot(pwm4,-1);
 
-    std::vector<double> controller_output = {w1,w2,w3,w4};
-
+    std::vector<double> controller_output = 	{w1,w2,w3,w4};
+    controller_output_pwm = {pwm1,pwm2,pwm3,pwm4};
     return controller_output;
 }
 

@@ -15,16 +15,16 @@ class Controller {
         float pwm_trim = 1550;
         const float rad2deg = 180/3.14;
 
-        const int f = 40;
+        const int f = 200;
         const float st = 1/(float)f;
         //PID Katsayilari
         double Kp_pitch = 1.5;
-        double Ki_pitch = 0.3;
-        double Kd_pitch = 0.05*f;
+        double Ki_pitch = 0.00;
+        double Kd_pitch = 1.50*f;
 
-        double Kp_roll = 0.5;
-        double Ki_roll = 0.05;
-        double Kd_roll = 0.05*f;
+        double Kp_roll = 1.5;
+        double Ki_roll = 0.00;
+        double Kd_roll = 1.50*f;
 
         double Kp_yaw = 0.1;
 
@@ -33,6 +33,7 @@ class Controller {
 
     public:
         Controller();
-        std::vector<double> Run (struct state state, float roll_des, float pitch_des, float yaw_rate_des, float gyro[3], float acc[3]);
+        std::vector<double> Run (struct state state, struct state state_des);
+        std::vector<int> controller_output_pwm;
         ~Controller();
 };

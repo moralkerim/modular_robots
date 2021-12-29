@@ -31,7 +31,7 @@ class Kalman_Filtresi {
         float pitch_acc, roll_acc, yaw_acc;
         const float rad2deg = 180/3.14;
 
-        const int f = 270;
+        const int f = 200;
         const double st = 1/(float)f;
 
     public:
