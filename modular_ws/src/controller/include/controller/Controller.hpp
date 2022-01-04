@@ -19,11 +19,11 @@ class Controller {
         const float st = 1/(float)f;
         //PID Katsayilari
         double Kp_pitch = 1.5;
-        double Ki_pitch = 0.00;
-        double Kd_pitch = 1.50*f;
+        double Ki_pitch = 0.05/(float)f;
+        double Kd_pitch = 1.50*(float)f;
 
         double Kp_roll = 1.5;
-        double Ki_roll = 0.00;
+        double Ki_roll = 0.05/(float)f;
         double Kd_roll = 1.50*f;
 
         double Kp_yaw = 0.1;
