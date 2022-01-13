@@ -2,9 +2,13 @@
 #include <math.h>
 
 
-Kalman_Filtresi::Kalman_Filtresi() {};
+Kalman_Filtresi::Kalman_Filtresi() : lpf(LP_FILTER_CUT_FREQ,st) {
+
+}
+
 
 void Kalman_Filtresi::Run(float gyro[3], float acc[3]) {
+
   float accX = acc[0]; 
   float accY = acc[1];
   float accZ = acc[2];
@@ -19,7 +23,11 @@ void Kalman_Filtresi::Run(float gyro[3], float acc[3]) {
 
   pitch_acc =  asin(accX/acctop)*rad2deg;
   roll_acc  =  asin(accY/acctop)*rad2deg;
-  yaw_acc   =  asin(accZ/acctop)*rad2deg;
+  //yaw_acc   =  asin(accZ/acctop)*rad2deg;
+
+  pitch_acc = lpf.update(pitch_acc);
+  roll_acc = lpf.update(roll_acc);
+  //yaw_acc = lpf.update(yaw_acc);
 
   #if USE_SIM
     attitude.roll_acc = roll_acc;
@@ -30,9 +38,9 @@ void Kalman_Filtresi::Run(float gyro[3], float acc[3]) {
     
   //Pitch angle
 	//**Tahmin**
-	pitch = pitch - pitch_bias*st + gyroY*st;
-	S11_m_pitch = 2*sa+st*st*sb; S12_m_pitch=-st*sb;
-	S21_m_pitch = -st*sb; 	   S22_m_pitch=2*sb;
+	pitch = pitch  - pitch_bias*st + gyroY*st;
+	S11_m_pitch = 2*sa_p+st*st*sb_p; S12_m_pitch=-st*sb_p;
+	S21_m_pitch = -st*sb_p; 	   S22_m_pitch=2*sb_p;
 
 	//**Düzeltme**
 	Kt11_pitch = S11_m_pitch / (S11_m_pitch+Q);
@@ -71,6 +79,7 @@ void Kalman_Filtresi::Run(float gyro[3], float acc[3]) {
 
    //Yaw angle
 	//**Tahmin**
+  /*
 	yaw = yaw - yaw_bias*st + gyroZ*st;
 	S11_m_yaw = 2*sa+st*st*sb; S12_m_yaw=-st*sb;
 	S21_m_yaw = -st*sb; 	   S22_m_yaw=2*sb;
@@ -85,7 +94,7 @@ void Kalman_Filtresi::Run(float gyro[3], float acc[3]) {
 	S11_p_yaw = -S11_m_yaw*(Kt11_yaw-1);  S12_p_yaw = -S12_m_yaw*(Kt11_yaw-1);
 	S21_p_yaw = S21_m_yaw-S11_m_yaw*Kt21_yaw; S22_p_yaw = S22_m_yaw-S12_m_yaw*Kt21_yaw;
 
-	S11_m_yaw = S11_p_yaw; S12_m_yaw = S12_p_yaw; S21_m_yaw = S21_p_yaw; S22_m_yaw = S22_p_yaw; 
+	S11_m_yaw = S11_p_yaw; S12_m_yaw = S12_p_yaw; S21_m_yaw = S21_p_yaw; S22_m_yaw = S22_p_yaw; */
   yaw_rate = gyroZ;
     //=================================
 
@@ -103,4 +112,4 @@ void Kalman_Filtresi::Run(float gyro[3], float acc[3]) {
 
 }
 
-Kalman_Filtresi::~Kalman_Filtresi() {};
+Kalman_Filtresi::~Kalman_Filtresi() {}

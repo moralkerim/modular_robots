@@ -1,5 +1,9 @@
 #include <math.h>
 #include <stdio.h>
+#include "LowPassFilter.hpp"
+
+#define LP_FILTER_CUT_FREQ 2*3.14*10
+
 
 struct state {
     float angles[3];
@@ -7,6 +11,7 @@ struct state {
     float bias[3];
 };
 class Kalman_Filtresi {
+
     private:
         double roll, pitch, yaw;
         double roll_rate, pitch_rate, yaw_rate;
@@ -17,6 +22,7 @@ class Kalman_Filtresi {
         float S11_p_pitch, S12_p_pitch, S21_p_pitch, S22_p_pitch;
         float Kt11_pitch, Kt21_pitch;
         double sa = 0.01; double sb = 0.01;
+        double sa_p = 0.02; double sb_p = 0.02;
 
         float S11_m_roll, S12_m_roll, S21_m_roll, S22_m_roll;
         float S11_p_roll, S12_p_roll, S21_p_roll, S22_p_roll;
@@ -33,9 +39,12 @@ class Kalman_Filtresi {
 
         const int f = 200;
         const double st = 1/(float)f;
+    	LowPassFilter lpf;
+
 
     public:
         struct state state;
+
 
     public:
         Kalman_Filtresi();

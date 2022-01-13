@@ -11,7 +11,7 @@ double PID::P_Angle(double alpha_des, double alpha, double Kp_angle) {
 }
 
 
-double PID::PD_Rate_Roll(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd) {
+double PID::PD_Rate(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd) {
 	double P, I, D, pd,de;
 	e_eski_roll = e_roll;
 	e_roll = alpha_dot_des - alpha_dot;
@@ -39,36 +39,6 @@ double PID::PD_Rate_Roll(double alpha_dot_des, double alpha_dot, double Kp, doub
 
 }
 
-double PID::PD_Rate_Pitch(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd) {
-	double P, I, D, pd,de;
-	e_eski_pitch = e_pitch;
-	e_pitch = alpha_dot_des - alpha_dot;
-  double e_pitch_int = e_pitch;
-  
-    if((int)pd_pitch_buf != (int)pd_pitch_sat_buf) {
-    if(sgn(e_pitch) == sgn(pd_pitch_sat_buf)) {
-      e_pitch_int = 0;
-    }
-  }
-
-
-	de = e_pitch - e_eski_pitch;
-  ie_pitch = ie_pitch + e_pitch_int;
-  ie_pitch_sat = ie_pitch;
-
-      
-	P = Kp*e_pitch; D = Kd*de; I = Ki * ie_pitch_sat;
-
-  
-
-	pd = P + I + D;
-  	pd_pitch_buf = pd;
-    pd = Sat(pd, 300, -300);
-	pd_pitch_sat_buf = pd;
-
-    return pd;
-
-}
 
 double PID::P_Rate_Yaw(double alpha_dot_des, double alpha_dot, double Kp) {
 	double P;
@@ -86,19 +56,48 @@ double PID::sgn(double v) {
   return 0;
 }
 
- double PID::Sat(double pwm, int max, int min) {
+ double PID::Sat(double pwm, int max, int min, int thr) {
 	double pwm_out;
-	if(pwm > max) {
-		pwm_out = max;
-	}
 
-	else if (pwm < min) {
-		pwm_out = min;
+	if(thr > 1020) {
+		if(pwm > max) {
+			pwm_out = max;
+		}
+
+		else if (pwm < min) {
+			pwm_out = min;
+		}
+
+		else {
+			pwm_out = pwm;
+		}
+
+
 	}
 
 	else {
-		pwm_out = pwm;
+		pwm_out = 1000;
 	}
+	return pwm_out;
+}
+
+ double PID::Sat(double pwm, int max, int min) {
+	double pwm_out;
+
+		if(pwm > max) {
+			pwm_out = max;
+		}
+
+		else if (pwm < min) {
+			pwm_out = min;
+		}
+
+		else {
+			pwm_out = pwm;
+		}
+
+
+
 
 	return pwm_out;
 }
@@ -110,6 +109,15 @@ float PID::pwm2ang(unsigned short int pwm) {
 	int out_max  = 30;
 
 	return (pwm - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+float PID::pwm2rate(unsigned short int pwm) {
+	int in_min  = 1000;
+	int in_max  = 2000;
+	int out_min = -15;
+	int out_max  = 15;
+
+	return -1 * ((pwm - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
 }
 
 //Convert pwm to motor speed for simulation

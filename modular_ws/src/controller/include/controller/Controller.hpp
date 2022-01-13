@@ -2,7 +2,7 @@
 #include  <vector>
 #include "PID.hpp"
 #define PWM_UPPER 2000
-#define PWM_LOWER 1050
+#define PWM_LOWER 1100
 
 class Controller {
 
@@ -18,22 +18,24 @@ class Controller {
         const int f = 200;
         const float st = 1/(float)f;
         //PID Katsayilari
-        double Kp_pitch = 1.5;
-        double Ki_pitch = 0.05/(float)f;
-        double Kd_pitch = 1.50*(float)f;
+        double Kp_pitch = 1.2;
+        double Ki_pitch = 0.2/(float)f; //10?
+        double Kd_pitch = 0.03*(float)f;
 
-        double Kp_roll = 1.5;
-        double Ki_roll = 0.05/(float)f;
-        double Kd_roll = 1.50*f;
+        double Kp_roll =  1.2;
+        double Ki_roll = 0.2/(float)f;
+        double Kd_roll = 0.007*(float)f;
 
-        double Kp_yaw = 0.1;
+        double Kp_yaw = 6;// 1;
 
-        float Kp_angle = 0.03*f;
-        PID pid;
+        float Kp_angle = 0.02*f;
+        PID pid_roll;
+        PID pid_pitch;
+        PID pid_yaw;
 
     public:
         Controller();
-        std::vector<double> Run (struct state state, struct state state_des);
+        std::vector<double> Run (struct state state, struct state state_des, int thr);
         std::vector<int> controller_output_pwm;
         ~Controller();
 };
