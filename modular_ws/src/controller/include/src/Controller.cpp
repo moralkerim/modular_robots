@@ -31,17 +31,17 @@ std::vector<double> Controller::Run (struct state state, struct state state_des,
         float pitch_des 	 = state_des.angles[1];
         float yaw_rate_des = state_des.rates[2];
 
-    float roll_rate_des = pid_roll.P_Angle(roll_des,roll, Kp_angle);
-    float pitch_rate_des = pid_pitch.P_Angle(pitch_des,pitch, Kp_angle);
+    roll_rate_des = pid_roll.P_Angle(roll_des,roll, Kp_angle);
+    pitch_rate_des = pid_pitch.P_Angle(pitch_des,pitch, Kp_angle);
 /*
     //printf("\nroll_rate_des: %.2f",roll_rate_des);
     //printf("\npitch_rate_des: %.2f",pitch_rate_des);
     //printf("\nyaw_rate_des: %.2f",yaw_rate_des);
 */  //printf("\nroll_rate_des: %.2f",roll_rate_des);
-    double pd_roll  = pid_roll.PD_Rate(roll_rate_des,roll_rate, Kp_roll, Ki_roll, Kd_roll);
+    pd_roll  = pid_roll.PD_Rate(roll_rate_des,roll_rate, Kp_roll, Ki_roll, Kd_roll);
     //printf("\npitch_rate_des: %.2f",pitch_rate_des);
-    double pd_pitch = pid_pitch.PD_Rate(pitch_rate_des,pitch_rate,Kp_pitch,Ki_pitch,Kd_pitch);
-    double p_yaw    = pid_yaw.P_Rate_Yaw(yaw_rate_des,yaw_rate,Kp_yaw);
+    pd_pitch = pid_pitch.PD_Rate(pitch_rate_des,pitch_rate,Kp_pitch,Ki_pitch,Kd_pitch);
+    p_yaw    = pid_yaw.P_Rate_Yaw(yaw_rate_des,yaw_rate,Kp_yaw);
 
 
     //printf("\npd_roll: %.2f",pd_roll);
@@ -50,10 +50,13 @@ std::vector<double> Controller::Run (struct state state, struct state state_des,
 
     ////printf("\nst: %.3f",st);
 
-    unsigned int pwm1 = thr + pd_pitch - pd_roll  + p_yaw;
-    unsigned int pwm2 = thr - pd_pitch + pd_roll  + p_yaw;
-    unsigned int pwm3 = thr + pd_pitch + pd_roll  - p_yaw;
-    unsigned int pwm4 = thr - pd_pitch - pd_roll  - p_yaw;
+    thr = pid_roll.Sat(thr, 1800, 1000);
+
+    int pwm1 = thr + pd_pitch - pd_roll  - p_yaw;
+    int pwm2 = thr - pd_pitch + pd_roll  - p_yaw ;
+    int pwm3 = thr + pd_pitch + pd_roll  + p_yaw ;
+    int pwm4 = thr - pd_pitch - pd_roll  + p_yaw ;
+
 
     //Saturate pwm values
     pwm1 = (int)pid_roll.Sat(pwm1,PWM_UPPER,PWM_LOWER,thr);
@@ -67,8 +70,13 @@ std::vector<double> Controller::Run (struct state state, struct state state_des,
     w3 = pid_roll.pwm2mot(pwm3,-1);
     w4 = pid_roll.pwm2mot(pwm4,-1);
 
+
     std::vector<double> controller_output = 	{w1,w2,w3,w4};
-    controller_output_pwm = {pwm1,pwm2,pwm3,pwm4};
+    controller_output_pwm[0] = pwm1;
+    controller_output_pwm[1] = pwm2;
+    controller_output_pwm[2] = pwm3;
+    controller_output_pwm[3] = pwm4;
+
     return controller_output;
 }
 

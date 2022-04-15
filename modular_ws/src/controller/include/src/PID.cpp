@@ -1,6 +1,6 @@
 #include "PID.hpp"
 
-PID::PID() {};
+PID::PID(): lpf(LP_FILTER_CUT_FREQ,st) {};
 
 double PID::P_Angle(double alpha_des, double alpha, double Kp_angle) {
 	double P;
@@ -12,8 +12,7 @@ double PID::P_Angle(double alpha_des, double alpha, double Kp_angle) {
 
 
 double PID::PD_Rate(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd) {
-	double P, I, D, pd,de;
-	e_eski_roll = e_roll;
+
 	e_roll = alpha_dot_des - alpha_dot;
   double e_roll_int = e_roll;
 
@@ -23,14 +22,19 @@ double PID::PD_Rate(double alpha_dot_des, double alpha_dot, double Kp, double Ki
     }
   }
 
+  	de_filt = N * (Kd * e_roll - de_int);
+  	de_int += de_filt*st;
 
 	de = e_roll - e_eski_roll;
-  ie_roll = ie_roll + e_roll_int;
+	e_eski_roll = e_roll;
+
+  ie_roll += e_roll_int*st;
+
   ie_roll_sat = ie_roll;
 	
 
-	P = Kp*e_roll; D = Kd*de; I = Ki * ie_roll_sat;
-
+	P = Kp*e_roll; D = de_filt; I = Ki * ie_roll_sat;
+	//D = lpf.update(D);
 	pd = P + I + D;
   	pd_roll_buf = pd;
 	pd  = Sat(pd,  300, -300);
@@ -39,12 +43,18 @@ double PID::PD_Rate(double alpha_dot_des, double alpha_dot, double Kp, double Ki
 
 }
 
+void PID::reset() {
+	ie_roll_sat = 0;
+	de_filt = 0;
+	de_int = 0;
+}
+
 
 double PID::P_Rate_Yaw(double alpha_dot_des, double alpha_dot, double Kp) {
 	double P;
 	double e_yaw = alpha_dot_des - alpha_dot;	
 	P = Kp*e_yaw;
-	P    = Sat(P,    300, -300);
+	P    = Sat(P,    150, -150);
 
     return P;
 
@@ -114,8 +124,8 @@ float PID::pwm2ang(unsigned short int pwm) {
 float PID::pwm2rate(unsigned short int pwm) {
 	int in_min  = 1000;
 	int in_max  = 2000;
-	int out_min = -15;
-	int out_max  = 15;
+	int out_min = -100;
+	int out_max  = 100;
 
 	return -1 * ((pwm - in_min) * (out_max - out_min) / (in_max - in_min) + out_min);
 }

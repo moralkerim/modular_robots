@@ -2,10 +2,18 @@
 #include <math.h>
 
 
-Kalman_Filtresi::Kalman_Filtresi() : lpf(LP_FILTER_CUT_FREQ,st) {
+Kalman_Filtresi::Kalman_Filtresi()  {
 
 }
 
+float Kalman_Filtresi::lpf(float x) {
+	//y[n]=(1−a)⋅y[n−1]+a⋅(x[n]+x[n−1])/2
+	float y = (1-a)*y_prev + a * (x + x_prev) / 2;
+	x_prev = x;
+	y_prev = y;
+
+	return y;
+}
 
 void Kalman_Filtresi::Run(float gyro[3], float acc[3]) {
 
@@ -21,12 +29,26 @@ void Kalman_Filtresi::Run(float gyro[3], float acc[3]) {
     //=================================
   float acctop=sqrt(accX*accX+accY*accY+accZ*accZ);
 
-  pitch_acc =  asin(accX/acctop)*rad2deg;
-  roll_acc  =  asin(accY/acctop)*rad2deg;
+  pitch_acc =  asin(accX/acctop)*rad2deg + PITCH_OFFSET;
+  roll_acc  =  asin(accY/acctop)*rad2deg + ROLL_OFFSET;
+
+  //roll_acc-=-0.67;	pitch_acc-=-1.15;	//İvmeölçer ile okunan hata değerleri offsetlemesi
+
+
+  //pitch_acc = lpf(pitch_acc);
+  //roll_acc = lpf(roll_acc);
+
+
+  pitch_gyro = gyroY * st;
+  roll_gyro =  gyroX * st;
+
+
   //yaw_acc   =  asin(accZ/acctop)*rad2deg;
 
+  /*
   pitch_acc = lpf.update(pitch_acc);
   roll_acc = lpf.update(roll_acc);
+  */
   //yaw_acc = lpf.update(yaw_acc);
 
   #if USE_SIM
@@ -36,8 +58,14 @@ void Kalman_Filtresi::Run(float gyro[3], float acc[3]) {
     //printf("\npitc_acc: %.2f", pitch_acc);
   #endif
     
+    if(gyro_ready) {
+
+    pitch_comp=(pitch_gyro+pitch_eski)*0.998+pitch_acc*0.002;	//Tümleyen filtre
+    roll_comp =(roll_gyro+roll_eski)*0.998+roll_acc*0.002;		//Tümleyen filtre
+
   //Pitch angle
 	//**Tahmin**
+    /*
 	pitch = pitch  - pitch_bias*st + gyroY*st;
 	S11_m_pitch = 2*sa_p+st*st*sb_p; S12_m_pitch=-st*sb_p;
 	S21_m_pitch = -st*sb_p; 	   S22_m_pitch=2*sb_p;
@@ -98,9 +126,24 @@ void Kalman_Filtresi::Run(float gyro[3], float acc[3]) {
   yaw_rate = gyroZ;
     //=================================
 
-    state.angles[0] = roll;
-    state.angles[1] = pitch;
-    state.angles[2] = yaw;
+    }
+
+    else {
+    	roll = roll_acc;
+    	pitch = pitch_acc;
+
+    	roll_comp  = roll_acc;
+    	pitch_comp = pitch_acc;
+
+    	gyro_ready = true;
+    }
+
+	pitch_eski=pitch_comp;
+	roll_eski=roll_comp;
+
+    state.angles[0] = roll_comp;
+    state.angles[1] = pitch_comp;
+    state.angles[2] = 0;
 
     state.rates[0] = roll_rate;
     state.rates[1] = pitch_rate;

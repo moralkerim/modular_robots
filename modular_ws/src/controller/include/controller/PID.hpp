@@ -1,14 +1,27 @@
+#include "LowPassFilter.hpp"
+#define LP_FILTER_CUT_FREQ 1
+#define N 10
+
 class PID {
 
     private:
-        float e_roll, e_pitch, e_eski_roll, e_eski_pitch, ie_roll, ie_pitch; //PID hatalari
+
         float imax=120, imin=-120;
-        const int f = 40;
+        const int f = 200;
         const float st = 1/(float)f;
 
-        float ie_roll_sat, ie_pitch_sat;
+
         float pd_roll_buf, pd_pitch_buf;
-        float pd_roll_sat_buf, pd_pitch_sat_buf;
+        LowPassFilter lpf;
+
+
+    public:
+        float e_roll, e_pitch, e_eski_roll, e_eski_pitch, ie_roll, ie_pitch; //PID hatalari
+        float ie_roll_sat;
+        float pd_roll_sat_buf;
+        float de, de_filt;
+        float de_int;
+        double P, I, D, pd;
 
     public:
         PID();
@@ -21,5 +34,6 @@ class PID {
         float pwm2rate(unsigned short int pwm);
         float pwm2mot(unsigned short int pwm, int dir);
         double sgn(double v);
+        void reset();
         ~PID();
 };

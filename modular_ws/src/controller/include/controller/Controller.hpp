@@ -16,26 +16,31 @@ class Controller {
         const float rad2deg = 180/3.14;
 
         const int f = 200;
-        const float st = 1/(float)f;
+        float st = 1/(float)f;
         //PID Katsayilari
-        double Kp_pitch = 1.2;
-        double Ki_pitch = 0.2/(float)f; //10?
-        double Kd_pitch = 0.03*(float)f;
 
-        double Kp_roll =  1.2;
-        double Ki_roll = 0.2/(float)f;
-        double Kd_roll = 0.007*(float)f;
 
-        double Kp_yaw = 6;// 1;
+        double Kp_roll = 0.3; //0.3
+        double Ki_roll = 0.07;  //0.008
+        double Kd_roll = 0.01; //0.007 0.01
 
-        float Kp_angle = 0.02*f;
-        PID pid_roll;
-        PID pid_pitch;
-        PID pid_yaw;
+        double Kp_pitch = Kp_roll;	//0.8
+        double Ki_pitch = Ki_roll;
+        double Kd_pitch = Kd_roll;
+
+        double Kp_yaw = 7.0;// 1;
+
+        float Kp_angle = 0.03*f;
+
 
     public:
         Controller();
         std::vector<double> Run (struct state state, struct state state_des, int thr);
-        std::vector<int> controller_output_pwm;
+        int controller_output_pwm[4];
+        double pd_roll, pd_pitch, p_yaw;
+        float roll_rate_des, pitch_rate_des;
+        PID pid_roll;
+        PID pid_pitch;
+        PID pid_yaw;
         ~Controller();
 };
