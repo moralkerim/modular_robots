@@ -63,6 +63,25 @@ void Kalman_Filtresi::Run(float gyro[3], float acc[3]) {
     pitch_comp=(pitch_gyro+pitch_eski)*0.998+pitch_acc*0.002;	//Tümleyen filtre
     roll_comp =(roll_gyro+roll_eski)*0.998+roll_acc*0.002;		//Tümleyen filtre
 
+    pitch_ekf = pitch_ekf - st*pitch_bias + gyroY*(st) + ((pitch_acc - pitch_ekf + st*pitch_bias - gyroY*(st))*(S11_pitch + (sa_p) - S21_pitch*st - (st)*(S12_pitch - S22_pitch*st)))/(Q + S11_pitch + (sa_p) - S21_pitch*st - (st)*(S12_pitch - S22_pitch*st));
+  pitch_bias = pitch_bias + ((S21_pitch + (sb_p) - S22_pitch*(st))*(pitch_acc - pitch_ekf + st*pitch_bias - gyroY*(st)))/(Q + S11_pitch + (sa_p) - S21_pitch*st - (st)*(S12_pitch - S22_pitch*st));
+
+  S11_pitch = -((S11_pitch + (sa_p) - S21_pitch*st - (st)*(S12_pitch - S22_pitch*st))/(Q + S11_pitch + (sa_p) - S21_pitch*st - (st)*(S12_pitch - S22_pitch*st)) - 1)*(S11_pitch + (sa_p) - S21_pitch*st - (st)*(S12_pitch - S22_pitch*st));
+  S12_pitch = -((S11_pitch + (sa_p) - S21_pitch*st - (st)*(S12_pitch - S22_pitch*st))/(Q + S11_pitch + (sa_p) - S21_pitch*st - (st)*(S12_pitch - S22_pitch*st)) - 1)*(S12_pitch + (sa_p) - S22_pitch*st);
+  S21_pitch = S21_pitch + (sb_p) - S22_pitch*(st) - ((S21_pitch + (sb_p) - S22_pitch*(st))*(S11_pitch + (sa_p) - S21_pitch*st - (st)*(S12_pitch - S22_pitch*st)))/(Q + S11_pitch + (sa_p) - S21_pitch*st - (st)*(S12_pitch - S22_pitch*st));
+  S22_pitch = S22_pitch + (sb_p) - ((S21_pitch + (sb_p) - S22_pitch*(st))*(S12_pitch + (sa_p) - S22_pitch*st))/(Q + S11_pitch + (sa_p) - S21_pitch*st - (st)*(S12_pitch - S22_pitch*st));
+    pitch_rate = gyroY;
+
+    roll_ekf = roll_ekf - st*roll_bias + gyroX*(st) + ((roll_acc - roll_ekf + st*roll_bias - gyroX*(st))*(S11_roll + (sa_r) - S21_roll*st - (st)*(S12_roll - S22_roll*st)))/(Q + S11_roll + (sa_r) - S21_roll*st - (st)*(S12_roll - S22_roll*st));
+  roll_bias = roll_bias + ((S21_roll + (sb_r) - S22_roll*(st))*(roll_acc - roll_ekf + st*roll_bias - gyroX*(st)))/(Q + S11_roll + (sa_r) - S21_roll*st - (st)*(S12_roll - S22_roll*st));
+
+  S11_roll = -((S11_roll + (sa_r) - S21_roll*st - (st)*(S12_roll - S22_roll*st))/(Q + S11_roll + (sa_r) - S21_roll*st - (st)*(S12_roll - S22_roll*st)) - 1)*(S11_roll + (sa_r) - S21_roll*st - (st)*(S12_roll - S22_roll*st));
+  S12_roll = -((S11_roll + (sa_r) - S21_roll*st - (st)*(S12_roll - S22_roll*st))/(Q + S11_roll + (sa_r) - S21_roll*st - (st)*(S12_roll - S22_roll*st)) - 1)*(S12_roll + (sa_r) - S22_roll*st);
+  S21_roll = S21_roll + (sb_r) - S22_roll*(st) - ((S21_roll + (sb_r) - S22_roll*(st))*(S11_roll + (sa_r) - S21_roll*st - (st)*(S12_roll - S22_roll*st)))/(Q + S11_roll + (sa_r) - S21_roll*st - (st)*(S12_roll - S22_roll*st));
+  S22_roll = S22_roll + (sb_r) - ((S21_roll + (sb_r) - S22_roll*(st))*(S12_roll + (sa_r) - S22_roll*st))/(Q + S11_roll + (sa_r) - S21_roll*st - (st)*(S12_roll - S22_roll*st));
+    roll_rate = gyroX;
+
+
   //Pitch angle
 	//**Tahmin**
     /*
@@ -83,6 +102,8 @@ void Kalman_Filtresi::Run(float gyro[3], float acc[3]) {
 	S11_m_pitch = S11_p_pitch; S12_m_pitch = S12_p_pitch; S21_m_pitch = S21_p_pitch; S22_m_pitch = S22_p_pitch; 
 
   pitch_rate = gyroY;
+
+
     //=================================
 
   //Roll angle
@@ -129,8 +150,8 @@ void Kalman_Filtresi::Run(float gyro[3], float acc[3]) {
     }
 
     else {
-    	roll = roll_acc;
-    	pitch = pitch_acc;
+    	roll_ekf = roll_acc;
+    	pitch_ekf = pitch_acc;
 
     	roll_comp  = roll_acc;
     	pitch_comp = pitch_acc;

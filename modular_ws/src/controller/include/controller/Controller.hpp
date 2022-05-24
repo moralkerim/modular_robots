@@ -15,20 +15,20 @@ class Controller {
         float pwm_trim = 1550;
         const float rad2deg = 180/3.14;
 
-        const int f = 200;
+        const int f = 400;
         float st = 1/(float)f;
         //PID Katsayilari
 
 
-        double Kp_roll = 0.3; //0.3
-        double Ki_roll = 0.07;  //0.008
-        double Kd_roll = 0.01; //0.007 0.01
+        double Kp_roll = 0.2; //0.3
+        double Ki_roll = 0.05;  //0.008
+        double Kd_roll = 0.02; //0.007 0.01
 
         double Kp_pitch = Kp_roll;	//0.8
         double Ki_pitch = Ki_roll;
         double Kd_pitch = Kd_roll;
 
-        double Kp_yaw = 7.0;// 1;
+        double Kp_yaw = 9.0;// 1;
 
         float Kp_angle = 0.03*f;
 

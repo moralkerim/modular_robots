@@ -7,7 +7,7 @@ class PID {
     private:
 
         float imax=120, imin=-120;
-        const int f = 200;
+        const int f = 400;
         const float st = 1/(float)f;
 
 

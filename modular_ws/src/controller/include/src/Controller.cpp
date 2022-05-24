@@ -33,6 +33,8 @@ std::vector<double> Controller::Run (struct state state, struct state state_des,
 
     roll_rate_des = pid_roll.P_Angle(roll_des,roll, Kp_angle);
     pitch_rate_des = pid_pitch.P_Angle(pitch_des,pitch, Kp_angle);
+
+
 /*
     //printf("\nroll_rate_des: %.2f",roll_rate_des);
     //printf("\npitch_rate_des: %.2f",pitch_rate_des);
@@ -44,6 +46,7 @@ std::vector<double> Controller::Run (struct state state, struct state state_des,
     p_yaw    = pid_yaw.P_Rate_Yaw(yaw_rate_des,yaw_rate,Kp_yaw);
 
 
+
     //printf("\npd_roll: %.2f",pd_roll);
     //printf("\npd_pitch: %.2f",pd_pitch);
     //printf("\np_yaw: %.2f",p_yaw);
@@ -52,10 +55,10 @@ std::vector<double> Controller::Run (struct state state, struct state state_des,
 
     thr = pid_roll.Sat(thr, 1800, 1000);
 
-    int pwm1 = thr + pd_pitch - pd_roll  - p_yaw;
-    int pwm2 = thr - pd_pitch + pd_roll  - p_yaw ;
-    int pwm3 = thr + pd_pitch + pd_roll  + p_yaw ;
-    int pwm4 = thr - pd_pitch - pd_roll  + p_yaw ;
+    int pwm1 = thr+ pd_pitch - pd_roll  - p_yaw ;
+    int pwm2 = thr- pd_pitch + pd_roll  - p_yaw ;
+    int pwm3 = thr+ pd_pitch + pd_roll  + p_yaw ;
+    int pwm4 = thr- pd_pitch - pd_roll  + p_yaw ;
 
 
     //Saturate pwm values
