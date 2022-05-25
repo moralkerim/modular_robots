@@ -3,9 +3,17 @@
 #include "LowPassFilter.hpp"
 
 #define LP_FILTER_CUT_FREQ 2*3.14*1
+//KALMAN
 #define ROLL_OFFSET   3.0
 #define PITCH_OFFSET -4.25
 #define a 0.1
+
+
+/*
+//COMP
+#define ROLL_OFFSET   3.0
+#define PITCH_OFFSET -6.05
+#define a 0.1 */
 
 struct state {
     float angles[3];

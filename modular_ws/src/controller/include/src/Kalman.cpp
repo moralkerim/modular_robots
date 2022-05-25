@@ -162,8 +162,8 @@ void Kalman_Filtresi::Run(float gyro[3], float acc[3]) {
 	pitch_eski=pitch_comp;
 	roll_eski=roll_comp;
 
-    state.angles[0] = roll_comp;
-    state.angles[1] = pitch_comp;
+    state.angles[0] = roll_ekf;
+    state.angles[1] = pitch_ekf;
     state.angles[2] = 0;
 
     state.rates[0] = roll_rate;

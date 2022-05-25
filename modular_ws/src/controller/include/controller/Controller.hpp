@@ -20,7 +20,7 @@ class Controller {
         //PID Katsayilari
 
 
-        double Kp_roll = 0.2; //0.3
+        double Kp_roll = 0.15; //0.3
         double Ki_roll = 0.05;  //0.008
         double Kd_roll = 0.02; //0.007 0.01
 

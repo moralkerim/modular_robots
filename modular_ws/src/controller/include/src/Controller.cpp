@@ -55,10 +55,10 @@ std::vector<double> Controller::Run (struct state state, struct state state_des,
 
     thr = pid_roll.Sat(thr, 1800, 1000);
 
-    int pwm1 = thr+ pd_pitch - pd_roll  - p_yaw ;
-    int pwm2 = thr- pd_pitch + pd_roll  - p_yaw ;
-    int pwm3 = thr+ pd_pitch + pd_roll  + p_yaw ;
-    int pwm4 = thr- pd_pitch - pd_roll  + p_yaw ;
+    int pwm1 = thr + pd_pitch - pd_roll  - p_yaw ;
+    int pwm2 = thr - pd_pitch + pd_roll  - p_yaw ;
+    int pwm3 = thr + pd_pitch + pd_roll  + p_yaw ;
+    int pwm4 = thr - pd_pitch - pd_roll  + p_yaw ;
 
 
     //Saturate pwm values
