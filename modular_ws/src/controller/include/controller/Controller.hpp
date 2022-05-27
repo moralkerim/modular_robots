@@ -3,6 +3,8 @@
 #include "PID.hpp"
 #define PWM_UPPER 2000
 #define PWM_LOWER 1100
+#define ROLL_TRIM 	2.82
+#define PITCH_TRIM -16.4
 
 class Controller {
 
@@ -20,7 +22,7 @@ class Controller {
         //PID Katsayilari
 
 
-        double Kp_roll = 0.15; //0.3
+        double Kp_roll = 0.13; //0.3
         double Ki_roll = 0.05;  //0.008
         double Kd_roll = 0.02; //0.007 0.01
 

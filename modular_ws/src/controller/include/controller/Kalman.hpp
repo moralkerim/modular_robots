@@ -51,7 +51,7 @@ class Kalman_Filtresi {
         const double st = 1/(float)f;
         bool gyro_ready;
 
-        float x_prev, y_prev;
+        float x_, y_;
         float pitch_eski, roll_eski;
 
     public:

@@ -8,10 +8,10 @@ Kalman_Filtresi::Kalman_Filtresi()  {
 
 float Kalman_Filtresi::lpf(float x) {
 	//y[n]=(1−a)⋅y[n−1]+a⋅(x[n]+x[n−1])/2
-	float y = (1-a)*y_prev + a * (x + x_prev) / 2;
-	x_prev = x;
-	y_prev = y;
 
+	float y = 0.8544*y_ + 0.07282 * x + 0.07282 * x_;
+	x_ = x;
+	y_ = y;
 	return y;
 }
 
@@ -144,7 +144,7 @@ void Kalman_Filtresi::Run(float gyro[3], float acc[3]) {
 	S21_p_yaw = S21_m_yaw-S11_m_yaw*Kt21_yaw; S22_p_yaw = S22_m_yaw-S12_m_yaw*Kt21_yaw;
 
 	S11_m_yaw = S11_p_yaw; S12_m_yaw = S12_p_yaw; S21_m_yaw = S21_p_yaw; S22_m_yaw = S22_p_yaw; */
-  yaw_rate = gyroZ;
+  yaw_rate = lpf(gyroZ);
     //=================================
 
     }
