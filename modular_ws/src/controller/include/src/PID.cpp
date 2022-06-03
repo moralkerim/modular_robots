@@ -113,12 +113,22 @@ double PID::sgn(double v) {
 }
 
 float PID::pwm2ang(unsigned short int pwm) {
+	int dead_zone = 5;
 	int in_min  = 1000;
 	int in_max  = 2000;
 	int out_min = -30;
 	int out_max  = 30;
+	unsigned short int pwm_out;
 
-	return (pwm - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+	if(pwm > 1500 - dead_zone && pwm < 1500 + dead_zone) {
+		pwm_out = 1500;
+	}
+
+	else {
+		pwm_out = pwm;
+	}
+
+	return (pwm_out - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
 float PID::pwm2rate(unsigned short int pwm) {

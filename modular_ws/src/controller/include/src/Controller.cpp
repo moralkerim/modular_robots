@@ -43,7 +43,8 @@ std::vector<double> Controller::Run (struct state state, struct state state_des,
     pd_roll  = pid_roll.PD_Rate(roll_rate_des,roll_rate, Kp_roll, Ki_roll, Kd_roll);
     //printf("\npitch_rate_des: %.2f",pitch_rate_des);
     pd_pitch = pid_pitch.PD_Rate(pitch_rate_des,pitch_rate,Kp_pitch,Ki_pitch,Kd_pitch);
-    p_yaw    = pid_yaw.P_Rate_Yaw(yaw_rate_des,yaw_rate,Kp_yaw);
+    //p_yaw    = pid_yaw.P_Rate_Yaw(yaw_rate_des,yaw_rate,Kp_yaw);
+    p_yaw    = pid_yaw.PD_Rate(yaw_rate_des,yaw_rate,Kp_yaw,Ki_yaw,0);
 
 
 

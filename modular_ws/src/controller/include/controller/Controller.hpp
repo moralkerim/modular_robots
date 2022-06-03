@@ -22,15 +22,16 @@ class Controller {
         //PID Katsayilari
 
 
-        double Kp_roll = 0.13; //0.3
-        double Ki_roll = 0.05;  //0.008
+        double Kp_roll = 0.1; //0.3
+        double Ki_roll = 0.02;  //0.008
         double Kd_roll = 0.02; //0.007 0.01
 
         double Kp_pitch = Kp_roll;	//0.8
         double Ki_pitch = Ki_roll;
         double Kd_pitch = Kd_roll;
 
-        double Kp_yaw = 9.0;// 1;
+        double Kp_yaw = 5.0;// 1;
+        double Ki_yaw = 6.5;// 1;
 
         float Kp_angle = 0.03*f;
 
