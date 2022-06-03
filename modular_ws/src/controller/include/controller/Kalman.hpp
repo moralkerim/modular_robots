@@ -1,6 +1,6 @@
 #include <math.h>
 #include <stdio.h>
-#include "LowPassFilter.hpp"
+#include "lpf.hpp"
 
 #define LP_FILTER_CUT_FREQ 2*3.14*1
 //KALMAN
@@ -51,7 +51,6 @@ class Kalman_Filtresi {
         const double st = 1/(float)f;
         bool gyro_ready;
 
-        float x_, y_;
         float pitch_eski, roll_eski;
 
     public:
@@ -61,9 +60,10 @@ class Kalman_Filtresi {
         float pitch_comp, roll_comp;
         float roll_ekf, pitch_ekf;
 
+        lpf lpf_roll, lpf_pitch, lpf_yaw;
+
     public:
         Kalman_Filtresi();
-        float lpf(float x);
 
         void Run(float gyro[3], float acc[3]);
         ~Kalman_Filtresi();

@@ -23,7 +23,7 @@ class Controller {
 
 
         double Kp_roll = 0.1; //0.3
-        double Ki_roll = 0.02;  //0.008
+        double Ki_roll = 0.1;  //0.008
         double Kd_roll = 0.02; //0.007 0.01
 
         double Kp_pitch = Kp_roll;	//0.8
