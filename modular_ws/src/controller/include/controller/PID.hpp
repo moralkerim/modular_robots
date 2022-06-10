@@ -33,6 +33,7 @@ class PID {
         float pwm2ang(unsigned short int pwm);
         float pwm2rate(unsigned short int pwm);
         float pwm2mot(unsigned short int pwm, int dir);
+        unsigned int F2thr(float F);
         double sgn(double v);
         void reset();
         ~PID();

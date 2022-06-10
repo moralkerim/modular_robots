@@ -1,6 +1,6 @@
 #include "PID.hpp"
 
-PID::PID(): lpf(LP_FILTER_CUT_FREQ,st) {};
+PID::PID() {};
 
 double PID::P_Angle(double alpha_des, double alpha, double Kp_angle) {
 	double P;
@@ -148,6 +148,16 @@ float PID::pwm2mot(unsigned short int pwm, int dir) {
 	float out_max  = 1326;
 
 	return (float)(dir) * ((float)pwm - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+unsigned int PID::F2thr(float F) {
+	float kf = 5.074714371861032e-08;
+	float max_rpm = 17591;
+	float Fm = F/4;
+	float wh = sqrt(Fm/kf);
+
+	unsigned int thr = (wh - 0) * (2000 - 1000) / (max_rpm - 0) + 1000;
+	return thr;
 }
 
 PID::~PID() {};

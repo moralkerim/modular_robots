@@ -4,8 +4,8 @@
 
 #define LP_FILTER_CUT_FREQ 2*3.14*1
 //KALMAN
-#define ROLL_OFFSET   2.0
-#define PITCH_OFFSET -4.95
+#define ROLL_OFFSET   -1 //2.0
+#define PITCH_OFFSET  -4 //-4.95
 #define a 0.1
 
 
@@ -60,7 +60,9 @@ class Kalman_Filtresi {
         float pitch_comp, roll_comp;
         float roll_ekf, pitch_ekf;
 
-        lpf lpf_roll, lpf_pitch, lpf_yaw;
+        lpf lpf_roll = lpf(0.8544, 0.07282, 0.07282);
+        lpf lpf_pitch = lpf(0.8544, 0.07282, 0.07282);
+        lpf lpf_yaw   = lpf(0.8544, 0.07282, 0.07282);
 
     public:
         Kalman_Filtresi();

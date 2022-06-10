@@ -1,10 +1,13 @@
+
 #include <stdio.h>
 #include  <vector>
 #include "PID.hpp"
+#include "lpf.hpp"
+
 #define PWM_UPPER 2000
 #define PWM_LOWER 1100
 #define ROLL_TRIM 	2.82
-#define PITCH_TRIM -16.4
+#define PITCH_TRIM -13.4
 
 class Controller {
 
@@ -21,10 +24,13 @@ class Controller {
         float st = 1/(float)f;
         //PID Katsayilari
 
-
-        double Kp_roll = 0.1; //0.3
-        double Ki_roll = 0.1;  //0.008
-        double Kd_roll = 0.02; //0.007 0.01
+        float m = 1.3; //1300 g
+        float g = 9.81;
+        float F_max = 31.23;
+        float F_min = 0;
+        double Kp_roll = 0.17; //0.3
+        double Ki_roll = 0.08;  //0.008
+        double Kd_roll = 0.015; //0.007 0.01
 
         double Kp_pitch = Kp_roll;	//0.8
         double Ki_pitch = Ki_roll;
@@ -35,15 +41,26 @@ class Controller {
 
         float Kp_angle = 0.03*f;
 
+        float Kp_alt = 80;
+        float Ki_alt = 0;
+
+        lpf roll_des_filt  = lpf(0.9244, 0.03779, 0.03779);
+        lpf pitch_des_filt = lpf(0.9244, 0.03779, 0.03779);
+        lpf yaw_des_filt   = lpf(0.9244, 0.03779, 0.03779);
+
 
     public:
         Controller();
         std::vector<double> Run (struct state state, struct state state_des, int thr);
+        std::vector<double> Run (struct state state, struct state state_des, float z_vel);
         int controller_output_pwm[4];
         double pd_roll, pd_pitch, p_yaw;
         float roll_rate_des, pitch_rate_des;
+        float F;
         PID pid_roll;
         PID pid_pitch;
         PID pid_yaw;
+        PID p_alt;
+        float alt_thr;
         ~Controller();
 };
