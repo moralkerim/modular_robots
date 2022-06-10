@@ -28,6 +28,7 @@ class PID {
         double P_Angle(double alpha_des, double alpha, double Kp_angle);
         double PD_Rate(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd);
         double P_Rate_Yaw(double alpha_dot_des, double alpha_dot, double Kp);
+        double PI_Alt(double z0, double z, double v_des, double v, double Kp_alt, double Ki_alt);
         double Sat(double pwm, int max, int min,int thr);
         double Sat(double pwm, int max, int min);
         float pwm2ang(unsigned short int pwm);

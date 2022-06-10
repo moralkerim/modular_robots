@@ -10,6 +10,19 @@ double PID::P_Angle(double alpha_des, double alpha, double Kp_angle) {
 
 }
 
+double PID::PI_Alt(double z0, double z, double v_des, double v, double Kp_alt, double Ki_alt) {
+	double P;
+	double I;
+	double e = v_des - v;
+	P = Kp_alt*e;
+	double ei = z0 - z;
+	I = Ki_alt * ei;
+
+	double PI = P + I;
+    return PI;
+
+}
+
 
 double PID::PD_Rate(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd) {
 
