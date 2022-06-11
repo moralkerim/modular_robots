@@ -42,7 +42,17 @@ class Kalman_Filtresi {
         float S11_p_yaw, S12_p_yaw, S21_p_yaw, S22_p_yaw;
         float Kt11_yaw, Kt21_yaw;
 
+        float S11_alt, S12_alt, S21_alt, S22_alt, S13_alt, S23_alt, S31_alt, S32_alt, S33_alt=10000;
+
+
         double Q = 10000; //0.5 -- onceki deger.
+
+		  float Qb = 2;
+		  float Qs = 0.25;
+		  float salt = 1;
+		  float svel = 2;
+		  float sbar = 5;
+
 
 
         const float rad2deg = 180/3.14;
@@ -59,6 +69,9 @@ class Kalman_Filtresi {
         float roll_gyro, pitch_gyro;
         float pitch_comp, roll_comp;
         float roll_ekf, pitch_ekf;
+        float gyro[3], acc[3];
+
+        float acc_vert, alt_gnd, vz, sonar_alt, baro_alt, baro_gnd;
 
         lpf lpf_roll = lpf(0.8544, 0.07282, 0.07282);
         lpf lpf_pitch = lpf(0.8544, 0.07282, 0.07282);
@@ -67,7 +80,7 @@ class Kalman_Filtresi {
     public:
         Kalman_Filtresi();
 
-        void Run(float gyro[3], float acc[3]);
+        void Run();
         ~Kalman_Filtresi();
 
 

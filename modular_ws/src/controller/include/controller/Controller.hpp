@@ -25,25 +25,25 @@ class Controller {
         float st = 1/(float)f;
         //PID Katsayilari
 
-        float m = 1.4; //1300 g
-        float g = 9.81;
-        float F_max = 31.23;
-        float F_min = 0;
-        double Kp_roll = 0.17; //0.3
-        double Ki_roll = 0.08;  //0.008
-        double Kd_roll = 0.015; //0.007 0.01
+        const float m = 1.4; //1300 g
+        const float g = 9.81;
+        const float F_max = 31.23;
+        const float F_min = 0;
+        const double Kp_roll = 0.17; //0.3
+        const double Ki_roll = 0.08;  //0.008
+        const double Kd_roll = 0.015; //0.007 0.01
 
-        double Kp_pitch = Kp_roll;	//0.8
-        double Ki_pitch = Ki_roll;
-        double Kd_pitch = Kd_roll;
+        const double Kp_pitch = Kp_roll;	//0.8
+        const double Ki_pitch = Ki_roll;
+        const double Kd_pitch = Kd_roll;
 
-        double Kp_yaw = 5.0;// 1;
-        double Ki_yaw = 6.5;// 1;
+        const double Kp_yaw = 5.0;// 1;
+        const double Ki_yaw = 6.5;// 1;
 
-        float Kp_angle = 0.03*f;
+        const float Kp_angle = 0.03*f;
 
-        float Kp_alt = 15; //30
-        float Ki_alt = 15;  //3
+        const float Kp_alt = 15; //30
+        const float Ki_alt = 15;  //3
 
         lpf roll_des_filt  = lpf(0.9244, 0.03779, 0.03779);
         lpf pitch_des_filt = lpf(0.9244, 0.03779, 0.03779);
