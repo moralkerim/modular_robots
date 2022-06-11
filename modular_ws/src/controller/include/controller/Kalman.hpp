@@ -4,8 +4,8 @@
 
 #define LP_FILTER_CUT_FREQ 2*3.14*1
 //KALMAN
-#define ROLL_OFFSET   -1 //2.0
-#define PITCH_OFFSET  -4 //-4.95
+#define ROLL_OFFSET   0.4 //2.0
+#define PITCH_OFFSET  -6 //-4.95
 #define a 0.1
 
 

@@ -3,6 +3,7 @@
 #include  <vector>
 #include "PID.hpp"
 #include "lpf.hpp"
+#include <math.h>
 
 #define PWM_UPPER 2000
 #define PWM_LOWER 1100

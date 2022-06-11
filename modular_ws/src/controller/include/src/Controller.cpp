@@ -139,6 +139,12 @@ std::vector<double> Controller::Run (struct state state, struct state state_des,
     ////printf("\nst: %.3f",st);
     //F = p_alt.PD_Rate(0, z_vel, Kp_alt, Ki_alt, 0) + m*g;
     F = p_alt.PI_Alt(z0, z, 0, z_vel, Kp_alt, Ki_alt) + m*g;
+    float deg2rad = 0.0175;
+    float roll_r = roll * deg2rad;
+    float pitch_r = pitch * deg2rad;
+    float b2e = 1 / cos(roll_r) / cos(pitch_r);
+
+    F = F * b2e ; // Body to Earth
     F = p_alt.Sat(F, F_max, F_min);
     float thr = p_alt.F2thr(F);
     thr = p_alt.Sat(thr, 1800, 1100);
