@@ -10,11 +10,29 @@ double PID::P_Angle(double alpha_des, double alpha, double Kp_angle) {
 
 }
 
-double PID::PI_Alt(double z0, double z, double v_des, double v, double Kp_alt, double Ki_alt) {
+double PID::PI_Alt(double z0, double z, double v, double Kp_alt, double Ki_alt, unsigned int ch3) {
 	double P;
 	double I;
+	float v_des;
+
+	if(ch3 > 1700) {
+		zi = z0 + x_inc;
+		v_des = vz_def;
+	}
+
+	else if (ch3 < 1300) {
+		zi = z0 - x_inc;
+		v_des = -1 * vz_def;
+	}
+
+	else {
+		zi = z0;
+		v_des = 0;
+	}
+
 	double e = v_des - v;
 	P = Kp_alt*e;
+
 	double ei = z0 - z;
 	I = Ki_alt * ei;
 

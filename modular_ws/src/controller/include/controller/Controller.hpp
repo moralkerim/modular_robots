@@ -42,7 +42,7 @@ class Controller {
 
         float Kp_angle = 0.03*f;
 
-        float Kp_alt = 20; //30
+        float Kp_alt = 15; //30
         float Ki_alt = 15;  //3
 
         lpf roll_des_filt  = lpf(0.9244, 0.03779, 0.03779);
@@ -53,7 +53,7 @@ class Controller {
     public:
         Controller();
         std::vector<double> Run (struct state state, struct state state_des, int thr);
-        std::vector<double> Run (struct state state, struct state state_des, float z_vel, float z0, float z);
+        std::vector<double> Run (struct state state, struct state state_des, float z_vel, float z0, float z, float ch3);
         int controller_output_pwm[4];
         double pd_roll, pd_pitch, p_yaw;
         float roll_rate_des, pitch_rate_des;

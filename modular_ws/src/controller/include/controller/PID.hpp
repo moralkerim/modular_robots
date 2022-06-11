@@ -10,6 +10,9 @@ class PID {
         const int f = 400;
         const float st = 1/(float)f;
 
+        const float vz_def = 0.3;
+        const float x_inc = vz_def * st;
+
 
         float pd_roll_buf, pd_pitch_buf;
         LowPassFilter lpf;
@@ -22,13 +25,14 @@ class PID {
         float de, de_filt;
         float de_int;
         double P, I, D, pd;
+        float zi;
 
     public:
         PID();
         double P_Angle(double alpha_des, double alpha, double Kp_angle);
         double PD_Rate(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd);
         double P_Rate_Yaw(double alpha_dot_des, double alpha_dot, double Kp);
-        double PI_Alt(double z0, double z, double v_des, double v, double Kp_alt, double Ki_alt);
+        double PI_Alt(double z0, double z, double v, double Kp_alt, double Ki_alt, unsigned int ch3);
         double Sat(double pwm, int max, int min,int thr);
         double Sat(double pwm, int max, int min);
         float pwm2ang(unsigned short int pwm);

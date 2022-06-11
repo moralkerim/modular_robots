@@ -88,7 +88,7 @@ std::vector<double> Controller::Run (struct state state, struct state state_des,
     return controller_output;
 }
 
-std::vector<double> Controller::Run (struct state state, struct state state_des, float z_vel, float z0, float z) {
+std::vector<double> Controller::Run (struct state state, struct state state_des, float z_vel, float z0, float z, float ch3) {
         //printf("\ngyroX: %.2f",gyro[0]);
         //printf("\naccX: %.2f",acc[0]);
 
@@ -138,7 +138,8 @@ std::vector<double> Controller::Run (struct state state, struct state state_des,
 
     ////printf("\nst: %.3f",st);
     //F = p_alt.PD_Rate(0, z_vel, Kp_alt, Ki_alt, 0) + m*g;
-    F = p_alt.PI_Alt(z0, z, 0, z_vel, Kp_alt, Ki_alt) + m*g;
+    //double PI_Alt(double z0, double z, double v, double Kp_alt, double Ki_alt, unsigned int ch3);
+    F = p_alt.PI_Alt(z0, z, z_vel, Kp_alt, Ki_alt, ch3) + m*g;
     float deg2rad = 0.0175;
     float roll_r = roll * deg2rad;
     float pitch_r = pitch * deg2rad;
