@@ -1,6 +1,6 @@
 #include "LowPassFilter.hpp"
 #define LP_FILTER_CUT_FREQ 1
-#define N 10
+#define N 20
 
 class PID {
 

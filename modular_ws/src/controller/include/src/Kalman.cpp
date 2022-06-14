@@ -52,9 +52,132 @@ void Kalman_Filtresi::Run() {
     
     if(gyro_ready) {
 
+
     pitch_comp=(pitch_gyro+pitch_eski)*0.998+pitch_acc*0.002;	//Tümleyen filtre
     roll_comp =(roll_gyro+roll_eski)*0.998+roll_acc*0.002;		//Tümleyen filtre
 
+
+    //ANGLE PREDICTION
+    roll_ekf = (roll_ekf) + st*(roll_rate);
+
+    S11_roll = S11_roll + sa + S31_roll*st + (st*st*(S13_roll + S33_roll*st))/st;
+    S12_roll = S12_roll + S32_roll*st;
+    S13_roll = S13_roll + S33_roll*st;
+
+    S21_roll = S21_roll + S23_roll*(st);
+    S22_roll = S22_roll + sb;
+    //S23_roll = S23_roll;
+
+    S31_roll = S31_roll + S33_roll*(st);
+    //S32_roll = S32_roll;
+    S33_roll = S33_roll + sr;
+
+    //ANGLE CORRECTION
+    float A_roll = (Qa*Qg + Qa*S22_roll + Qa*S23_roll + Qa*S32_roll + Qa*S33_roll + Qg*S11_roll + S11_roll*S22_roll - S12_roll*S21_roll + S11_roll*S23_roll - S13_roll*S21_roll + S11_roll*S32_roll - S12_roll*S31_roll + S11_roll*S33_roll - S13_roll*S31_roll);
+    float Kt11_roll = 1 - (Qa*(Qg + S22_roll + S23_roll + S32_roll + S33_roll))/A_roll;
+    float Kt12_roll = (Qa*(S12_roll + S13_roll))/A_roll;
+    float Kt21_roll = (Qg*S21_roll + S21_roll*S32_roll - S22_roll*S31_roll + S21_roll*S33_roll - S23_roll*S31_roll)/A_roll;
+    float Kt22_roll = (Qa*S22_roll + Qa*S23_roll + S11_roll*S22_roll - S12_roll*S21_roll + S11_roll*S23_roll - S13_roll*S21_roll)/A_roll;
+    float Kt31_roll = (Qg*S31_roll - S21_roll*S32_roll + S22_roll*S31_roll - S21_roll*S33_roll + S23_roll*S31_roll)/A_roll;
+    float Kt32_roll = (Qa*S32_roll + Qa*S33_roll + S11_roll*S32_roll - S12_roll*S31_roll + S11_roll*S33_roll - S13_roll*S31_roll)/A_roll;
+
+    roll_ekf = (roll_ekf) + Kt11_roll*((roll_acc) - (roll_ekf)) - Kt12_roll*((roll_bias) - (gyroX) + (roll_rate));
+
+
+    roll_bias = (roll_bias) + Kt21_roll*((roll_acc) - (roll_ekf)) - Kt22_roll*((roll_bias) - (gyroX) + (roll_rate));
+
+
+    roll_rate = (roll_rate) + Kt31_roll*((roll_acc) - (roll_ekf)) - Kt32_roll*((roll_bias) - (gyroX) + (roll_rate));
+
+
+    S11_roll = - S11_roll*(Kt11_roll - 1) - Kt12_roll*S21_roll - Kt12_roll*S31_roll;
+
+
+    S12_roll = - S12_roll*(Kt11_roll - 1) - Kt12_roll*S22_roll - Kt12_roll*S32_roll;
+
+
+    S13_roll = - S13_roll*(Kt11_roll - 1) - Kt12_roll*S23_roll - Kt12_roll*S33_roll;
+
+
+    S21_roll = - S21_roll*(Kt22_roll - 1) - Kt21_roll*S11_roll - Kt22_roll*S31_roll;
+
+
+    S22_roll = - S22_roll*(Kt22_roll - 1) - Kt21_roll*S12_roll - Kt22_roll*S32_roll;
+
+
+    S23_roll = - S23_roll*(Kt22_roll - 1) - Kt21_roll*S13_roll - Kt22_roll*S33_roll;
+
+
+    S31_roll = - S31_roll*(Kt32_roll - 1) - Kt31_roll*S11_roll - Kt32_roll*S21_roll;
+
+
+    S32_roll = - S32_roll*(Kt32_roll - 1) - Kt31_roll*S12_roll - Kt32_roll*S22_roll;
+
+
+    S33_roll = - S33_roll*(Kt32_roll - 1) - Kt31_roll*S13_roll - Kt32_roll*S23_roll;
+
+    //============================
+
+    //ANGLE PREDICTION
+    pitch_ekf = (pitch_ekf) + st*(pitch_rate);
+
+    S11_pitch = S11_pitch + sa + S31_pitch*st + (st*st*(S13_pitch + S33_pitch*st))/st;
+    S12_pitch = S12_pitch + S32_pitch*st;
+    S13_pitch = S13_pitch + S33_pitch*st;
+
+    S21_pitch = S21_pitch + S23_pitch*(st);
+    S22_pitch = S22_pitch + sb;
+    //S23_pitch = S23_pitch;
+
+    S31_pitch = S31_pitch + S33_pitch*(st);
+    //S32_pitch = S32_pitch;
+    S33_pitch = S33_pitch + sr;
+
+    //ANGLE CORRECTION
+    float A_pitch = (Qa*Qg + Qa*S22_pitch + Qa*S23_pitch + Qa*S32_pitch + Qa*S33_pitch + Qg*S11_pitch + S11_pitch*S22_pitch - S12_pitch*S21_pitch + S11_pitch*S23_pitch - S13_pitch*S21_pitch + S11_pitch*S32_pitch - S12_pitch*S31_pitch + S11_pitch*S33_pitch - S13_pitch*S31_pitch);
+    float Kt11_pitch = 1 - (Qa*(Qg + S22_pitch + S23_pitch + S32_pitch + S33_pitch))/A_pitch;
+    float Kt12_pitch = (Qa*(S12_pitch + S13_pitch))/A_pitch;
+    float Kt21_pitch = (Qg*S21_pitch + S21_pitch*S32_pitch - S22_pitch*S31_pitch + S21_pitch*S33_pitch - S23_pitch*S31_pitch)/A_pitch;
+    float Kt22_pitch = (Qa*S22_pitch + Qa*S23_pitch + S11_pitch*S22_pitch - S12_pitch*S21_pitch + S11_pitch*S23_pitch - S13_pitch*S21_pitch)/A_pitch;
+    float Kt31_pitch = (Qg*S31_pitch - S21_pitch*S32_pitch + S22_pitch*S31_pitch - S21_pitch*S33_pitch + S23_pitch*S31_pitch)/A_pitch;
+    float Kt32_pitch = (Qa*S32_pitch + Qa*S33_pitch + S11_pitch*S32_pitch - S12_pitch*S31_pitch + S11_pitch*S33_pitch - S13_pitch*S31_pitch)/A_pitch;
+
+    pitch_ekf = (pitch_ekf) + Kt11_pitch*((pitch_acc) - (pitch_ekf)) - Kt12_pitch*((pitch_bias) - (gyroY) + (pitch_rate));
+
+    //pitch_ekf = 0;
+    pitch_bias = (pitch_bias) + Kt21_pitch*((pitch_acc) - (pitch_ekf)) - Kt22_pitch*((pitch_bias) - (gyroY) + (pitch_rate));
+    //pitch_bias = 0;
+
+    pitch_rate = (pitch_rate) + Kt31_pitch*((pitch_acc) - (pitch_ekf)) - Kt32_pitch*((pitch_bias) - (gyroY) + (pitch_rate));
+
+
+    S11_pitch = - S11_pitch*(Kt11_pitch - 1) - Kt12_pitch*S21_pitch - Kt12_pitch*S31_pitch;
+
+
+    S12_pitch = - S12_pitch*(Kt11_pitch - 1) - Kt12_pitch*S22_pitch - Kt12_pitch*S32_pitch;
+
+
+    S13_pitch = - S13_pitch*(Kt11_pitch - 1) - Kt12_pitch*S23_pitch - Kt12_pitch*S33_pitch;
+
+
+    S21_pitch = - S21_pitch*(Kt22_pitch - 1) - Kt21_pitch*S11_pitch - Kt22_pitch*S31_pitch;
+
+
+    S22_pitch = - S22_pitch*(Kt22_pitch - 1) - Kt21_pitch*S12_pitch - Kt22_pitch*S32_pitch;
+
+
+    S23_pitch = - S23_pitch*(Kt22_pitch - 1) - Kt21_pitch*S13_pitch - Kt22_pitch*S33_pitch;
+
+
+    S31_pitch = - S31_pitch*(Kt32_pitch - 1) - Kt31_pitch*S11_pitch - Kt32_pitch*S21_pitch;
+
+
+    S32_pitch = - S32_pitch*(Kt32_pitch - 1) - Kt31_pitch*S12_pitch - Kt32_pitch*S22_pitch;
+
+
+    S33_pitch = - S33_pitch*(Kt32_pitch - 1) - Kt31_pitch*S13_pitch - Kt32_pitch*S23_pitch;
+
+    /*
     pitch_ekf = pitch_ekf - st*pitch_bias + gyroY*(st) + ((pitch_acc - pitch_ekf + st*pitch_bias - gyroY*(st))*(S11_pitch + (sa_p) - S21_pitch*st - (st)*(S12_pitch - S22_pitch*st)))/(Q + S11_pitch + (sa_p) - S21_pitch*st - (st)*(S12_pitch - S22_pitch*st));
   pitch_bias = pitch_bias + ((S21_pitch + (sb_p) - S22_pitch*(st))*(pitch_acc - pitch_ekf + st*pitch_bias - gyroY*(st)))/(Q + S11_pitch + (sa_p) - S21_pitch*st - (st)*(S12_pitch - S22_pitch*st));
 
@@ -71,12 +194,14 @@ void Kalman_Filtresi::Run() {
   S12_roll = -((S11_roll + (sa_r) - S21_roll*st - (st)*(S12_roll - S22_roll*st))/(Q + S11_roll + (sa_r) - S21_roll*st - (st)*(S12_roll - S22_roll*st)) - 1)*(S12_roll + (sa_r) - S22_roll*st);
   S21_roll = S21_roll + (sb_r) - S22_roll*(st) - ((S21_roll + (sb_r) - S22_roll*(st))*(S11_roll + (sa_r) - S21_roll*st - (st)*(S12_roll - S22_roll*st)))/(Q + S11_roll + (sa_r) - S21_roll*st - (st)*(S12_roll - S22_roll*st));
   S22_roll = S22_roll + (sb_r) - ((S21_roll + (sb_r) - S22_roll*(st))*(S12_roll + (sa_r) - S22_roll*st))/(Q + S11_roll + (sa_r) - S21_roll*st - (st)*(S12_roll - S22_roll*st));
-    roll_rate = gyroX;
+    roll_rate = gyroX; */
 
-
+/*
   roll_rate  = lpf_roll.Run(gyroX);
-  pitch_rate = lpf_pitch.Run(gyroY);
+  pitch_rate = lpf_pitch.Run(gyroY);*/
+
   yaw_rate   = lpf_yaw.Run(gyroZ);
+
     //=================================
 
     }
