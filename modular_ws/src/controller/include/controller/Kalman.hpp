@@ -48,11 +48,11 @@ class Kalman_Filtresi {
 
 
         double Qa = 1e5; //0.5 -- onceki deger.
-        double Qg = 5e1;
+        double Qg = 1e1;
 
-		  float Qb = 2;
-		  float Qs = 0.25;
-		  float salt = 1;
+		  float Qb = 1e7;
+
+
 		  float svel = 2;
 		  float sbar = 5;
 
@@ -73,7 +73,8 @@ class Kalman_Filtresi {
         float pitch_comp, roll_comp;
         float roll_ekf, pitch_ekf;
         float gyro[3], acc[3];
-
+        float Qs = 0.25;
+        float salt = 1;
         float acc_vert, alt_gnd, vz, sonar_alt, baro_alt, baro_gnd;
 
         float PITCH_OFFSET, ROLL_OFFSET;

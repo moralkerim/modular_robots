@@ -7,7 +7,7 @@
 
 #define PWM_UPPER 2000
 #define PWM_LOWER 1100
-#define ROLL_TRIM 	-1.2
+#define ROLL_TRIM 	3.6
 #define PITCH_TRIM -2
 
 class Controller {
@@ -29,9 +29,9 @@ class Controller {
         const float g = 9.81;
         const float F_max = 31.23;
         const float F_min = 0;
-        const double Kp_roll = 0.1; //0.3
-        const double Ki_roll = 0.05;  //0.008
-        const double Kd_roll = 0.01; //0.007 0.01
+        const double Kp_roll = 0.15; //0.3
+        const double Ki_roll = 0.1;  //0.008
+        const double Kd_roll = 0.02; //0.007 0.01
 
         const double Kp_pitch = Kp_roll;	//0.8
         const double Ki_pitch = Ki_roll;
@@ -42,7 +42,7 @@ class Controller {
 
         const float Kp_angle = 0.03*f;
 
-        const float Kp_alt = 15; //30
+        const float Kp_alt = 10; //30
         const float Ki_alt = 15;  //3
 
         lpf roll_des_filt  = lpf(0.9244, 0.03779, 0.03779);

@@ -4,10 +4,20 @@ PID::PID() {};
 
 double PID::P_Angle(double alpha_des, double alpha, double Kp_angle) {
 	double P;
-	double e = alpha_des - alpha;
-	P = Kp_angle*e;
+	e_angle = alpha_des - alpha;
+	P = Kp_angle*e_angle;
     return P;
 
+}
+
+double PID::P_Sqrt(double alpha_des, double alpha, double Kp_angle) {
+	e_angle = alpha_des - alpha;
+	double abs_e = abs(e_angle);
+	double sign_e = sgn(e_angle);
+	double sqrt_e = sqrt(abs_e);
+	double P = Kp_angle * sqrt_e;
+	P = P * sign_e;
+	return P;
 }
 
 double PID::PI_Alt(double z0, double z, double v, double Kp_alt, double Ki_alt, unsigned int ch3) {
@@ -42,9 +52,34 @@ double PID::PI_Alt(double z0, double z, double v, double Kp_alt, double Ki_alt, 
 }
 
 
+double PID::PID_Rate2(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd) {
+	e_roll = alpha_dot_des - alpha_dot;
+	P = Kp * e_roll;
+	I = Ki * e_angle;
+
+	double alpha_dot_dot_des = alpha_dot_des - alpha_dot_des_;
+	alpha_dot_dot_des = alpha_dot_dot_des / st;
+
+	D = Kd * alpha_dot_dot_des;
+
+	/*
+  	de_filt = N * (Kd * alpha_dot_des - de_int);
+  	de_int += de_filt*st;
+  	D = de_filt;
+*/
+
+	pd = P + I + D;
+  	pd_roll_buf = pd;
+	pd  = Sat(pd,  300, -300);
+	pd_roll_sat_buf = pd;
+	alpha_dot_des_ = alpha_dot_des;
+	return pd;
+}
+
 double PID::PD_Rate(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd) {
 
 	e_roll = alpha_dot_des - alpha_dot;
+  double e_roll_der = - alpha_dot;
   double e_roll_int = e_roll;
 
   if((int)pd_roll_buf != (int)pd_roll_sat_buf) {

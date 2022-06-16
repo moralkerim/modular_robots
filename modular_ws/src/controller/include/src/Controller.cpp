@@ -35,6 +35,12 @@ std::vector<double> Controller::Run (struct state state, struct state state_des,
         pitch_des 		= pitch_des_filt.Run(pitch_des);
         yaw_rate_des  	= yaw_des_filt.Run(yaw_rate_des);
 
+        /*
+    roll_rate_des  = pid_roll.P_Sqrt(roll_des,  roll,  Kp_angle);
+    pitch_rate_des = pid_roll.P_Sqrt(pitch_des, pitch, Kp_angle);
+*/
+
+
     roll_rate_des = pid_roll.P_Angle(roll_des,roll, Kp_angle);
     pitch_rate_des = pid_pitch.P_Angle(pitch_des,pitch, Kp_angle);
 
@@ -44,12 +50,16 @@ std::vector<double> Controller::Run (struct state state, struct state state_des,
     //printf("\npitch_rate_des: %.2f",pitch_rate_des);
     //printf("\nyaw_rate_des: %.2f",yaw_rate_des);
 */  //printf("\nroll_rate_des: %.2f",roll_rate_des);
+    /*
     pd_roll  = pid_roll.PD_Rate(roll_rate_des,roll_rate, Kp_roll, Ki_roll, Kd_roll);
     //printf("\npitch_rate_des: %.2f",pitch_rate_des);
     pd_pitch = pid_pitch.PD_Rate(pitch_rate_des,pitch_rate,Kp_pitch,Ki_pitch,Kd_pitch);
     //p_yaw    = pid_yaw.P_Rate_Yaw(yaw_rate_des,yaw_rate,Kp_yaw);
     p_yaw    = pid_yaw.PD_Rate(yaw_rate_des,yaw_rate,Kp_yaw,Ki_yaw,0);
-
+*/
+    pd_roll  = pid_roll.PID_Rate2(roll_rate_des,roll_rate, Kp_roll, Ki_roll, Kd_roll);
+    pd_pitch = pid_pitch.PID_Rate2(pitch_rate_des,pitch_rate,Kp_pitch,Ki_pitch,Kd_pitch);
+    p_yaw    = pid_yaw.PD_Rate(yaw_rate_des,yaw_rate,Kp_yaw,Ki_yaw,0);
 
 
     //printf("\npd_roll: %.2f",pd_roll);
@@ -124,12 +134,18 @@ std::vector<double> Controller::Run (struct state state, struct state state_des,
     //printf("\npitch_rate_des: %.2f",pitch_rate_des);
     //printf("\nyaw_rate_des: %.2f",yaw_rate_des);
 */  //printf("\nroll_rate_des: %.2f",roll_rate_des);
+
+    /*
     pd_roll  = pid_roll.PD_Rate(roll_rate_des,roll_rate, Kp_roll, Ki_roll, Kd_roll);
     //printf("\npitch_rate_des: %.2f",pitch_rate_des);
     pd_pitch = pid_pitch.PD_Rate(pitch_rate_des,pitch_rate,Kp_pitch,Ki_pitch,Kd_pitch);
     //p_yaw    = pid_yaw.P_Rate_Yaw(yaw_rate_des,yaw_rate,Kp_yaw);
     p_yaw    = pid_yaw.PD_Rate(yaw_rate_des,yaw_rate,Kp_yaw,Ki_yaw,0);
+	*/
 
+    pd_roll  = pid_roll.PID_Rate2(roll_rate_des,roll_rate, Kp_roll, Ki_roll, Kd_roll);
+    pd_pitch = pid_pitch.PID_Rate2(pitch_rate_des,pitch_rate,Kp_pitch,Ki_pitch,Kd_pitch);
+    p_yaw    = pid_yaw.PD_Rate(yaw_rate_des,yaw_rate,Kp_yaw,Ki_yaw,0);
 
 
     //printf("\npd_roll: %.2f",pd_roll);
