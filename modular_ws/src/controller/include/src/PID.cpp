@@ -15,7 +15,7 @@ double PID::P_Sqrt(double alpha_des, double alpha, double Kp_angle) {
 	double abs_e = abs(e_angle);
 	double sign_e = sgn(e_angle);
 	double sqrt_e = sqrt(abs_e);
-	double P = Kp_angle * sqrt_e;
+	double P = Kp_angle * sqrt_e + alpha_des;
 	P = P * sign_e;
 	return P;
 }
@@ -55,12 +55,14 @@ double PID::PI_Alt(double z0, double z, double v, double Kp_alt, double Ki_alt, 
 double PID::PID_Rate2(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd) {
 	e_roll = alpha_dot_des - alpha_dot;
 	P = Kp * e_roll;
-	I = Ki * e_angle;
+	I = Ki * (e_angle + angle0);
 
 	double alpha_dot_dot_des = alpha_dot_des - alpha_dot_des_;
 	alpha_dot_dot_des = alpha_dot_dot_des / st;
 
 	D = Kd * alpha_dot_dot_des;
+
+	//D = d_filt.Run(D);
 
 	/*
   	de_filt = N * (Kd * alpha_dot_des - de_int);

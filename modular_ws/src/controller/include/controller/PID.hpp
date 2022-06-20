@@ -1,6 +1,7 @@
-#include "LowPassFilter.hpp"
+#include "lpf.hpp"
+#include <math.h>
 #define LP_FILTER_CUT_FREQ 1
-#define N 20
+#define N 100
 
 class PID {
 
@@ -15,8 +16,9 @@ class PID {
 
 
         float pd_roll_buf, pd_pitch_buf;
-        LowPassFilter lpf;
+
         double alpha_dot_des_;
+        lpf d_filt  = lpf(0.9512, 0.02439, 0.02439);
 
     public:
         float e_roll, e_pitch, e_eski_roll, e_eski_pitch, ie_roll, ie_pitch; //PID hatalari
@@ -27,6 +29,7 @@ class PID {
         double P, I, D, pd;
         float zi;
         double e_angle;
+        float angle0;
 
     public:
         PID();

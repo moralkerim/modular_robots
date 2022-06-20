@@ -7,7 +7,7 @@
 
 #define PWM_UPPER 2000
 #define PWM_LOWER 1100
-#define ROLL_TRIM 	3.6
+#define ROLL_TRIM 	4.5
 #define PITCH_TRIM -2
 
 class Controller {
@@ -29,7 +29,7 @@ class Controller {
         const float g = 9.81;
         const float F_max = 31.23;
         const float F_min = 0;
-        const double Kp_roll = 0.15; //0.3
+        const double Kp_roll = 0.1; //0.3
         const double Ki_roll = 0.1;  //0.008
         const double Kd_roll = 0.02; //0.007 0.01
 
