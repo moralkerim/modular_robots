@@ -50,7 +50,7 @@ void Kalman_Filtresi::Run() {
     //printf("\npitc_acc: %.2f", pitch_acc);
   #endif
     
-    if(gyro_ready) {
+    //if(gyro_ready) {
 
 
     pitch_comp=(pitch_gyro+pitch_eski)*0.998+pitch_acc*0.002;	//Tümleyen filtre
@@ -73,48 +73,48 @@ void Kalman_Filtresi::Run() {
     S33_roll = S33_roll + sr;
 
     //ANGLE CORRECTION
-    float A_roll = (Qa*Qg + Qa*S22_roll + Qa*S23_roll + Qa*S32_roll + Qa*S33_roll + Qg*S11_roll + S11_roll*S22_roll - S12_roll*S21_roll + S11_roll*S23_roll - S13_roll*S21_roll + S11_roll*S32_roll - S12_roll*S31_roll + S11_roll*S33_roll - S13_roll*S31_roll);
-    float Kt11_roll = 1 - (Qa*(Qg + S22_roll + S23_roll + S32_roll + S33_roll))/A_roll;
-    float Kt12_roll = (Qa*(S12_roll + S13_roll))/A_roll;
-    float Kt21_roll = (Qg*S21_roll + S21_roll*S32_roll - S22_roll*S31_roll + S21_roll*S33_roll - S23_roll*S31_roll)/A_roll;
-    float Kt22_roll = (Qa*S22_roll + Qa*S23_roll + S11_roll*S22_roll - S12_roll*S21_roll + S11_roll*S23_roll - S13_roll*S21_roll)/A_roll;
-    float Kt31_roll = (Qg*S31_roll - S21_roll*S32_roll + S22_roll*S31_roll - S21_roll*S33_roll + S23_roll*S31_roll)/A_roll;
-    float Kt32_roll = (Qa*S32_roll + Qa*S33_roll + S11_roll*S32_roll - S12_roll*S31_roll + S11_roll*S33_roll - S13_roll*S31_roll)/A_roll;
+    float A = (Qa*Qg + Qa*S22_roll + Qa*S23_roll + Qa*S32_roll + Qa*S33_roll + Qg*S11_roll + S11_roll*S22_roll - S12_roll*S21_roll + S11_roll*S23_roll - S13_roll*S21_roll + S11_roll*S32_roll - S12_roll*S31_roll + S11_roll*S33_roll - S13_roll*S31_roll);
+    float Kt11_att = 1 - (Qa*(Qg + S22_roll + S23_roll + S32_roll + S33_roll))/A;
+    float Kt12_att = (Qa*(S12_roll + S13_roll))/A;
+    float Kt21_att = (Qg*S21_roll + S21_roll*S32_roll - S22_roll*S31_roll + S21_roll*S33_roll - S23_roll*S31_roll)/A;
+    float Kt22_att = (Qa*S22_roll + Qa*S23_roll + S11_roll*S22_roll - S12_roll*S21_roll + S11_roll*S23_roll - S13_roll*S21_roll)/A;
+    float Kt31_att = (Qg*S31_roll - S21_roll*S32_roll + S22_roll*S31_roll - S21_roll*S33_roll + S23_roll*S31_roll)/A;
+    float Kt32_att = (Qa*S32_roll + Qa*S33_roll + S11_roll*S32_roll - S12_roll*S31_roll + S11_roll*S33_roll - S13_roll*S31_roll)/A;
 
-    roll_ekf = (roll_ekf) + Kt11_roll*((roll_acc) - (roll_ekf)) - Kt12_roll*((roll_bias) - (gyroX) + (roll_rate));
-
-
-    roll_bias = (roll_bias) + Kt21_roll*((roll_acc) - (roll_ekf)) - Kt22_roll*((roll_bias) - (gyroX) + (roll_rate));
+    roll_ekf = (roll_ekf) + Kt11_att*((roll_acc) - (roll_ekf)) - Kt12_att*((roll_bias) - (gyroX) + (roll_rate));
 
 
-    roll_rate = (roll_rate) + Kt31_roll*((roll_acc) - (roll_ekf)) - Kt32_roll*((roll_bias) - (gyroX) + (roll_rate));
+    roll_bias = (roll_bias) + Kt21_att*((roll_acc) - (roll_ekf)) - Kt22_att*((roll_bias) - (gyroX) + (roll_rate));
 
 
-    S11_roll = - S11_roll*(Kt11_roll - 1) - Kt12_roll*S21_roll - Kt12_roll*S31_roll;
+    roll_rate = (roll_rate) + Kt31_att*((roll_acc) - (roll_ekf)) - Kt32_att*((roll_bias) - (gyroX) + (roll_rate));
 
 
-    S12_roll = - S12_roll*(Kt11_roll - 1) - Kt12_roll*S22_roll - Kt12_roll*S32_roll;
+    S11_roll = - S11_roll*(Kt11_att - 1) - Kt12_att*S21_roll - Kt12_att*S31_roll;
 
 
-    S13_roll = - S13_roll*(Kt11_roll - 1) - Kt12_roll*S23_roll - Kt12_roll*S33_roll;
+    S12_roll = - S12_roll*(Kt11_att - 1) - Kt12_att*S22_roll - Kt12_att*S32_roll;
 
 
-    S21_roll = - S21_roll*(Kt22_roll - 1) - Kt21_roll*S11_roll - Kt22_roll*S31_roll;
+    S13_roll = - S13_roll*(Kt11_att - 1) - Kt12_att*S23_roll - Kt12_att*S33_roll;
 
 
-    S22_roll = - S22_roll*(Kt22_roll - 1) - Kt21_roll*S12_roll - Kt22_roll*S32_roll;
+    S21_roll = - S21_roll*(Kt22_att - 1) - Kt21_att*S11_roll - Kt22_att*S31_roll;
 
 
-    S23_roll = - S23_roll*(Kt22_roll - 1) - Kt21_roll*S13_roll - Kt22_roll*S33_roll;
+    S22_roll = - S22_roll*(Kt22_att - 1) - Kt21_att*S12_roll - Kt22_att*S32_roll;
 
 
-    S31_roll = - S31_roll*(Kt32_roll - 1) - Kt31_roll*S11_roll - Kt32_roll*S21_roll;
+    S23_roll = - S23_roll*(Kt22_att - 1) - Kt21_att*S13_roll - Kt22_att*S33_roll;
 
 
-    S32_roll = - S32_roll*(Kt32_roll - 1) - Kt31_roll*S12_roll - Kt32_roll*S22_roll;
+    S31_roll = - S31_roll*(Kt32_att - 1) - Kt31_att*S11_roll - Kt32_att*S21_roll;
 
 
-    S33_roll = - S33_roll*(Kt32_roll - 1) - Kt31_roll*S13_roll - Kt32_roll*S23_roll;
+    S32_roll = - S32_roll*(Kt32_att - 1) - Kt31_att*S12_roll - Kt32_att*S22_roll;
+
+
+    S33_roll = - S33_roll*(Kt32_att - 1) - Kt31_att*S13_roll - Kt32_att*S23_roll;
 
     //============================
 
@@ -134,48 +134,48 @@ void Kalman_Filtresi::Run() {
     S33_pitch = S33_pitch + sr;
 
     //ANGLE CORRECTION
-    float A_pitch = (Qa*Qg + Qa*S22_pitch + Qa*S23_pitch + Qa*S32_pitch + Qa*S33_pitch + Qg*S11_pitch + S11_pitch*S22_pitch - S12_pitch*S21_pitch + S11_pitch*S23_pitch - S13_pitch*S21_pitch + S11_pitch*S32_pitch - S12_pitch*S31_pitch + S11_pitch*S33_pitch - S13_pitch*S31_pitch);
-    float Kt11_pitch = 1 - (Qa*(Qg + S22_pitch + S23_pitch + S32_pitch + S33_pitch))/A_pitch;
-    float Kt12_pitch = (Qa*(S12_pitch + S13_pitch))/A_pitch;
-    float Kt21_pitch = (Qg*S21_pitch + S21_pitch*S32_pitch - S22_pitch*S31_pitch + S21_pitch*S33_pitch - S23_pitch*S31_pitch)/A_pitch;
-    float Kt22_pitch = (Qa*S22_pitch + Qa*S23_pitch + S11_pitch*S22_pitch - S12_pitch*S21_pitch + S11_pitch*S23_pitch - S13_pitch*S21_pitch)/A_pitch;
-    float Kt31_pitch = (Qg*S31_pitch - S21_pitch*S32_pitch + S22_pitch*S31_pitch - S21_pitch*S33_pitch + S23_pitch*S31_pitch)/A_pitch;
-    float Kt32_pitch = (Qa*S32_pitch + Qa*S33_pitch + S11_pitch*S32_pitch - S12_pitch*S31_pitch + S11_pitch*S33_pitch - S13_pitch*S31_pitch)/A_pitch;
+    A = (Qa*Qg + Qa*S22_pitch + Qa*S23_pitch + Qa*S32_pitch + Qa*S33_pitch + Qg*S11_pitch + S11_pitch*S22_pitch - S12_pitch*S21_pitch + S11_pitch*S23_pitch - S13_pitch*S21_pitch + S11_pitch*S32_pitch - S12_pitch*S31_pitch + S11_pitch*S33_pitch - S13_pitch*S31_pitch);
+     Kt11_att = 1 - (Qa*(Qg + S22_pitch + S23_pitch + S32_pitch + S33_pitch))/A;
+     Kt12_att = (Qa*(S12_pitch + S13_pitch))/A;
+     Kt21_att = (Qg*S21_pitch + S21_pitch*S32_pitch - S22_pitch*S31_pitch + S21_pitch*S33_pitch - S23_pitch*S31_pitch)/A;
+     Kt22_att = (Qa*S22_pitch + Qa*S23_pitch + S11_pitch*S22_pitch - S12_pitch*S21_pitch + S11_pitch*S23_pitch - S13_pitch*S21_pitch)/A;
+     Kt31_att = (Qg*S31_pitch - S21_pitch*S32_pitch + S22_pitch*S31_pitch - S21_pitch*S33_pitch + S23_pitch*S31_pitch)/A;
+     Kt32_att = (Qa*S32_pitch + Qa*S33_pitch + S11_pitch*S32_pitch - S12_pitch*S31_pitch + S11_pitch*S33_pitch - S13_pitch*S31_pitch)/A;
 
-    pitch_ekf = (pitch_ekf) + Kt11_pitch*((pitch_acc) - (pitch_ekf)) - Kt12_pitch*((pitch_bias) - (gyroY) + (pitch_rate));
+    pitch_ekf = (pitch_ekf) + Kt11_att*((pitch_acc) - (pitch_ekf)) - Kt12_att*((pitch_bias) - (gyroY) + (pitch_rate));
 
     //pitch_ekf = 0;
-    pitch_bias = (pitch_bias) + Kt21_pitch*((pitch_acc) - (pitch_ekf)) - Kt22_pitch*((pitch_bias) - (gyroY) + (pitch_rate));
+    pitch_bias = (pitch_bias) + Kt21_att*((pitch_acc) - (pitch_ekf)) - Kt22_att*((pitch_bias) - (gyroY) + (pitch_rate));
     //pitch_bias = 0;
 
-    pitch_rate = (pitch_rate) + Kt31_pitch*((pitch_acc) - (pitch_ekf)) - Kt32_pitch*((pitch_bias) - (gyroY) + (pitch_rate));
+    pitch_rate = (pitch_rate) + Kt31_att*((pitch_acc) - (pitch_ekf)) - Kt32_att*((pitch_bias) - (gyroY) + (pitch_rate));
 
 
-    S11_pitch = - S11_pitch*(Kt11_pitch - 1) - Kt12_pitch*S21_pitch - Kt12_pitch*S31_pitch;
+    S11_pitch = - S11_pitch*(Kt11_att - 1) - Kt12_att*S21_pitch - Kt12_att*S31_pitch;
 
 
-    S12_pitch = - S12_pitch*(Kt11_pitch - 1) - Kt12_pitch*S22_pitch - Kt12_pitch*S32_pitch;
+    S12_pitch = - S12_pitch*(Kt11_att - 1) - Kt12_att*S22_pitch - Kt12_att*S32_pitch;
 
 
-    S13_pitch = - S13_pitch*(Kt11_pitch - 1) - Kt12_pitch*S23_pitch - Kt12_pitch*S33_pitch;
+    S13_pitch = - S13_pitch*(Kt11_att - 1) - Kt12_att*S23_pitch - Kt12_att*S33_pitch;
 
 
-    S21_pitch = - S21_pitch*(Kt22_pitch - 1) - Kt21_pitch*S11_pitch - Kt22_pitch*S31_pitch;
+    S21_pitch = - S21_pitch*(Kt22_att - 1) - Kt21_att*S11_pitch - Kt22_att*S31_pitch;
 
 
-    S22_pitch = - S22_pitch*(Kt22_pitch - 1) - Kt21_pitch*S12_pitch - Kt22_pitch*S32_pitch;
+    S22_pitch = - S22_pitch*(Kt22_att - 1) - Kt21_att*S12_pitch - Kt22_att*S32_pitch;
 
 
-    S23_pitch = - S23_pitch*(Kt22_pitch - 1) - Kt21_pitch*S13_pitch - Kt22_pitch*S33_pitch;
+    S23_pitch = - S23_pitch*(Kt22_att - 1) - Kt21_att*S13_pitch - Kt22_att*S33_pitch;
 
 
-    S31_pitch = - S31_pitch*(Kt32_pitch - 1) - Kt31_pitch*S11_pitch - Kt32_pitch*S21_pitch;
+    S31_pitch = - S31_pitch*(Kt32_att - 1) - Kt31_att*S11_pitch - Kt32_att*S21_pitch;
 
 
-    S32_pitch = - S32_pitch*(Kt32_pitch - 1) - Kt31_pitch*S12_pitch - Kt32_pitch*S22_pitch;
+    S32_pitch = - S32_pitch*(Kt32_att - 1) - Kt31_att*S12_pitch - Kt32_att*S22_pitch;
 
 
-    S33_pitch = - S33_pitch*(Kt32_pitch - 1) - Kt31_pitch*S13_pitch - Kt32_pitch*S23_pitch;
+    S33_pitch = - S33_pitch*(Kt32_att - 1) - Kt31_att*S13_pitch - Kt32_att*S23_pitch;
 
     /*
     pitch_ekf = pitch_ekf - st*pitch_bias + gyroY*(st) + ((pitch_acc - pitch_ekf + st*pitch_bias - gyroY*(st))*(S11_pitch + (sa_p) - S21_pitch*st - (st)*(S12_pitch - S22_pitch*st)))/(Q + S11_pitch + (sa_p) - S21_pitch*st - (st)*(S12_pitch - S22_pitch*st));
@@ -204,8 +204,9 @@ void Kalman_Filtresi::Run() {
 
     //=================================
 
-    }
+    //}
 
+    /*
     else {
     	roll_ekf = roll_acc;
     	pitch_ekf = pitch_acc;
@@ -214,7 +215,7 @@ void Kalman_Filtresi::Run() {
     	pitch_comp = pitch_acc;
 
     	gyro_ready = true;
-    }
+    } */
 
       float u = acc_vert;
 
@@ -235,15 +236,17 @@ void Kalman_Filtresi::Run() {
 	  //S32_alt = S32_alt;
 	  S33_alt = S33_alt + sbar;
 
+	  A = (Qb*Qs + Qb*S11_alt + Qs*S11_alt + Qs*S13_alt + Qs*S31_alt + Qs*S33_alt + S11_alt*S33_alt - S13_alt*S31_alt);
+
 	  //ALT CORRECTION
-	  float Kt11 = (Qs*(S11_alt + S13_alt))/(Qb*Qs + Qb*S11_alt + Qs*S11_alt + Qs*S13_alt + Qs*S31_alt + Qs*S33_alt + S11_alt*S33_alt - S13_alt*S31_alt);
-	  float Kt12 = (Qb*S11_alt + S11_alt*S33_alt - S13_alt*S31_alt)/(Qb*Qs + Qb*S11_alt + Qs*S11_alt + Qs*S13_alt + Qs*S31_alt + Qs*S33_alt + S11_alt*S33_alt - S13_alt*S31_alt);
+	  float Kt11 = (Qs*(S11_alt + S13_alt))/A;
+	  float Kt12 = (Qb*S11_alt + S11_alt*S33_alt - S13_alt*S31_alt)/A;
 
-	  float Kt21 = (Qs*S21_alt + Qs*S23_alt + S11_alt*S23_alt - S13_alt*S21_alt)/(Qb*Qs + Qb*S11_alt + Qs*S11_alt + Qs*S13_alt + Qs*S31_alt + Qs*S33_alt + S11_alt*S33_alt - S13_alt*S31_alt);
-	  float Kt22 = (Qb*S21_alt - S11_alt*S23_alt + S13_alt*S21_alt + S21_alt*S33_alt - S23_alt*S31_alt)/(Qb*Qs + Qb*S11_alt + Qs*S11_alt + Qs*S13_alt + Qs*S31_alt + Qs*S33_alt + S11_alt*S33_alt - S13_alt*S31_alt);
+	  float Kt21 = (Qs*S21_alt + Qs*S23_alt + S11_alt*S23_alt - S13_alt*S21_alt)/A;
+	  float Kt22 = (Qb*S21_alt - S11_alt*S23_alt + S13_alt*S21_alt + S21_alt*S33_alt - S23_alt*S31_alt)/A;
 
-	  float Kt31 = (Qs*S31_alt + Qs*S33_alt + S11_alt*S33_alt - S13_alt*S31_alt)/(Qb*Qs + Qb*S11_alt + Qs*S11_alt + Qs*S13_alt + Qs*S31_alt + Qs*S33_alt + S11_alt*S33_alt - S13_alt*S31_alt);
-	  float Kt32 = (Qb*S31_alt - S11_alt*S33_alt + S13_alt*S31_alt)/(Qb*Qs + Qb*S11_alt + Qs*S11_alt + Qs*S13_alt + Qs*S31_alt + Qs*S33_alt + S11_alt*S33_alt - S13_alt*S31_alt);
+	  float Kt31 = (Qs*S31_alt + Qs*S33_alt + S11_alt*S33_alt - S13_alt*S31_alt)/A;
+	  float Kt32 = (Qb*S31_alt - S11_alt*S33_alt + S13_alt*S31_alt)/A;
 
 	  alt_gnd = (alt_gnd) - Kt12*((alt_gnd) - (sonar_alt)) - Kt11*((alt_gnd) - (baro_alt) + (baro_gnd));
 

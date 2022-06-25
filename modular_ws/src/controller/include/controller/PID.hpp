@@ -7,7 +7,7 @@ class PID {
 
     private:
 
-        float imax=120, imin=-120;
+        const float imax=120, imin=-120;
         const int f = 400;
         const float st = 1/(float)f;
 
@@ -17,7 +17,7 @@ class PID {
 
         float pd_roll_buf, pd_pitch_buf;
 
-        double alpha_dot_des_;
+        float alpha_dot_des_;
         lpf d_filt  = lpf(0.9512, 0.02439, 0.02439);
 
     public:
@@ -26,26 +26,26 @@ class PID {
         float pd_roll_sat_buf;
         float de, de_filt;
         float de_int;
-        double P, I, D, pd;
+        float P, I, D, pd;
         float zi;
-        double e_angle;
+        float e_angle;
         float angle0;
 
     public:
         PID();
-        double P_Angle(double alpha_des, double alpha, double Kp_angle);
-        double P_Sqrt(double alpha_des, double alpha, double Kp_angle);
-        double PD_Rate(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd);
-        double PID_Rate2(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd);
-        double P_Rate_Yaw(double alpha_dot_des, double alpha_dot, double Kp);
-        double PI_Alt(double z0, double z, double v, double Kp_alt, double Ki_alt, unsigned int ch3);
-        double Sat(double pwm, int max, int min,int thr);
-        double Sat(double pwm, int max, int min);
+        float P_Angle(float alpha_des, float alpha, float Kp_angle);
+        float P_Sqrt(float alpha_des, float alpha, float Kp_angle);
+        float PD_Rate(float alpha_dot_des, float alpha_dot, float Kp, float Ki, float Kd);
+        float PID_Rate2(float alpha_dot_des, float alpha_dot, float Kp, float Ki, float Kd);
+        float P_Rate_Yaw(float alpha_dot_des, float alpha_dot, float Kp);
+        float PI_Alt(float z0, float z, float v, float Kp_alt, float Ki_alt, unsigned int ch3);
+        float Sat(float pwm, int max, int min,int thr);
+        float Sat(float pwm, int max, int min);
         float pwm2ang(unsigned short int pwm);
         float pwm2rate(unsigned short int pwm);
         float pwm2mot(unsigned short int pwm, int dir);
         unsigned int F2thr(float F);
-        double sgn(double v);
+        uint8_t sgn(float v);
         void reset();
         ~PID();
 };

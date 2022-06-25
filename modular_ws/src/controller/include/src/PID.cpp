@@ -2,27 +2,27 @@
 
 PID::PID() {};
 
-double PID::P_Angle(double alpha_des, double alpha, double Kp_angle) {
-	double P;
+float PID::P_Angle(float alpha_des, float alpha, float Kp_angle) {
+	float P;
 	e_angle = alpha_des - alpha;
 	P = Kp_angle*e_angle;
     return P;
 
 }
 
-double PID::P_Sqrt(double alpha_des, double alpha, double Kp_angle) {
+float PID::P_Sqrt(float alpha_des, float alpha, float Kp_angle) {
 	e_angle = alpha_des - alpha;
-	double abs_e = abs(e_angle);
-	double sign_e = sgn(e_angle);
-	double sqrt_e = sqrt(abs_e);
-	double P = Kp_angle * sqrt_e + alpha_des;
+	float abs_e = abs(e_angle);
+	uint8_t sign_e = sgn(e_angle);
+	float sqrt_e = sqrt(abs_e);
+	float P = Kp_angle * sqrt_e + alpha_des;
 	P = P * sign_e;
 	return P;
 }
 
-double PID::PI_Alt(double z0, double z, double v, double Kp_alt, double Ki_alt, unsigned int ch3) {
-	double P;
-	double I;
+float PID::PI_Alt(float z0, float z, float v, float Kp_alt, float Ki_alt, unsigned int ch3) {
+	float P;
+	float I;
 	float v_des;
 
 	if(ch3 > 1700) {
@@ -40,24 +40,24 @@ double PID::PI_Alt(double z0, double z, double v, double Kp_alt, double Ki_alt, 
 		v_des = 0;
 	}
 
-	double e = v_des - v;
+	float e = v_des - v;
 	P = Kp_alt*e;
 
-	double ei = z0 - z;
+	float ei = z0 - z;
 	I = Ki_alt * ei;
 
-	double PI = P + I;
+	float PI = P + I;
     return PI;
 
 }
 
 
-double PID::PID_Rate2(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd) {
+float PID::PID_Rate2(float alpha_dot_des, float alpha_dot, float Kp, float Ki, float Kd) {
 	e_roll = alpha_dot_des - alpha_dot;
 	P = Kp * e_roll;
 	I = Ki * (e_angle + angle0);
 
-	double alpha_dot_dot_des = alpha_dot_des - alpha_dot_des_;
+	float alpha_dot_dot_des = alpha_dot_des - alpha_dot_des_;
 	alpha_dot_dot_des = alpha_dot_dot_des / st;
 
 	D = Kd * alpha_dot_dot_des;
@@ -78,11 +78,11 @@ double PID::PID_Rate2(double alpha_dot_des, double alpha_dot, double Kp, double 
 	return pd;
 }
 
-double PID::PD_Rate(double alpha_dot_des, double alpha_dot, double Kp, double Ki, double Kd) {
+float PID::PD_Rate(float alpha_dot_des, float alpha_dot, float Kp, float Ki, float Kd) {
 
 	e_roll = alpha_dot_des - alpha_dot;
-  double e_roll_der = - alpha_dot;
-  double e_roll_int = e_roll;
+  float e_roll_der = - alpha_dot;
+  float e_roll_int = e_roll;
 
   if((int)pd_roll_buf != (int)pd_roll_sat_buf) {
     if(sgn(e_roll) == sgn(pd_roll_sat_buf)) {
@@ -118,9 +118,9 @@ void PID::reset() {
 }
 
 
-double PID::P_Rate_Yaw(double alpha_dot_des, double alpha_dot, double Kp) {
-	double P;
-	double e_yaw = alpha_dot_des - alpha_dot;	
+float PID::P_Rate_Yaw(float alpha_dot_des, float alpha_dot, float Kp) {
+	float P;
+	float e_yaw = alpha_dot_des - alpha_dot;
 	P = Kp*e_yaw;
 	P    = Sat(P,    150, -150);
 
@@ -128,14 +128,14 @@ double PID::P_Rate_Yaw(double alpha_dot_des, double alpha_dot, double Kp) {
 
 }
 
-double PID::sgn(double v) {
+uint8_t PID::sgn(float v) {
   if (v < 0) return -1;
   if (v > 0) return 1;
   return 0;
 }
 
- double PID::Sat(double pwm, int max, int min, int thr) {
-	double pwm_out;
+ float PID::Sat(float pwm, int max, int min, int thr) {
+	float pwm_out;
 
 	if(thr > 1020) {
 		if(pwm > max) {
@@ -159,8 +159,8 @@ double PID::sgn(double v) {
 	return pwm_out;
 }
 
- double PID::Sat(double pwm, int max, int min) {
-	double pwm_out;
+ float PID::Sat(float pwm, int max, int min) {
+	float pwm_out;
 
 		if(pwm > max) {
 			pwm_out = max;

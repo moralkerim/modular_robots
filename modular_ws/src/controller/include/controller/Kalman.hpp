@@ -1,6 +1,8 @@
 #include <math.h>
 #include <stdio.h>
 #include "lpf.hpp"
+#include "state.h"
+
 
 #define LP_FILTER_CUT_FREQ 2*3.14*1
 //KALMAN
@@ -16,23 +18,19 @@
 #define PITCH_OFFSET -6.05
 #define a 0.1 */
 
-struct state {
-    float angles[3];
-    float rates[3];
-    float bias[3];
-};
+
 class Kalman_Filtresi {
 
     private:
-        double roll, pitch, yaw;
-        double roll_rate, pitch_rate, yaw_rate;
+		float roll, pitch, yaw;
+		float roll_rate, pitch_rate, yaw_rate;
 
         float pitch_bias, roll_bias, yaw_bias;
 
         //float S11_m_pitch, S12_m_pitch, S21_m_pitch, S22_m_pitch;
         float S11_pitch=0, S12_pitch=0, S21_pitch=0, S22_pitch=1e5;
         float S13_pitch, S23_pitch, S31_pitch, S32_pitch, S33_pitch;
-        double sa = 1e-3; double sb = 1e-3  ; double sr=2e-2;
+        const float sa = 1e-3; const float sb = 1e-3  ; const float sr=2e-2;
         //double sa_p = 5e-1; double sb_p = 1e-1; double sr_p=1e-1;
 
         //float S11_m_roll, S12_m_roll, S21_m_roll, S22_m_roll;
@@ -47,14 +45,14 @@ class Kalman_Filtresi {
         float S11_alt, S12_alt, S21_alt, S22_alt, S13_alt, S23_alt, S31_alt, S32_alt, S33_alt=10000;
 
 
-        double Qa = 1e5; //0.5 -- onceki deger.
-        double Qg = 1e1;
+        const float Qa = 1e5; //0.5 -- onceki deger.
+        const float Qg = 1e1;
 
-		  float Qb = 1e7;
+        const float Qb = 1e7;
 
 
-		  float svel = 2;
-		  float sbar = 5;
+        const float svel = 2;
+        const float sbar = 5;
 
 
 

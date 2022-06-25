@@ -1,15 +1,11 @@
 #include "Controller.hpp"
 
 
-struct state {
-    float angles[3];
-    float rates[3];
-    float bias[3];
-};
+
 
 Controller::Controller() {}
 
-std::vector<double> Controller::Run (struct state state, struct state state_des, int thr) {
+std::vector<float> Controller::Run (void) {
         //printf("\ngyroX: %.2f",gyro[0]);
         //printf("\naccX: %.2f",acc[0]);
         
@@ -67,8 +63,28 @@ std::vector<double> Controller::Run (struct state state, struct state state_des,
     //printf("\np_yaw: %.2f",p_yaw);
 
     ////printf("\nst: %.3f",st);
+    int thr;
+    switch(mod) {
+    	case STABILIZE:
+    	    thr = pid_roll.Sat(ch3, 1800, 1000);
+    	    break;
+    	case ALT_HOLD:
+    		F = p_alt.PI_Alt(z0, z, z_vel, Kp_alt, Ki_alt, ch3) + m*g;
+			float deg2rad = 0.0175;
+			float roll_r = roll * deg2rad;
+			float pitch_r = pitch * deg2rad;
+			float b2e = 1 / cos(roll_r) / cos(pitch_r);
 
-    thr = pid_roll.Sat(thr, 1800, 1000);
+			F = F * b2e ; // Body to Earth
+			F = p_alt.Sat(F, F_max, F_min);
+			thr = p_alt.F2thr(F);
+			thr = p_alt.Sat(thr, 1800, 1100);
+			alt_thr = thr;
+			z0 = p_alt.zi;
+			break;
+
+    }
+
 
     int pwm1 = thr + pd_pitch - pd_roll  - p_yaw + PITCH_TRIM - ROLL_TRIM;
     int pwm2 = thr - pd_pitch + pd_roll  - p_yaw - PITCH_TRIM + ROLL_TRIM;
@@ -82,6 +98,12 @@ std::vector<double> Controller::Run (struct state state, struct state state_des,
     pwm3 = (int)pid_roll.Sat(pwm3,PWM_UPPER,PWM_LOWER,thr);
     pwm4 = (int)pid_roll.Sat(pwm4,PWM_UPPER,PWM_LOWER,thr);
 
+    /* MOTOR TEST
+    pwm1 = 1000;
+    pwm2 = 1000;
+    pwm3 = 1000;
+    pwm4 = 1000; */
+
     //Convert pwm to motor speed 
     w1 = pid_roll.pwm2mot(pwm1, 1);
     w2 = pid_roll.pwm2mot(pwm2, 1);
@@ -89,7 +111,7 @@ std::vector<double> Controller::Run (struct state state, struct state state_des,
     w4 = pid_roll.pwm2mot(pwm4,-1);
 
 
-    std::vector<double> controller_output = 	{w1,w2,w3,w4};
+    std::vector<float> controller_output = 	{w1,w2,w3,w4};
     controller_output_pwm[0] = pwm1;
     controller_output_pwm[1] = pwm2;
     controller_output_pwm[2] = pwm3;
@@ -98,6 +120,7 @@ std::vector<double> Controller::Run (struct state state, struct state state_des,
     return controller_output;
 }
 
+/*
 std::vector<double> Controller::Run (struct state state, struct state state_des, float z_vel, float z0, float z, float ch3) {
         //printf("\ngyroX: %.2f",gyro[0]);
         //printf("\naccX: %.2f",acc[0]);
@@ -142,7 +165,7 @@ std::vector<double> Controller::Run (struct state state, struct state state_des,
     //p_yaw    = pid_yaw.P_Rate_Yaw(yaw_rate_des,yaw_rate,Kp_yaw);
     p_yaw    = pid_yaw.PD_Rate(yaw_rate_des,yaw_rate,Kp_yaw,Ki_yaw,0);
 	*/
-
+/*
     pd_roll  = pid_roll.PID_Rate2(roll_rate_des,roll_rate, Kp_roll, Ki_roll, Kd_roll);
     pd_pitch = pid_pitch.PID_Rate2(pitch_rate_des,pitch_rate,Kp_pitch,Ki_pitch,Kd_pitch);
     p_yaw    = pid_yaw.PD_Rate(yaw_rate_des,yaw_rate,Kp_yaw,Ki_yaw,0);
@@ -193,5 +216,5 @@ std::vector<double> Controller::Run (struct state state, struct state state_des,
 
     return controller_output;
 }
-
+*/
 Controller::~Controller() {}
