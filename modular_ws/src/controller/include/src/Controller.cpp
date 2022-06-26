@@ -53,8 +53,9 @@ std::vector<float> Controller::Run (void) {
     //p_yaw    = pid_yaw.P_Rate_Yaw(yaw_rate_des,yaw_rate,Kp_yaw);
     p_yaw    = pid_yaw.PD_Rate(yaw_rate_des,yaw_rate,Kp_yaw,Ki_yaw,0);
 */
-    pd_roll  = pid_roll.PID_Rate2(roll_rate_des,roll_rate, Kp_roll, Ki_roll, Kd_roll);
-    pd_pitch = pid_pitch.PID_Rate2(pitch_rate_des,pitch_rate,Kp_pitch,Ki_pitch,Kd_pitch);
+    //PID_Rate2(float alpha_dot_des, float alpha_dot, float alpha, float Kp, float Ki, float Kd, float Kp_angle)
+    pd_roll  = pid_roll.PID_Rate2(roll_rate_des,roll_rate, roll, Kp_roll, Ki_roll, Kd_roll, Kp_angle);
+    pd_pitch = pid_pitch.PID_Rate2(pitch_rate_des,pitch_rate, pitch, Kp_pitch,Ki_pitch,Kd_pitch, Kp_angle);
     p_yaw    = pid_yaw.PD_Rate(yaw_rate_des,yaw_rate,Kp_yaw,Ki_yaw,0);
 
 

@@ -52,15 +52,20 @@ float PID::PI_Alt(float z0, float z, float v, float Kp_alt, float Ki_alt, unsign
 }
 
 
-float PID::PID_Rate2(float alpha_dot_des, float alpha_dot, float Kp, float Ki, float Kd) {
+float PID::PID_Rate2(float alpha_dot_des, float alpha_dot, float alpha, float Kp, float Ki, float Kd, float Kp_angle) {
 	e_roll = alpha_dot_des - alpha_dot;
 	P = Kp * e_roll;
-	I = Ki * (e_angle + angle0);
+
+	ie_roll += e_angle*st;
+
+	I = Ki * (ie_roll * Kp_angle - alpha);
 
 	float alpha_dot_dot_des = alpha_dot_des - alpha_dot_des_;
+	float alpha_dot_dot = (alpha_dot - alpha_dot_) / st;
 	alpha_dot_dot_des = alpha_dot_dot_des / st;
+	alpha_dot_dot = d_filt.Run(alpha_dot_dot);
 
-	D = Kd * alpha_dot_dot_des;
+	D = Kd * (-alpha_dot * Kp_angle - alpha_dot_dot);
 
 	//D = d_filt.Run(D);
 
@@ -75,6 +80,7 @@ float PID::PID_Rate2(float alpha_dot_des, float alpha_dot, float Kp, float Ki, f
 	pd  = Sat(pd,  300, -300);
 	pd_roll_sat_buf = pd;
 	alpha_dot_des_ = alpha_dot_des;
+	alpha_dot_ = alpha_dot;
 	return pd;
 }
 
