@@ -33,9 +33,9 @@ class Controller {
         const float g = 9.81;
         const float F_max = 31.23;
         const float F_min = 0;
-        const float Kp_roll = 0.1; //0.3
-        const float Ki_roll = 0.03;  //0.008
-        const float Kd_roll = 0.02; //0.007 0.01
+        const float Kp_roll = 0.15; //0.3
+        const float Ki_roll = 0.01;  //0.008
+        const float Kd_roll = 0.03; //0.007 0.01
 
         const float Kp_pitch = Kp_roll;	//0.8
         const float Ki_pitch = Ki_roll;
