@@ -17,12 +17,11 @@ void Kalman_Filtresi::Run() {
   float gyroY = gyro[1];
   float gyroZ = gyro[2];
 
+  float A;
+
     //---IMU KİSMİ----
     //=================================
-  float acctop=sqrt(accX*accX+accY*accY+accZ*accZ);
 
-  pitch_acc =  asin(accX/acctop)*rad2deg + PITCH_OFFSET;
-  roll_acc  =  asin(accY/acctop)*rad2deg + ROLL_OFFSET;
 
   //roll_acc-=-0.67;	pitch_acc-=-1.15;	//İvmeölçer ile okunan hata değerleri offsetlemesi
 
@@ -50,7 +49,12 @@ void Kalman_Filtresi::Run() {
     //printf("\npitc_acc: %.2f", pitch_acc);
   #endif
     
-    //if(gyro_ready) {
+    if(gyro_ready) {
+
+  float acctop=sqrt(accX*accX+accY*accY+accZ*accZ);
+
+  pitch_acc =  asin(accX/acctop)*rad2deg + PITCH_OFFSET;
+  roll_acc  =  asin(accY/acctop)*rad2deg + ROLL_OFFSET;
 
 
     pitch_comp=(pitch_gyro+pitch_eski)*0.998+pitch_acc*0.002;	//Tümleyen filtre
@@ -73,7 +77,7 @@ void Kalman_Filtresi::Run() {
     S33_roll = S33_roll + sr;
 
     //ANGLE CORRECTION
-    float A = (Qa*Qg + Qa*S22_roll + Qa*S23_roll + Qa*S32_roll + Qa*S33_roll + Qg*S11_roll + S11_roll*S22_roll - S12_roll*S21_roll + S11_roll*S23_roll - S13_roll*S21_roll + S11_roll*S32_roll - S12_roll*S31_roll + S11_roll*S33_roll - S13_roll*S31_roll);
+    A = (Qa*Qg + Qa*S22_roll + Qa*S23_roll + Qa*S32_roll + Qa*S33_roll + Qg*S11_roll + S11_roll*S22_roll - S12_roll*S21_roll + S11_roll*S23_roll - S13_roll*S21_roll + S11_roll*S32_roll - S12_roll*S31_roll + S11_roll*S33_roll - S13_roll*S31_roll);
     float Kt11_att = 1 - (Qa*(Qg + S22_roll + S23_roll + S32_roll + S33_roll))/A;
     float Kt12_att = (Qa*(S12_roll + S13_roll))/A;
     float Kt21_att = (Qg*S21_roll + S21_roll*S32_roll - S22_roll*S31_roll + S21_roll*S33_roll - S23_roll*S31_roll)/A;
@@ -204,18 +208,24 @@ void Kalman_Filtresi::Run() {
 
     //=================================
 
-    //}
+    }
 
-    /*
+
     else {
-    	roll_ekf = roll_acc;
-    	pitch_ekf = pitch_acc;
+    	for(int i=0; i<2000; i++) {
+    		  float acctop=sqrt(accX*accX+accY*accY+accZ*accZ);
 
-    	roll_comp  = roll_acc;
-    	pitch_comp = pitch_acc;
+    		  float pitch_acc =  asin(accX/acctop)*rad2deg;
+    		  float roll_acc  =  asin(accY/acctop)*rad2deg ;
 
+        	ROLL_OFFSET += roll_acc;
+        	PITCH_OFFSET += pitch_acc;
+    	}
+
+    	ROLL_OFFSET  = -1*  ROLL_OFFSET  / 2000;
+    	PITCH_OFFSET = -1 * PITCH_OFFSET / 2000;
     	gyro_ready = true;
-    } */
+    }
 
       float u = acc_vert;
 
@@ -282,6 +292,38 @@ void Kalman_Filtresi::Run() {
 
 
 	  S33_alt = - S33_alt*(Kt31 - 1) - S13_alt*(Kt31 + Kt32);
+
+	  //X Position Estimation
+	  //camx = cam_filt.Run(camx);
+	  xpos = (xpos) + st*(vx) + (accXm*st*st)/2;
+	  vx = (vx) + accXm*(st);
+
+	  S11_x = S11_x + spx + S21_x*st + (st*st*(S12_x + S22_x*st))/st;
+	  S12_x = S12_x + S22_x*st;
+	  S21_x = S21_x + svx + S22_x*(st);
+	  //S22_x = S22_x;
+
+
+	  //X Position Correction
+	  Kt11 = S11_x/(Qc + S11_x);
+	  Kt21 = S21_x/(Qc + S11_x);
+
+
+
+	  xpos = (xpos) + (Kt11)*(camx - (xpos));
+
+	  vx = (vx) + (Kt21)*(camx - (xpos));
+
+
+	  S11_x = -S11_x*((Kt11) - 1);
+
+	  S12_x = -S12_x*((Kt11) - 1);
+
+	  S21_x = S21_x - S11_x*(Kt21);
+
+	  S22_x = S22_x - S12_x*(Kt21);
+
+
 
 
 	pitch_eski=pitch_comp;

@@ -20,17 +20,17 @@ float PID::P_Sqrt(float alpha_des, float alpha, float Kp_angle) {
 	return P;
 }
 
-float PID::PI_Alt(float z0, float z, float v, float Kp_alt, float Ki_alt, unsigned int ch3) {
+float PID::PI_Vel(float z0, float z, float v, float Kp_alt, float Ki_alt, unsigned int ch) {
 	float P;
 	float I;
 	float v_des;
 
-	if(ch3 > 1700) {
+	if(ch > 1700) {
 		zi = z0 + x_inc;
 		v_des = vz_def;
 	}
 
-	else if (ch3 < 1300) {
+	else if (ch < 1300) {
 		zi = z0 - x_inc;
 		v_des = -1 * vz_def;
 	}
@@ -118,7 +118,7 @@ float PID::PD_Rate(float alpha_dot_des, float alpha_dot, float Kp, float Ki, flo
 }
 
 void PID::reset() {
-	ie_roll_sat = 0;
+	ie_roll = 0;
 	de_filt = 0;
 	de_int = 0;
 }

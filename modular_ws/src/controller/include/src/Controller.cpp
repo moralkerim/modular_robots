@@ -23,54 +23,27 @@ std::vector<float> Controller::Run (void) {
         pitch_bias = state.bias[1];
         yaw_bias = state.bias[2];
         
-        float roll_des     = state_des.angles[0];
-        float pitch_des 	 = state_des.angles[1];
-        float yaw_rate_des = state_des.rates[2];
-
-        roll_des 	  	= roll_des_filt.Run(roll_des);
-        pitch_des 		= pitch_des_filt.Run(pitch_des);
-        yaw_rate_des  	= yaw_des_filt.Run(yaw_rate_des);
-
-        /*
-    roll_rate_des  = pid_roll.P_Sqrt(roll_des,  roll,  Kp_angle);
-    pitch_rate_des = pid_roll.P_Sqrt(pitch_des, pitch, Kp_angle);
-*/
 
 
-    roll_rate_des = pid_roll.P_Angle(roll_des,roll, Kp_angle);
-    pitch_rate_des = pid_pitch.P_Angle(pitch_des,pitch, Kp_angle);
-
-
-/*
-    //printf("\nroll_rate_des: %.2f",roll_rate_des);
-    //printf("\npitch_rate_des: %.2f",pitch_rate_des);
-    //printf("\nyaw_rate_des: %.2f",yaw_rate_des);
-*/  //printf("\nroll_rate_des: %.2f",roll_rate_des);
-    /*
-    pd_roll  = pid_roll.PD_Rate(roll_rate_des,roll_rate, Kp_roll, Ki_roll, Kd_roll);
-    //printf("\npitch_rate_des: %.2f",pitch_rate_des);
-    pd_pitch = pid_pitch.PD_Rate(pitch_rate_des,pitch_rate,Kp_pitch,Ki_pitch,Kd_pitch);
-    //p_yaw    = pid_yaw.P_Rate_Yaw(yaw_rate_des,yaw_rate,Kp_yaw);
-    p_yaw    = pid_yaw.PD_Rate(yaw_rate_des,yaw_rate,Kp_yaw,Ki_yaw,0);
-*/
-    //PID_Rate2(float alpha_dot_des, float alpha_dot, float alpha, float Kp, float Ki, float Kd, float Kp_angle)
-    pd_roll  = pid_roll.PID_Rate2(roll_rate_des,roll_rate, roll, Kp_roll, Ki_roll, Kd_roll, Kp_angle);
-    pd_pitch = pid_pitch.PID_Rate2(pitch_rate_des,pitch_rate, pitch, Kp_pitch,Ki_pitch,Kd_pitch, Kp_angle);
-    p_yaw    = pid_yaw.PD_Rate(yaw_rate_des,yaw_rate,Kp_yaw,Ki_yaw,0);
-
-
-    //printf("\npd_roll: %.2f",pd_roll);
-    //printf("\npd_pitch: %.2f",pd_pitch);
-    //printf("\np_yaw: %.2f",p_yaw);
-
-    ////printf("\nst: %.3f",st);
     int thr;
+
     switch(mod) {
     	case STABILIZE:
+    	{
     	    thr = pid_roll.Sat(ch3, 1800, 1000);
+            roll_des     = state_des.angles[0];
+            pitch_des 	 = state_des.angles[1];
+            yaw_rate_des = state_des.rates[2];
+
+            roll_des 	  	= roll_des_filt.Run(roll_des);
+            pitch_des 		= pitch_des_filt.Run(pitch_des);
+            yaw_rate_des  	= yaw_des_filt.Run(yaw_rate_des);
     	    break;
+    	}
+
     	case ALT_HOLD:
-    		F = p_alt.PI_Alt(z0, z, z_vel, Kp_alt, Ki_alt, ch3) + m*g;
+    	{
+    		F = p_alt.PI_Vel(z0, z, z_vel, Kp_alt, Ki_alt, ch3) + m*g;
 			float deg2rad = 0.0175;
 			float roll_r = roll * deg2rad;
 			float pitch_r = pitch * deg2rad;
@@ -82,9 +55,34 @@ std::vector<float> Controller::Run (void) {
 			thr = p_alt.Sat(thr, 1800, 1100);
 			alt_thr = thr;
 			z0 = p_alt.zi;
+
+            roll_des     = state_des.angles[0];
+            pitch_des 	 = state_des.angles[1];
+            yaw_rate_des = state_des.rates[2];
+
+            roll_des 	  	= roll_des_filt.Run(roll_des);
+            pitch_des 		= pitch_des_filt.Run(pitch_des);
+            yaw_rate_des  	= yaw_des_filt.Run(yaw_rate_des);
 			break;
+    	}
+
+    	case LOITER:
+    	{
+    		//roll_des  = p_velx.PI_Vel(0, y, vy, Kp_vel, Ki_vel, ch1);
+    		pitch_des = p_velx.PI_Vel(0, x, vx, Kp_vel, Ki_vel, ch2);
+    		break;
+    	}
 
     }
+
+	roll_rate_des = pid_roll.P_Angle(roll_des,roll, Kp_angle);
+	pitch_rate_des = pid_pitch.P_Angle(pitch_des,pitch, Kp_angle);
+
+
+	pd_roll  = pid_roll.PID_Rate2(roll_rate_des,roll_rate, roll, Kp_roll, Ki_roll, Kd_roll, Kp_angle);
+	pd_pitch = pid_pitch.PID_Rate2(pitch_rate_des,pitch_rate, pitch, Kp_pitch,Ki_pitch,Kd_pitch, Kp_angle);
+	p_yaw    = pid_yaw.PD_Rate(yaw_rate_des,yaw_rate,Kp_yaw,Ki_yaw,0);
+
 
 
     int pwm1 = thr + pd_pitch - pd_roll  - p_yaw + PITCH_TRIM - ROLL_TRIM;
@@ -99,11 +97,12 @@ std::vector<float> Controller::Run (void) {
     pwm3 = (int)pid_roll.Sat(pwm3,PWM_UPPER,PWM_LOWER,thr);
     pwm4 = (int)pid_roll.Sat(pwm4,PWM_UPPER,PWM_LOWER,thr);
 
-    /* MOTOR TEST
+    // MOTOR TEST
+    /*
     pwm1 = 1000;
     pwm2 = 1000;
-    pwm3 = 1000;
-    pwm4 = 1000; */
+    pwm3 = 1300;
+    pwm4 = 1300; */
 
     //Convert pwm to motor speed 
     w1 = pid_roll.pwm2mot(pwm1, 1);

@@ -38,7 +38,7 @@ class PID {
         float PD_Rate(float alpha_dot_des, float alpha_dot, float Kp, float Ki, float Kd);
         float PID_Rate2(float alpha_dot_des, float alpha_dot, float alpha, float Kp, float Ki, float Kd, float Kp_angle);
         float P_Rate_Yaw(float alpha_dot_des, float alpha_dot, float Kp);
-        float PI_Alt(float z0, float z, float v, float Kp_alt, float Ki_alt, unsigned int ch3);
+        float PI_Vel(float z0, float z, float v, float Kp_alt, float Ki_alt, unsigned int ch);
         float Sat(float pwm, int max, int min,int thr);
         float Sat(float pwm, int max, int min);
         float pwm2ang(unsigned short int pwm);
