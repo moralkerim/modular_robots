@@ -75,12 +75,14 @@ std::vector<float> Controller::Run (void) {
 
     }
 
-	roll_rate_des = pid_roll.P_Angle(roll_des,roll, Kp_angle);
-	pitch_rate_des = pid_pitch.P_Angle(pitch_des,pitch, Kp_angle);
+	roll_rate_des = pid_roll.P_Angle(roll_des,roll, Kp_angle,Ki_angle) + roll_des;
+	pitch_rate_des = pid_pitch.P_Angle(pitch_des,pitch, Kp_angle,Ki_angle) + pitch_des;
 
+	float pd_roll_ff  = pid_roll.RateFF(roll_rate_des);
+	float pd_pitch_ff = pid_roll.RateFF(pitch_rate_des);
 
-	pd_roll  = pid_roll.PID_Rate2(roll_rate_des,roll_rate, roll, Kp_roll, Ki_roll, Kd_roll, Kp_angle);
-	pd_pitch = pid_pitch.PID_Rate2(pitch_rate_des,pitch_rate, pitch, Kp_pitch,Ki_pitch,Kd_pitch, Kp_angle);
+	pd_roll  = pid_roll.PID_Rate2(roll_rate_des,roll_rate, roll, Kp_roll, Ki_roll, Kd_roll, Kp_angle) + pd_roll_ff;
+	pd_pitch = pid_pitch.PID_Rate2(pitch_rate_des,pitch_rate, pitch, Kp_pitch,Ki_pitch,Kd_pitch, Kp_angle) + pd_pitch_ff;
 	p_yaw    = pid_yaw.PD_Rate(yaw_rate_des,yaw_rate,Kp_yaw,Ki_yaw,0);
 
 

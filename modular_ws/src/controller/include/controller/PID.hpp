@@ -19,10 +19,12 @@ class PID {
 
         float alpha_dot_des_, alpha_dot_;
         lpf d_filt  = lpf(0.8544, 0.07282, 0.07282);
+        float ff_, rate_des_;
+        const float K_ff = 2;
 
     public:
         float e_roll, e_pitch, e_eski_roll, e_eski_pitch, ie_roll, ie_pitch; //PID hatalari
-        float ie_roll_sat;
+        float ie_roll_rate,ie_roll_sat;
         float pd_roll_sat_buf;
         float de, de_filt;
         float de_int;
@@ -33,7 +35,8 @@ class PID {
 
     public:
         PID();
-        float P_Angle(float alpha_des, float alpha, float Kp_angle);
+        float RateFF(float rate_des);
+        float P_Angle(float alpha_des, float alpha, float Kp_angle, float Ki_angle);
         float P_Sqrt(float alpha_des, float alpha, float Kp_angle);
         float PD_Rate(float alpha_dot_des, float alpha_dot, float Kp, float Ki, float Kd);
         float PID_Rate2(float alpha_dot_des, float alpha_dot, float alpha, float Kp, float Ki, float Kd, float Kp_angle);

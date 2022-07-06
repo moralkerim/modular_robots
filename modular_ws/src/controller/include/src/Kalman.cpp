@@ -56,9 +56,10 @@ void Kalman_Filtresi::Run() {
   pitch_acc =  asin(accX/acctop)*rad2deg + PITCH_OFFSET;
   roll_acc  =  asin(accY/acctop)*rad2deg + ROLL_OFFSET;
 
-
-    pitch_comp=(pitch_gyro+pitch_eski)*0.998+pitch_acc*0.002;	//Tümleyen filtre
-    roll_comp =(roll_gyro+roll_eski)*0.998+roll_acc*0.002;		//Tümleyen filtre
+  	//float alpha = 0.998;
+  	float alpha = 0.998;
+    pitch_comp=(pitch_gyro+pitch_eski)*alpha+pitch_acc*(1-alpha);	//Tümleyen filtre
+    roll_comp =(roll_gyro+roll_eski)*alpha+roll_acc*(1-alpha);		//Tümleyen filtre
 
 
     //ANGLE PREDICTION
@@ -212,6 +213,7 @@ void Kalman_Filtresi::Run() {
 
 
     else {
+    	/*
     	for(int i=0; i<2000; i++) {
     		  float acctop=sqrt(accX*accX+accY*accY+accZ*accZ);
 
@@ -223,7 +225,7 @@ void Kalman_Filtresi::Run() {
     	}
 
     	ROLL_OFFSET  = -1*  ROLL_OFFSET  / 2000;
-    	PITCH_OFFSET = -1 * PITCH_OFFSET / 2000;
+    	PITCH_OFFSET = -1 * PITCH_OFFSET / 2000; */
     	gyro_ready = true;
     }
 

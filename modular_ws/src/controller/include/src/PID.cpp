@@ -2,11 +2,13 @@
 
 PID::PID() {};
 
-float PID::P_Angle(float alpha_des, float alpha, float Kp_angle) {
-	float P;
+float PID::P_Angle(float alpha_des, float alpha, float Kp_angle, float Ki_angle) {
+	float P,I;
 	e_angle = alpha_des - alpha;
+	ie_roll += e_angle*st;
 	P = Kp_angle*e_angle;
-    return P;
+	I = Ki_angle*ie_roll;
+    return P+I;
 
 }
 
@@ -51,14 +53,21 @@ float PID::PI_Vel(float z0, float z, float v, float Kp_alt, float Ki_alt, unsign
 
 }
 
+float PID::RateFF(float rate_des) {
+	float ff = 0.9975*ff_ + 0.0904*rate_des - 0.0904*rate_des_;
+	return K_ff*ff;
+}
+
 
 float PID::PID_Rate2(float alpha_dot_des, float alpha_dot, float alpha, float Kp, float Ki, float Kd, float Kp_angle) {
 	e_roll = alpha_dot_des - alpha_dot;
+	ie_roll_rate += e_roll*st;
 	P = Kp * e_roll;
 
-	ie_roll += e_angle*st;
 
-	I = Ki * (ie_roll * Kp_angle - alpha);
+
+	//I = Ki * (ie_roll * Kp_angle - alpha);
+	I = Ki * ie_roll_rate;
 
 	float alpha_dot_dot_des = alpha_dot_des - alpha_dot_des_;
 	float alpha_dot_dot = (alpha_dot - alpha_dot_) / st;
@@ -119,6 +128,7 @@ float PID::PD_Rate(float alpha_dot_des, float alpha_dot, float Kp, float Ki, flo
 
 void PID::reset() {
 	ie_roll = 0;
+	ie_roll_rate = 0;
 	de_filt = 0;
 	de_int = 0;
 }
@@ -190,8 +200,8 @@ float PID::pwm2ang(unsigned short int pwm) {
 	int dead_zone = 5;
 	int in_min  = 1000;
 	int in_max  = 2000;
-	int out_min = -30;
-	int out_max  = 30;
+	int out_min = -15;
+	int out_max  = 15;
 	unsigned short int pwm_out;
 
 	if(pwm > 1500 - dead_zone && pwm < 1500 + dead_zone) {
