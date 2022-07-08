@@ -29,7 +29,7 @@ class Kalman_Filtresi {
         //float S11_m_pitch, S12_m_pitch, S21_m_pitch, S22_m_pitch;
         float S11_pitch=0, S12_pitch=0, S21_pitch=0, S22_pitch;
         float S13_pitch, S23_pitch, S31_pitch, S32_pitch, S33_pitch;
-        const float sa = 1e-8;  const float sr=7e-2;
+        const float sa = 1e-6;  const float sr=7e-2;
         //double sa_p = 5e-1; double sb_p = 1e-1; double sr_p=1e-1;
 
         //float S11_m_roll, S12_m_roll, S21_m_roll, S22_m_roll;
@@ -74,7 +74,7 @@ class Kalman_Filtresi {
         float gyro[3], acc[3];
         float pitch_bias, roll_bias, yaw_bias;
         float sb = 1e-5  ;
-        float Qa = 1; //0.5 -- onceki deger.
+        float Qa = 10; //0.5 -- onceki deger.
 
         float Qs = 0.25;
         float Qc = 2.7e-2;

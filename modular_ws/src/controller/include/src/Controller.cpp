@@ -100,12 +100,12 @@ std::vector<float> Controller::Run (void) {
     pwm4 = (int)pid_roll.Sat(pwm4,PWM_UPPER,PWM_LOWER,thr);
 
     // MOTOR TEST
-    /*
+/*
     pwm1 = 1000;
     pwm2 = 1000;
-    pwm3 = 1300;
-    pwm4 = 1300; */
-
+    pwm3 = 1000;
+    pwm4 = 1000;
+*/
     //Convert pwm to motor speed 
     w1 = pid_roll.pwm2mot(pwm1, 1);
     w2 = pid_roll.pwm2mot(pwm2, 1);

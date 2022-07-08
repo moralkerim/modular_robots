@@ -213,7 +213,7 @@ void Kalman_Filtresi::Run() {
 
 
     else {
-    	/*
+
     	for(int i=0; i<2000; i++) {
     		  float acctop=sqrt(accX*accX+accY*accY+accZ*accZ);
 
@@ -225,7 +225,7 @@ void Kalman_Filtresi::Run() {
     	}
 
     	ROLL_OFFSET  = -1*  ROLL_OFFSET  / 2000;
-    	PITCH_OFFSET = -1 * PITCH_OFFSET / 2000; */
+    	PITCH_OFFSET = -1 * PITCH_OFFSET / 2000;
     	gyro_ready = true;
     }
 
