@@ -198,8 +198,14 @@ uint8_t PID::sgn(float v) {
 
 float PID::pwm2ang(unsigned short int pwm) {
 	int dead_zone = 5;
+
 	int in_min  = 1000;
 	int in_max  = 2000;
+
+	/*
+	int in_min  = 1160;
+	int in_max  = 1850;
+	*/
 	int out_min = -15;
 	int out_max  = 15;
 	unsigned short int pwm_out;
@@ -216,8 +222,14 @@ float PID::pwm2ang(unsigned short int pwm) {
 }
 
 float PID::pwm2rate(unsigned short int pwm) {
+
 	int in_min  = 1000;
 	int in_max  = 2000;
+
+	/*
+	int in_min  = 1160;
+	int in_max  = 1850;
+	 */
 	int out_min = -100;
 	int out_max  = 100;
 

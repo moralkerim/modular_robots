@@ -20,7 +20,7 @@ class PID {
         float alpha_dot_des_, alpha_dot_;
         lpf d_filt  = lpf(0.8544, 0.07282, 0.07282);
         float ff_, rate_des_;
-        const float K_ff = 2;
+        const float K_ff = 1;
 
     public:
         float e_roll, e_pitch, e_eski_roll, e_eski_pitch, ie_roll, ie_pitch; //PID hatalari
