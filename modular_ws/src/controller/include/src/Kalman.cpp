@@ -399,11 +399,11 @@ void Kalman_Filtresi::Run() {
 
     state.angles[0] = roll_ekf;
     state.angles[1] = pitch_ekf;
-    state.angles[2] = yaw_ekf;
+    state.angles[2] = -1*yaw_ekf;
 
     state.rates[0] = roll_rate;
     state.rates[1] = pitch_rate;
-    state.rates[2] = -1*yaw_rate;
+    state.rates[2] = yaw_rate;
 
     state.bias[0] = roll_bias;
     state.bias[1] = pitch_bias;
