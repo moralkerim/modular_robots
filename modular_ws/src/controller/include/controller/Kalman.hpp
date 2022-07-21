@@ -18,6 +18,11 @@
 #define PITCH_OFFSET -6.05
 #define a 0.1 */
 
+typedef enum {
+	ROLL,
+	PITCH,
+	YAW
+}euler_angle;
 
 class Kalman_Filtresi {
 
@@ -29,22 +34,22 @@ class Kalman_Filtresi {
         //float S11_m_pitch, S12_m_pitch, S21_m_pitch, S22_m_pitch;
         float S11_pitch=0, S12_pitch=0, S21_pitch=0, S22_pitch;
         float S13_pitch, S23_pitch, S31_pitch, S32_pitch, S33_pitch;
-        const float sa = 1e-6;  const float sr=7e-2;
+        float sa = 1e-6;  float sr=7e-2;
         //double sa_p = 5e-1; double sb_p = 1e-1; double sr_p=1e-1;
 
         //float S11_m_roll, S12_m_roll, S21_m_roll, S22_m_roll;
         float S11_roll=0, S12_roll=0, S21_roll=0, S22_roll;
         float S13_roll, S23_roll, S31_roll, S32_roll, S33_roll;
      //   float Kt11_roll, Kt21_roll;
-/*
-        float S11_m_yaw, S12_m_yaw, S21_m_yaw, S22_m_yaw;
-        float S11_p_yaw, S12_p_yaw, S21_p_yaw, S22_p_yaw;
-        float Kt11_yaw, Kt21_yaw;
-*/
+
+        float S11_yaw=1e5, S12_yaw=0, S21_yaw=0, S22_yaw;
+        float S13_yaw, S23_yaw, S31_yaw, S32_yaw, S33_yaw;
+
+
         float S11_alt, S12_alt, S21_alt, S22_alt, S13_alt, S23_alt, S31_alt, S32_alt, S33_alt=10000;
         float S11_x, S12_x, S21_x, S22_x ;
 
-        const float Qg = 1e1;
+        float Qg = 1e1;
 
         const float Qb = 1e7;
 
@@ -70,11 +75,11 @@ class Kalman_Filtresi {
         float pitch_acc, roll_acc, yaw_acc;
         float roll_gyro, pitch_gyro;
         float pitch_comp, roll_comp;
-        float roll_ekf, pitch_ekf;
+        float roll_ekf, pitch_ekf, yaw_ekf;
         float gyro[3], acc[3];
         float pitch_bias, roll_bias, yaw_bias;
         float sb = 1e-5  ;
-        float Qa = 10; //0.5 -- onceki deger.
+        float Qa = 5e4; //0.5 -- onceki deger.
 
         float Qs = 0.25;
         float Qc = 2.7e-2;
@@ -94,6 +99,10 @@ class Kalman_Filtresi {
         //lpf lpf_pitch = lpf(0.8544, 0.07282, 0.07282);
         lpf lpf_yaw   = lpf(0.8544, 0.07282, 0.07282);
         lpf cam_filt  = lpf(0.9244, 0.03779, 0.03779);
+
+        void EKF_Attitude(euler_angle euler_angle);
+        void EKF_Alt(void);
+        void EKF_Cam(void);
 
     public:
         Kalman_Filtresi();

@@ -206,8 +206,8 @@ float PID::pwm2ang(unsigned short int pwm) {
 	int in_min  = 1160;
 	int in_max  = 1850;
 	*/
-	int out_min = -15;
-	int out_max  = 15;
+	int out_min = -30;
+	int out_max  = 30;
 	unsigned short int pwm_out;
 
 	if(pwm > 1500 - dead_zone && pwm < 1500 + dead_zone) {
