@@ -24,6 +24,7 @@ typedef enum {
 	YAW
 }euler_angle;
 
+
 class Kalman_Filtresi {
 
     private:
@@ -49,6 +50,7 @@ class Kalman_Filtresi {
         float S11_alt, S12_alt, S21_alt, S22_alt, S13_alt, S23_alt, S31_alt, S32_alt, S33_alt=10000;
         float S11_x, S12_x, S21_x, S22_x ;
 
+        float Sp1_1, Sp1_2, Sp1_3, Sp1_4, Sp2_1, Sp2_2, Sp2_3, Sp2_4, Sp3_1, Sp3_2, Sp3_3, Sp3_4, Sp4_1, Sp4_2, Sp4_3, Sp4_4=1e9;
         float Qg = 1e1;
 
         const float Qb = 1e7;
@@ -69,6 +71,7 @@ class Kalman_Filtresi {
         bool gyro_ready;
 
         float pitch_eski, roll_eski;
+        float xbody, ybody;
 
     public:
         struct state state;
@@ -80,16 +83,24 @@ class Kalman_Filtresi {
         float pitch_bias, roll_bias, yaw_bias;
         float sb = 1e-5  ;
         float Qa = 5e4; //0.5 -- onceki deger.
-
+        float x,v,b,ap;
+        float Qap=1;
         float Qs = 0.25;
         float Qc = 2.7e-2;
+        float Qgps = 4;
+        float sv = 1e-3;
+        float sx = 1e-3;
+        float sa_p = 1e-3;
+        float sb_p = 3;
 
         float salt = 1;
         float acc_vert, alt_gnd, vz, sonar_alt, baro_alt, baro_gnd;
         float accXm, accYm;
         float camx;
         float xpos, vx;
+        float xgps, accx;
         float GyroXh, GyroYh;
+        float xned, yned;
 
 
 
@@ -103,6 +114,10 @@ class Kalman_Filtresi {
         void EKF_Attitude(euler_angle euler_angle);
         void EKF_Alt(void);
         void EKF_Cam(void);
+        void NED2Body(void);
+        void EKF_Pos(void);
+        void PredictPos(void);
+        void UpdatePos(void);
 
     public:
         Kalman_Filtresi();

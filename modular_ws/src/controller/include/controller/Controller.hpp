@@ -59,7 +59,7 @@ class Controller {
 
     public:
         Controller();
-        std::vector<float> Run (void);
+        void Run (void);
         int controller_output_pwm[4];
         float pd_roll, pd_pitch, p_yaw;
         float roll_rate_des, pitch_rate_des;

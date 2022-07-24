@@ -5,6 +5,72 @@
 Kalman_Filtresi::Kalman_Filtresi()  {
 
 }
+void Kalman_Filtresi::PredictPos() {
+	x =(ap*st*st)/2 + (v)*st + (x);
+	v =                   (v) + st*ap;
+	//ap =                                ap;
+	//b =                                (b);
+
+	Sp1_1=Sp1_1 + sx + Sp2_1*st + (Sp3_1*st*st)/2 + (st*st*(Sp1_2 + Sp2_2*st + (Sp3_2*st*st)/2))/st + ((pow(st,4))*(Sp1_3 + Sp2_3*st + (Sp3_3*st*st)/2))/(2*st*st);
+	Sp1_2=Sp1_2 + Sp2_2*st + (Sp3_2*st*st)/2 + (st*st*(Sp1_3 + Sp2_3*st + (Sp3_3*st*st)/2))/st;
+	Sp1_3=Sp1_3 + Sp2_3*st + (Sp3_3*st*st)/2;
+	Sp1_4=Sp1_4 + Sp2_4*st + (Sp3_4*st*st)/2;
+	Sp2_1=Sp2_1 + Sp3_1*st + (st*st*(Sp2_2 + Sp3_2*st))/st + ((pow(st,4))*(Sp2_3 + Sp3_3*st))/(2*st*st);
+	Sp2_2=Sp2_2 + sv + Sp3_2*st + (st*st*(Sp2_3 + Sp3_3*st))/st;
+	Sp2_3=Sp2_3 + Sp3_3*st;
+	Sp2_4=Sp2_4 + Sp3_4*st;
+	Sp3_1=Sp3_1 + Sp3_2*(st) + (Sp3_3*st*st)/2;
+	Sp3_2=Sp3_2 + Sp3_3*(st);
+	Sp3_3=Sp3_3 + sa_p;
+	Sp3_4=Sp3_4;
+	Sp4_1=Sp4_1 + Sp4_2*(st) + (Sp4_3*st*st)/2;
+	Sp4_2=Sp4_2 + Sp4_3*(st);
+	Sp4_3=Sp4_3;
+	Sp4_4=Sp4_4 + sb_p;
+}
+
+void Kalman_Filtresi::UpdatePos() {
+	float A = Qap*Qgps + Qap*Sp1_1 + Qgps*Sp3_3 + Qgps*Sp3_4 + Qgps*Sp4_3 + Qgps*Sp4_4 + Sp1_1*Sp3_3 - Sp1_3*Sp3_1 + Sp1_1*Sp3_4 - Sp1_4*Sp3_1 + Sp1_1*Sp4_3 - Sp1_3*Sp4_1 + Sp1_1*Sp4_4 - Sp1_4*Sp4_1;
+	float Kt1_1=1 - (Qgps*(Qap + Sp3_3 + Sp3_4 + Sp4_3 + Sp4_4))/A;
+	float Kt1_2=(Qgps*(Sp1_3 + Sp1_4))/A;
+	float Kt2_1=(Qap*Sp2_1 + Sp2_1*Sp3_3 - Sp2_3*Sp3_1 + Sp2_1*Sp3_4 - Sp2_4*Sp3_1 + Sp2_1*Sp4_3 - Sp2_3*Sp4_1 + Sp2_1*Sp4_4 - Sp2_4*Sp4_1)/A;
+	float Kt2_2=(Qgps*Sp2_3 + Qgps*Sp2_4 + Sp1_1*Sp2_3 - Sp1_3*Sp2_1 + Sp1_1*Sp2_4 - Sp1_4*Sp2_1)/A;
+	float Kt3_1=(Qap*Sp3_1 + Sp3_1*Sp4_3 - Sp3_3*Sp4_1 + Sp3_1*Sp4_4 - Sp3_4*Sp4_1)/A;
+	float Kt3_2=(Qgps*Sp3_3 + Qgps*Sp3_4 + Sp1_1*Sp3_3 - Sp1_3*Sp3_1 + Sp1_1*Sp3_4 - Sp1_4*Sp3_1)/A;
+	float Kt4_1=(Qap*Sp4_1 - Sp3_1*Sp4_3 + Sp3_3*Sp4_1 - Sp3_1*Sp4_4 + Sp3_4*Sp4_1)/A;
+	float Kt4_2=(Qgps*Sp4_3 + Qgps*Sp4_4 + Sp1_1*Sp4_3 - Sp1_3*Sp4_1 + Sp1_1*Sp4_4 - Sp1_4*Sp4_1)/A;
+
+	x = (x) - Kt1_1*((x) - (xbody)) - Kt1_2*((ap) - (accx) + (b));
+	v = (v) - Kt2_1*((x) - (xbody)) - Kt2_2*((ap) - (accx) + (b));
+	ap = (ap) - Kt3_1*((x) - (xbody)) - Kt3_2*((ap) - (accx) + (b));
+	b = (b) - Kt4_1*((x) - (xbody)) - Kt4_2*((ap) - (accx) + (b));
+
+
+	Sp1_1=- Sp1_1*(Kt1_1 - 1) - Kt1_2*Sp3_1 - Kt1_2*Sp4_1;
+	Sp1_2=- Sp1_2*(Kt1_1 - 1) - Kt1_2*Sp3_2 - Kt1_2*Sp4_2;
+	Sp1_3=- Sp1_3*(Kt1_1 - 1) - Kt1_2*Sp3_3 - Kt1_2*Sp4_3;
+	Sp1_4=- Sp1_4*(Kt1_1 - 1) - Kt1_2*Sp3_4 - Kt1_2*Sp4_4;
+	Sp2_1=Sp2_1 - Kt2_1*Sp1_1 - Kt2_2*Sp3_1 - Kt2_2*Sp4_1;
+	Sp2_2=Sp2_2 - Kt2_1*Sp1_2 - Kt2_2*Sp3_2 - Kt2_2*Sp4_2;
+	Sp2_3=Sp2_3 - Kt2_1*Sp1_3 - Kt2_2*Sp3_3 - Kt2_2*Sp4_3;
+	Sp2_4=Sp2_4 - Kt2_1*Sp1_4 - Kt2_2*Sp3_4 - Kt2_2*Sp4_4;
+	Sp3_1=- Sp3_1*(Kt3_2 - 1) - Kt3_1*Sp1_1 - Kt3_2*Sp4_1;
+	Sp3_2=- Sp3_2*(Kt3_2 - 1) - Kt3_1*Sp1_2 - Kt3_2*Sp4_2;
+	Sp3_3=- Sp3_3*(Kt3_2 - 1) - Kt3_1*Sp1_3 - Kt3_2*Sp4_3;
+	Sp3_4=- Sp3_4*(Kt3_2 - 1) - Kt3_1*Sp1_4 - Kt3_2*Sp4_4;
+	Sp4_1=- Sp4_1*(Kt4_2 - 1) - Kt4_1*Sp1_1 - Kt4_2*Sp3_1;
+	Sp4_2=- Sp4_2*(Kt4_2 - 1) - Kt4_1*Sp1_2 - Kt4_2*Sp3_2;
+	Sp4_3=- Sp4_3*(Kt4_2 - 1) - Kt4_1*Sp1_3 - Kt4_2*Sp3_3;
+	Sp4_4=- Sp4_4*(Kt4_2 - 1) - Kt4_1*Sp1_4 - Kt4_2*Sp3_4;
+
+}
+
+void Kalman_Filtresi::EKF_Pos() {
+
+	PredictPos();
+	UpdatePos();
+
+}
 
 void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 	  float accX = acc[0];
@@ -73,7 +139,7 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 			angle_acc = yaw_acc;
 			gyro = gyroZ;
 			sa = 5e2;
-			Qa = 5e7;
+			Qa = 5e8;
 			Qg = 1e1;
 
 			S11_angle = S11_yaw;
@@ -88,7 +154,6 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 			break;
 
 	}
-
 
     angle_ekf = (angle_ekf) + st*(angle_rate);
 
@@ -310,68 +375,44 @@ void Kalman_Filtresi::EKF_Cam() {
 
 
 }
+
+void Kalman_Filtresi::NED2Body() {
+	float deg2rad = M_PI/180.0;
+
+	float yaw = -yaw_ekf*deg2rad;
+
+	float DCM11 = cos(yaw);
+	float DCM22 = DCM11;
+
+	float DCM12 = sin(yaw);
+	float DCM21 = -DCM12;
+
+	xbody = DCM11*xned + DCM21*yned;
+	ybody = DCM12*xned + DCM22*yned;
+}
 void Kalman_Filtresi::Run() {
 
 
 
-  float A;
   float accX = acc[0];
   float accY = acc[1];
   float accZ = acc[2];
 
-  float gyroX = gyro[0];
-  float gyroY = gyro[1];
-  float gyroZ = gyro[2];
-
-    //---IMU KİSMİ----
-    //=================================
 
 
-  //roll_acc-=-0.67;	pitch_acc-=-1.15;	//İvmeölçer ile okunan hata değerleri offsetlemesi
 
-
-  //pitch_acc = lpf(pitch_acc);
-  //roll_acc = lpf(roll_acc);
-
-
-  //pitch_gyro = gyroY * st;
-  //roll_gyro =  gyroX * st;
-
-
-  //yaw_acc   =  asin(accZ/acctop)*rad2deg;
-
-  /*
-  pitch_acc = lpf.update(pitch_acc);
-  roll_acc = lpf.update(roll_acc);
-  */
-  //yaw_acc = lpf.update(yaw_acc);
-
-  #if USE_SIM
-    attitude.roll_acc = roll_acc;
-    attitude.pitch_acc = pitch_acc;
-    attitude.yaw_acc = yaw_acc;
-    //printf("\npitc_acc: %.2f", pitch_acc);
-  #endif
-    
     if(gyro_ready) {
 
-  //float acctop=sqrt(accX*accX+accY*accY+accZ*accZ);
-
-  //pitch_acc =  asin(accX/acctop)*rad2deg + PITCH_OFFSET;
-  //roll_acc  =  asin(accY/acctop)*rad2deg + ROLL_OFFSET;
-
-  	//float alpha = 0.998;
-  	//float alpha = 0.998;
-    //pitch_comp=(pitch_gyro+pitch_eski)*alpha+pitch_acc*(1-alpha);	//Tümleyen filtre
-    //roll_comp =(roll_gyro+roll_eski)*alpha+roll_acc*(1-alpha);		//Tümleyen filtre
 
     EKF_Attitude(ROLL);
     EKF_Attitude(PITCH);
     EKF_Attitude(YAW);
 
-    EKF_Alt();
+    //EKF_Alt();
+    //NED2Body();
+    //EKF_Pos();
 
-    EKF_Cam();
+    //EKF_Cam();
 
     }
 

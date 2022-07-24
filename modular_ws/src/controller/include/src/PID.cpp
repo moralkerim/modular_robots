@@ -69,9 +69,9 @@ float PID::PID_Rate2(float alpha_dot_des, float alpha_dot, float alpha, float Kp
 	//I = Ki * (ie_roll * Kp_angle - alpha);
 	I = Ki * ie_roll_rate;
 
-	float alpha_dot_dot_des = alpha_dot_des - alpha_dot_des_;
+	//float alpha_dot_dot_des = alpha_dot_des - alpha_dot_des_;
 	float alpha_dot_dot = (alpha_dot - alpha_dot_) / st;
-	alpha_dot_dot_des = alpha_dot_dot_des / st;
+	//alpha_dot_dot_des = alpha_dot_dot_des / st;
 	alpha_dot_dot = d_filt.Run(alpha_dot_dot);
 
 	D = Kd * (-alpha_dot * Kp_angle - alpha_dot_dot);
