@@ -25,7 +25,7 @@ class Controller {
         float pwm_trim = 1550;
         const float rad2deg = 180/3.14;
 
-        const int f = 400;
+        const int f = 200;
         float st = 1/(float)f;
         //PID Katsayilari
 

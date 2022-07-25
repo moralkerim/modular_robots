@@ -8,7 +8,7 @@ class PID {
     private:
 
         const float imax=120, imin=-120;
-        const int f = 400;
+        const int f = 200;
         const float st = 1/(float)f;
 
         const float vz_def = 0.3;

@@ -6,9 +6,11 @@ Kalman_Filtresi::Kalman_Filtresi()  {
 
 }
 void Kalman_Filtresi::PredictPos() {
+	float deg2rad = M_PI/180.0;
 	x =(ap*st*st)/2 + (v)*st + (x);
 	v =                   (v) + st*ap;
-	//ap =                                ap;
+	float g = 9.81;
+	ap = -g*deg2rad*pitch_ekf;
 	//b =                                (b);
 
 	Sp1_1=Sp1_1 + sx + Sp2_1*st + (Sp3_1*st*st)/2 + (st*st*(Sp1_2 + Sp2_2*st + (Sp3_2*st*st)/2))/st + ((pow(st,4))*(Sp1_3 + Sp2_3*st + (Sp3_3*st*st)/2))/(2*st*st);
@@ -409,8 +411,8 @@ void Kalman_Filtresi::Run() {
     EKF_Attitude(YAW);
 
     //EKF_Alt();
-    //NED2Body();
-    //EKF_Pos();
+    NED2Body();
+    EKF_Pos();
 
     //EKF_Cam();
 

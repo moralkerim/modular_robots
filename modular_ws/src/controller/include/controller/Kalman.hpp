@@ -66,15 +66,16 @@ class Kalman_Filtresi {
 
         const float rad2deg = 180/3.14;
 
-        const int f = 400;
+        const int f = 200;
         const double st = 1/(float)f;
         bool gyro_ready;
 
         float pitch_eski, roll_eski;
-        float xbody, ybody;
 
     public:
         struct state state;
+        float xbody, ybody;
+
         float pitch_acc, roll_acc, yaw_acc;
         float roll_gyro, pitch_gyro;
         float pitch_comp, roll_comp;
@@ -88,10 +89,10 @@ class Kalman_Filtresi {
         float Qs = 0.25;
         float Qc = 2.7e-2;
         float Qgps = 4;
-        float sv = 1e-3;
+        float sv = 1e-5;
         float sx = 1e-3;
-        float sa_p = 1e-3;
-        float sb_p = 3;
+        float sa_p = 1e0;
+        float sb_p = 1e0;
 
         float salt = 1;
         float acc_vert, alt_gnd, vz, sonar_alt, baro_alt, baro_gnd;
