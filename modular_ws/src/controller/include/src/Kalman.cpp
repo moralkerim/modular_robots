@@ -5,98 +5,216 @@
 Kalman_Filtresi::Kalman_Filtresi()  {
 
 }
-void Kalman_Filtresi::PredictPos() {
-	float deg2rad = M_PI/180.0;
-	x =(ap*pos_st*pos_st)/2 + (v)*pos_st + (x);
-	v =                   (v) + pos_st*ap;
-	float g = 9.81;
+void Kalman_Filtresi::PredictUpdatePos(pos_axis axis) {
+	float pos,vel,a,b,accm,pos_gps,vgps,S1_1,S1_2,S1_3,S1_4,S2_1,S2_2,S2_3,S2_4,S3_1,S3_2,S3_3,S3_4,S4_1, S4_2, S4_3, S4_4;
+	switch (axis) {
+		case x_axis:
+			pos = x;
+			a = apx;
+			vel = vx;
+			b = bax;
+
+			pos_gps = xgps;
+			vgps   = vgpsx;
+			accm		= accx;
+
+			S1_1 = Sp1_1x;
+			S1_2 = Sp1_2x;
+			S1_3 = Sp1_3x;
+			S1_4 = Sp1_4x;
+			S2_1 = Sp2_1x;
+			S2_2 = Sp2_2x;
+			S2_3 = Sp2_3x;
+			S2_4 = Sp2_4x;
+			S3_1 = Sp3_1x;
+			S3_2 = Sp3_2x;
+			S3_3 = Sp3_3x;
+			S3_4 = Sp3_4x;
+			S4_1 = Sp4_1x;
+			S4_2 = Sp4_2x;
+			S4_3 = Sp4_3x;
+			S4_4 = Sp4_4x;
+			break;
+
+		case y_axis:
+			pos = y;
+			a = apy;
+			vel = vy;
+			b = bay;
+
+			pos_gps = ygps;
+			vgps   = vgpsy;
+			accm		= accy;
+
+			S1_1 = Sp1_1y;
+			S1_2 = Sp1_2y;
+			S1_3 = Sp1_3y;
+			S1_4 = Sp1_4y;
+			S2_1 = Sp2_1y;
+			S2_2 = Sp2_2y;
+			S2_3 = Sp2_3y;
+			S2_4 = Sp2_4y;
+			S3_1 = Sp3_1y;
+			S3_2 = Sp3_2y;
+			S3_3 = Sp3_3y;
+			S3_4 = Sp3_4y;
+			S4_1 = Sp4_1y;
+			S4_2 = Sp4_2y;
+			S4_3 = Sp4_3y;
+			S4_4 = Sp4_4y;
+			break;
+
+	}
+	//float deg2rad = M_PI/180.0;
+	pos =(a*pos_st*pos_st)/2 + (vel)*pos_st + (pos);
+	vel =                   (vel) + pos_st*a;
+	//float g = 9.81;
 	//ap = -g*deg2rad*pitch_ekf;
 	//b =                                (b);
 
-	Sp1_1=Sp1_1 + sx + Sp1_2*pos_st + Sp2_1*pos_st + (Sp1_3*pos_st*pos_st)/2 + Sp2_2*pos_st*pos_st + (Sp2_3*pos_st*pos_st*pos_st)/2 + (Sp3_1*pos_st*pos_st)/2 + (Sp3_2*pos_st*pos_st*pos_st)/2 + (Sp3_3*pos_st*pos_st*pos_st*pos_st)/4;
-	Sp1_2=Sp1_2 + Sp1_3*pos_st + Sp2_2*pos_st + Sp2_3*pos_st*pos_st + (Sp3_2*pos_st*pos_st)/2 + (Sp3_3*pos_st*pos_st*pos_st)/2;
-	Sp1_3=0;
-	Sp1_4=Sp1_4 + Sp2_4*pos_st + (Sp3_4*pos_st*pos_st)/2;
-	Sp2_1=Sp2_1 + (pos_st*pos_st*(Sp2_3 + Sp3_3*pos_st))/2 + Sp3_1*pos_st + pos_st*(Sp2_2 + Sp3_2*pos_st);
-	Sp2_2=Sp2_2 + sv + Sp3_2*pos_st + pos_st*(Sp2_3 + Sp3_3*pos_st);
-	Sp2_3=0;
-	Sp2_4=Sp2_4 + Sp3_4*pos_st;
-	Sp3_1=0;
-	Sp3_2=0;
-	Sp3_3=sa;
-	Sp3_4=0;
-	Sp4_1=Sp4_1 + Sp4_2*pos_st + (Sp4_3*pos_st*pos_st)/2;
-	Sp4_2=Sp4_2 + Sp4_3*pos_st;
-	Sp4_3=0;
-	Sp4_4=Sp4_4 + sb;
-}
+	S1_1=S1_1 + sx + S1_2*pos_st + S2_1*pos_st + (S1_3*pos_st*pos_st)/2 + S2_2*pos_st*pos_st + (S2_3*pos_st*pos_st*pos_st)/2 + (S3_1*pos_st*pos_st)/2 + (S3_2*pos_st*pos_st*pos_st)/2 + (S3_3*pos_st*pos_st*pos_st*pos_st)/4;
+	S1_2=S1_2 + S1_3*pos_st + S2_2*pos_st + S2_3*pos_st*pos_st + (S3_2*pos_st*pos_st)/2 + (S3_3*pos_st*pos_st*pos_st)/2;
+	S1_3=0;
+	S1_4=S1_4 + S2_4*pos_st + (S3_4*pos_st*pos_st)/2;
+	S2_1=S2_1 + (pos_st*pos_st*(S2_3 + S3_3*pos_st))/2 + S3_1*pos_st + pos_st*(S2_2 + S3_2*pos_st);
+	S2_2=S2_2 + sv + S3_2*pos_st + pos_st*(S2_3 + S3_3*pos_st);
+	S2_3=0;
+	S2_4=S2_4 + S3_4*pos_st;
+	S3_1=0;
+	S3_2=0;
+	S3_3=sa;
+	S3_4=0;
+	S4_1=S4_1 + S4_2*pos_st + (S4_3*pos_st*pos_st)/2;
+	S4_2=S4_2 + S4_3*pos_st;
+	S4_3=0;
+	S4_4=S4_4 + sb;
 
-void Kalman_Filtresi::UpdatePos() {
-	float A = (Qap*Qgps*Qgps_v + Qap*Qgps*Sp2_2 + Qap*Qgps_v*Sp1_1 + Qgps*Qgps_v*Sp3_3 + Qgps*Qgps_v*Sp3_4 + Qgps*Qgps_v*Sp4_3 + Qgps*Qgps_v*Sp4_4 + Qap*Sp1_1*Sp2_2 - Qap*Sp1_2*Sp2_1 + Qgps*Sp2_2*Sp3_3 - Qgps*Sp2_3*Sp3_2 + Qgps*Sp2_2*Sp3_4 - Qgps*Sp2_4*Sp3_2 + Qgps*Sp2_2*Sp4_3 - Qgps*Sp2_3*Sp4_2 + Qgps*Sp2_2*Sp4_4 - Qgps*Sp2_4*Sp4_2 + Qgps_v*Sp1_1*Sp3_3 - Qgps_v*Sp1_3*Sp3_1 + Qgps_v*Sp1_1*Sp3_4 - Qgps_v*Sp1_4*Sp3_1 + Qgps_v*Sp1_1*Sp4_3 - Qgps_v*Sp1_3*Sp4_1 + Qgps_v*Sp1_1*Sp4_4 - Qgps_v*Sp1_4*Sp4_1 + Sp1_1*Sp2_2*Sp3_3 - Sp1_1*Sp2_3*Sp3_2 - Sp1_2*Sp2_1*Sp3_3 + Sp1_2*Sp2_3*Sp3_1 + Sp1_3*Sp2_1*Sp3_2 - Sp1_3*Sp2_2*Sp3_1 + Sp1_1*Sp2_2*Sp3_4 - Sp1_1*Sp2_4*Sp3_2 - Sp1_2*Sp2_1*Sp3_4 + Sp1_2*Sp2_4*Sp3_1 + Sp1_4*Sp2_1*Sp3_2 - Sp1_4*Sp2_2*Sp3_1 + Sp1_1*Sp2_2*Sp4_3 - Sp1_1*Sp2_3*Sp4_2 - Sp1_2*Sp2_1*Sp4_3 + Sp1_2*Sp2_3*Sp4_1 + Sp1_3*Sp2_1*Sp4_2 - Sp1_3*Sp2_2*Sp4_1 + Sp1_1*Sp2_2*Sp4_4 - Sp1_1*Sp2_4*Sp4_2 - Sp1_2*Sp2_1*Sp4_4 + Sp1_2*Sp2_4*Sp4_1 + Sp1_4*Sp2_1*Sp4_2 - Sp1_4*Sp2_2*Sp4_1);
-	float Kt11=1 - (Qap*Qgps*Qgps_v + Qap*Qgps*Sp2_2 + Qgps*Qgps_v*Sp3_3 + Qgps*Qgps_v*Sp3_4 + Qgps*Qgps_v*Sp4_3 + Qgps*Qgps_v*Sp4_4 + Qgps*Sp2_2*Sp3_3 - Qgps*Sp2_3*Sp3_2 + Qgps*Sp2_2*Sp3_4 - Qgps*Sp2_4*Sp3_2 + Qgps*Sp2_2*Sp4_3 - Qgps*Sp2_3*Sp4_2 + Qgps*Sp2_2*Sp4_4 - Qgps*Sp2_4*Sp4_2)/A;
-	float Kt12=(Qgps*(Qgps_v*Sp1_3 + Qgps_v*Sp1_4 - Sp1_2*Sp2_3 + Sp1_3*Sp2_2 - Sp1_2*Sp2_4 + Sp1_4*Sp2_2))/A;
-	float Kt13=(Qgps*(Qap*Sp1_2 + Sp1_2*Sp3_3 - Sp1_3*Sp3_2 + Sp1_2*Sp3_4 - Sp1_4*Sp3_2 + Sp1_2*Sp4_3 - Sp1_3*Sp4_2 + Sp1_2*Sp4_4 - Sp1_4*Sp4_2))/A;
-	float Kt21=(Qgps_v*(Qap*Sp2_1 + Sp2_1*Sp3_3 - Sp2_3*Sp3_1 + Sp2_1*Sp3_4 - Sp2_4*Sp3_1 + Sp2_1*Sp4_3 - Sp2_3*Sp4_1 + Sp2_1*Sp4_4 - Sp2_4*Sp4_1))/A;
-	float Kt22=(Qgps_v*(Qgps*Sp2_3 + Qgps*Sp2_4 + Sp1_1*Sp2_3 - Sp1_3*Sp2_1 + Sp1_1*Sp2_4 - Sp1_4*Sp2_1))/A;
-	float Kt23=1 - (Qap*Qgps*Qgps_v + Qap*Qgps_v*Sp1_1 + Qgps*Qgps_v*Sp3_3 + Qgps*Qgps_v*Sp3_4 + Qgps*Qgps_v*Sp4_3 + Qgps*Qgps_v*Sp4_4 + Qgps_v*Sp1_1*Sp3_3 - Qgps_v*Sp1_3*Sp3_1 + Qgps_v*Sp1_1*Sp3_4 - Qgps_v*Sp1_4*Sp3_1 + Qgps_v*Sp1_1*Sp4_3 - Qgps_v*Sp1_3*Sp4_1 + Qgps_v*Sp1_1*Sp4_4 - Qgps_v*Sp1_4*Sp4_1)/A;
-	float Kt31=(Qap*Qgps_v*Sp3_1 - Qap*Sp2_1*Sp3_2 + Qap*Sp2_2*Sp3_1 + Qgps_v*Sp3_1*Sp4_3 - Qgps_v*Sp3_3*Sp4_1 + Qgps_v*Sp3_1*Sp4_4 - Qgps_v*Sp3_4*Sp4_1 - Sp2_1*Sp3_2*Sp4_3 + Sp2_1*Sp3_3*Sp4_2 + Sp2_2*Sp3_1*Sp4_3 - Sp2_2*Sp3_3*Sp4_1 - Sp2_3*Sp3_1*Sp4_2 + Sp2_3*Sp3_2*Sp4_1 - Sp2_1*Sp3_2*Sp4_4 + Sp2_1*Sp3_4*Sp4_2 + Sp2_2*Sp3_1*Sp4_4 - Sp2_2*Sp3_4*Sp4_1 - Sp2_4*Sp3_1*Sp4_2 + Sp2_4*Sp3_2*Sp4_1)/A;
-	float Kt32=(Qgps*Qgps_v*Sp3_3 + Qgps*Qgps_v*Sp3_4 + Qgps*Sp2_2*Sp3_3 - Qgps*Sp2_3*Sp3_2 + Qgps*Sp2_2*Sp3_4 - Qgps*Sp2_4*Sp3_2 + Qgps_v*Sp1_1*Sp3_3 - Qgps_v*Sp1_3*Sp3_1 + Qgps_v*Sp1_1*Sp3_4 - Qgps_v*Sp1_4*Sp3_1 + Sp1_1*Sp2_2*Sp3_3 - Sp1_1*Sp2_3*Sp3_2 - Sp1_2*Sp2_1*Sp3_3 + Sp1_2*Sp2_3*Sp3_1 + Sp1_3*Sp2_1*Sp3_2 - Sp1_3*Sp2_2*Sp3_1 + Sp1_1*Sp2_2*Sp3_4 - Sp1_1*Sp2_4*Sp3_2 - Sp1_2*Sp2_1*Sp3_4 + Sp1_2*Sp2_4*Sp3_1 + Sp1_4*Sp2_1*Sp3_2 - Sp1_4*Sp2_2*Sp3_1)/A;
-	float Kt33=(Qap*Qgps*Sp3_2 + Qap*Sp1_1*Sp3_2 - Qap*Sp1_2*Sp3_1 + Qgps*Sp3_2*Sp4_3 - Qgps*Sp3_3*Sp4_2 + Qgps*Sp3_2*Sp4_4 - Qgps*Sp3_4*Sp4_2 + Sp1_1*Sp3_2*Sp4_3 - Sp1_1*Sp3_3*Sp4_2 - Sp1_2*Sp3_1*Sp4_3 + Sp1_2*Sp3_3*Sp4_1 + Sp1_3*Sp3_1*Sp4_2 - Sp1_3*Sp3_2*Sp4_1 + Sp1_1*Sp3_2*Sp4_4 - Sp1_1*Sp3_4*Sp4_2 - Sp1_2*Sp3_1*Sp4_4 + Sp1_2*Sp3_4*Sp4_1 + Sp1_4*Sp3_1*Sp4_2 - Sp1_4*Sp3_2*Sp4_1)/A;
-	float Kt41=(Qap*Qgps_v*Sp4_1 - Qap*Sp2_1*Sp4_2 + Qap*Sp2_2*Sp4_1 - Qgps_v*Sp3_1*Sp4_3 + Qgps_v*Sp3_3*Sp4_1 - Qgps_v*Sp3_1*Sp4_4 + Qgps_v*Sp3_4*Sp4_1 + Sp2_1*Sp3_2*Sp4_3 - Sp2_1*Sp3_3*Sp4_2 - Sp2_2*Sp3_1*Sp4_3 + Sp2_2*Sp3_3*Sp4_1 + Sp2_3*Sp3_1*Sp4_2 - Sp2_3*Sp3_2*Sp4_1 + Sp2_1*Sp3_2*Sp4_4 - Sp2_1*Sp3_4*Sp4_2 - Sp2_2*Sp3_1*Sp4_4 + Sp2_2*Sp3_4*Sp4_1 + Sp2_4*Sp3_1*Sp4_2 - Sp2_4*Sp3_2*Sp4_1)/A;
-	float Kt42=(Qgps*Qgps_v*Sp4_3 + Qgps*Qgps_v*Sp4_4 + Qgps*Sp2_2*Sp4_3 - Qgps*Sp2_3*Sp4_2 + Qgps*Sp2_2*Sp4_4 - Qgps*Sp2_4*Sp4_2 + Qgps_v*Sp1_1*Sp4_3 - Qgps_v*Sp1_3*Sp4_1 + Qgps_v*Sp1_1*Sp4_4 - Qgps_v*Sp1_4*Sp4_1 + Sp1_1*Sp2_2*Sp4_3 - Sp1_1*Sp2_3*Sp4_2 - Sp1_2*Sp2_1*Sp4_3 + Sp1_2*Sp2_3*Sp4_1 + Sp1_3*Sp2_1*Sp4_2 - Sp1_3*Sp2_2*Sp4_1 + Sp1_1*Sp2_2*Sp4_4 - Sp1_1*Sp2_4*Sp4_2 - Sp1_2*Sp2_1*Sp4_4 + Sp1_2*Sp2_4*Sp4_1 + Sp1_4*Sp2_1*Sp4_2 - Sp1_4*Sp2_2*Sp4_1)/A;
-	float Kt43=(Qap*Qgps*Sp4_2 + Qap*Sp1_1*Sp4_2 - Qap*Sp1_2*Sp4_1 - Qgps*Sp3_2*Sp4_3 + Qgps*Sp3_3*Sp4_2 - Qgps*Sp3_2*Sp4_4 + Qgps*Sp3_4*Sp4_2 - Sp1_1*Sp3_2*Sp4_3 + Sp1_1*Sp3_3*Sp4_2 + Sp1_2*Sp3_1*Sp4_3 - Sp1_2*Sp3_3*Sp4_1 - Sp1_3*Sp3_1*Sp4_2 + Sp1_3*Sp3_2*Sp4_1 - Sp1_1*Sp3_2*Sp4_4 + Sp1_1*Sp3_4*Sp4_2 + Sp1_2*Sp3_1*Sp4_4 - Sp1_2*Sp3_4*Sp4_1 - Sp1_4*Sp3_1*Sp4_2 + Sp1_4*Sp3_2*Sp4_1)/A;
+	float A = (Qap*Qgps*Qgps_v + Qap*Qgps*S2_2 + Qap*Qgps_v*S1_1 + Qgps*Qgps_v*S3_3 + Qgps*Qgps_v*S3_4 + Qgps*Qgps_v*S4_3 + Qgps*Qgps_v*S4_4 + Qap*S1_1*S2_2 - Qap*S1_2*S2_1 + Qgps*S2_2*S3_3 - Qgps*S2_3*S3_2 + Qgps*S2_2*S3_4 - Qgps*S2_4*S3_2 + Qgps*S2_2*S4_3 - Qgps*S2_3*S4_2 + Qgps*S2_2*S4_4 - Qgps*S2_4*S4_2 + Qgps_v*S1_1*S3_3 - Qgps_v*S1_3*S3_1 + Qgps_v*S1_1*S3_4 - Qgps_v*S1_4*S3_1 + Qgps_v*S1_1*S4_3 - Qgps_v*S1_3*S4_1 + Qgps_v*S1_1*S4_4 - Qgps_v*S1_4*S4_1 + S1_1*S2_2*S3_3 - S1_1*S2_3*S3_2 - S1_2*S2_1*S3_3 + S1_2*S2_3*S3_1 + S1_3*S2_1*S3_2 - S1_3*S2_2*S3_1 + S1_1*S2_2*S3_4 - S1_1*S2_4*S3_2 - S1_2*S2_1*S3_4 + S1_2*S2_4*S3_1 + S1_4*S2_1*S3_2 - S1_4*S2_2*S3_1 + S1_1*S2_2*S4_3 - S1_1*S2_3*S4_2 - S1_2*S2_1*S4_3 + S1_2*S2_3*S4_1 + S1_3*S2_1*S4_2 - S1_3*S2_2*S4_1 + S1_1*S2_2*S4_4 - S1_1*S2_4*S4_2 - S1_2*S2_1*S4_4 + S1_2*S2_4*S4_1 + S1_4*S2_1*S4_2 - S1_4*S2_2*S4_1);
+	float Kt11=1 - (Qap*Qgps*Qgps_v + Qap*Qgps*S2_2 + Qgps*Qgps_v*S3_3 + Qgps*Qgps_v*S3_4 + Qgps*Qgps_v*S4_3 + Qgps*Qgps_v*S4_4 + Qgps*S2_2*S3_3 - Qgps*S2_3*S3_2 + Qgps*S2_2*S3_4 - Qgps*S2_4*S3_2 + Qgps*S2_2*S4_3 - Qgps*S2_3*S4_2 + Qgps*S2_2*S4_4 - Qgps*S2_4*S4_2)/A;
+	float Kt12=(Qgps*(Qgps_v*S1_3 + Qgps_v*S1_4 - S1_2*S2_3 + S1_3*S2_2 - S1_2*S2_4 + S1_4*S2_2))/A;
+	float Kt13=(Qgps*(Qap*S1_2 + S1_2*S3_3 - S1_3*S3_2 + S1_2*S3_4 - S1_4*S3_2 + S1_2*S4_3 - S1_3*S4_2 + S1_2*S4_4 - S1_4*S4_2))/A;
+	float Kt21=(Qgps_v*(Qap*S2_1 + S2_1*S3_3 - S2_3*S3_1 + S2_1*S3_4 - S2_4*S3_1 + S2_1*S4_3 - S2_3*S4_1 + S2_1*S4_4 - S2_4*S4_1))/A;
+	float Kt22=(Qgps_v*(Qgps*S2_3 + Qgps*S2_4 + S1_1*S2_3 - S1_3*S2_1 + S1_1*S2_4 - S1_4*S2_1))/A;
+	float Kt23=1 - (Qap*Qgps*Qgps_v + Qap*Qgps_v*S1_1 + Qgps*Qgps_v*S3_3 + Qgps*Qgps_v*S3_4 + Qgps*Qgps_v*S4_3 + Qgps*Qgps_v*S4_4 + Qgps_v*S1_1*S3_3 - Qgps_v*S1_3*S3_1 + Qgps_v*S1_1*S3_4 - Qgps_v*S1_4*S3_1 + Qgps_v*S1_1*S4_3 - Qgps_v*S1_3*S4_1 + Qgps_v*S1_1*S4_4 - Qgps_v*S1_4*S4_1)/A;
+	float Kt31=(Qap*Qgps_v*S3_1 - Qap*S2_1*S3_2 + Qap*S2_2*S3_1 + Qgps_v*S3_1*S4_3 - Qgps_v*S3_3*S4_1 + Qgps_v*S3_1*S4_4 - Qgps_v*S3_4*S4_1 - S2_1*S3_2*S4_3 + S2_1*S3_3*S4_2 + S2_2*S3_1*S4_3 - S2_2*S3_3*S4_1 - S2_3*S3_1*S4_2 + S2_3*S3_2*S4_1 - S2_1*S3_2*S4_4 + S2_1*S3_4*S4_2 + S2_2*S3_1*S4_4 - S2_2*S3_4*S4_1 - S2_4*S3_1*S4_2 + S2_4*S3_2*S4_1)/A;
+	float Kt32=(Qgps*Qgps_v*S3_3 + Qgps*Qgps_v*S3_4 + Qgps*S2_2*S3_3 - Qgps*S2_3*S3_2 + Qgps*S2_2*S3_4 - Qgps*S2_4*S3_2 + Qgps_v*S1_1*S3_3 - Qgps_v*S1_3*S3_1 + Qgps_v*S1_1*S3_4 - Qgps_v*S1_4*S3_1 + S1_1*S2_2*S3_3 - S1_1*S2_3*S3_2 - S1_2*S2_1*S3_3 + S1_2*S2_3*S3_1 + S1_3*S2_1*S3_2 - S1_3*S2_2*S3_1 + S1_1*S2_2*S3_4 - S1_1*S2_4*S3_2 - S1_2*S2_1*S3_4 + S1_2*S2_4*S3_1 + S1_4*S2_1*S3_2 - S1_4*S2_2*S3_1)/A;
+	float Kt33=(Qap*Qgps*S3_2 + Qap*S1_1*S3_2 - Qap*S1_2*S3_1 + Qgps*S3_2*S4_3 - Qgps*S3_3*S4_2 + Qgps*S3_2*S4_4 - Qgps*S3_4*S4_2 + S1_1*S3_2*S4_3 - S1_1*S3_3*S4_2 - S1_2*S3_1*S4_3 + S1_2*S3_3*S4_1 + S1_3*S3_1*S4_2 - S1_3*S3_2*S4_1 + S1_1*S3_2*S4_4 - S1_1*S3_4*S4_2 - S1_2*S3_1*S4_4 + S1_2*S3_4*S4_1 + S1_4*S3_1*S4_2 - S1_4*S3_2*S4_1)/A;
+	float Kt41=(Qap*Qgps_v*S4_1 - Qap*S2_1*S4_2 + Qap*S2_2*S4_1 - Qgps_v*S3_1*S4_3 + Qgps_v*S3_3*S4_1 - Qgps_v*S3_1*S4_4 + Qgps_v*S3_4*S4_1 + S2_1*S3_2*S4_3 - S2_1*S3_3*S4_2 - S2_2*S3_1*S4_3 + S2_2*S3_3*S4_1 + S2_3*S3_1*S4_2 - S2_3*S3_2*S4_1 + S2_1*S3_2*S4_4 - S2_1*S3_4*S4_2 - S2_2*S3_1*S4_4 + S2_2*S3_4*S4_1 + S2_4*S3_1*S4_2 - S2_4*S3_2*S4_1)/A;
+	float Kt42=(Qgps*Qgps_v*S4_3 + Qgps*Qgps_v*S4_4 + Qgps*S2_2*S4_3 - Qgps*S2_3*S4_2 + Qgps*S2_2*S4_4 - Qgps*S2_4*S4_2 + Qgps_v*S1_1*S4_3 - Qgps_v*S1_3*S4_1 + Qgps_v*S1_1*S4_4 - Qgps_v*S1_4*S4_1 + S1_1*S2_2*S4_3 - S1_1*S2_3*S4_2 - S1_2*S2_1*S4_3 + S1_2*S2_3*S4_1 + S1_3*S2_1*S4_2 - S1_3*S2_2*S4_1 + S1_1*S2_2*S4_4 - S1_1*S2_4*S4_2 - S1_2*S2_1*S4_4 + S1_2*S2_4*S4_1 + S1_4*S2_1*S4_2 - S1_4*S2_2*S4_1)/A;
+	float Kt43=(Qap*Qgps*S4_2 + Qap*S1_1*S4_2 - Qap*S1_2*S4_1 - Qgps*S3_2*S4_3 + Qgps*S3_3*S4_2 - Qgps*S3_2*S4_4 + Qgps*S3_4*S4_2 - S1_1*S3_2*S4_3 + S1_1*S3_3*S4_2 + S1_2*S3_1*S4_3 - S1_2*S3_3*S4_1 - S1_3*S3_1*S4_2 + S1_3*S3_2*S4_1 - S1_1*S3_2*S4_4 + S1_1*S3_4*S4_2 + S1_2*S3_1*S4_4 - S1_2*S3_4*S4_1 - S1_4*S3_1*S4_2 + S1_4*S3_2*S4_1)/A;
 
-	x = x - Kt13*(v - vgps) - Kt11*(x - xgps) - Kt12*(ap - accx + b);
+	pos = pos - Kt13*(vel - vgps) - Kt11*(pos - pos_gps) - Kt12*(a - accm + b);
 
-	v = v - Kt23*(v - vgps) - Kt21*(x - xgps) - Kt22*(ap - accx + b);
+	vel = vel - Kt23*(vel - vgps) - Kt21*(pos - pos_gps) - Kt22*(a - accm + b);
 
-	ap = ap - Kt33*(v - vgps) - Kt31*(x - xgps) - Kt32*(ap - accx + b);
+	a = a - Kt33*(vel - vgps) - Kt31*(pos - pos_gps) - Kt32*(a - accm + b);
 
-	b = b - Kt43*(v - vgps) - Kt41*(x - xgps) - Kt42*(ap - accx + b);
+	b = b - Kt43*(vel - vgps) - Kt41*(pos - pos_gps) - Kt42*(a - accm + b);
 
-	Sp1_1=- Sp1_1*(Kt11 - 1) - Kt13*Sp2_1 - Kt12*Sp3_1 - Kt12*Sp4_1;
-	Sp1_2=- Sp1_2*(Kt11 - 1) - Kt13*Sp2_2 - Kt12*Sp3_2 - Kt12*Sp4_2;
-	Sp1_3=- Sp1_3*(Kt11 - 1) - Kt13*Sp2_3 - Kt12*Sp3_3 - Kt12*Sp4_3;
-	Sp1_4=- Sp1_4*(Kt11 - 1) - Kt13*Sp2_4 - Kt12*Sp3_4 - Kt12*Sp4_4;
-	Sp2_1=- Sp2_1*(Kt23 - 1) - Kt21*Sp1_1 - Kt22*Sp3_1 - Kt22*Sp4_1;
-	Sp2_2=- Sp2_2*(Kt23 - 1) - Kt21*Sp1_2 - Kt22*Sp3_2 - Kt22*Sp4_2;
-	Sp2_3=- Sp2_3*(Kt23 - 1) - Kt21*Sp1_3 - Kt22*Sp3_3 - Kt22*Sp4_3;
-	Sp2_4=- Sp2_4*(Kt23 - 1) - Kt21*Sp1_4 - Kt22*Sp3_4 - Kt22*Sp4_4;
-	Sp3_1=- Sp3_1*(Kt32 - 1) - Kt31*Sp1_1 - Kt33*Sp2_1 - Kt32*Sp4_1;
-	Sp3_2=- Sp3_2*(Kt32 - 1) - Kt31*Sp1_2 - Kt33*Sp2_2 - Kt32*Sp4_2;
-	Sp3_3=- Sp3_3*(Kt32 - 1) - Kt31*Sp1_3 - Kt33*Sp2_3 - Kt32*Sp4_3;
-	Sp3_4=- Sp3_4*(Kt32 - 1) - Kt31*Sp1_4 - Kt33*Sp2_4 - Kt32*Sp4_4;
-	Sp4_1=- Sp4_1*(Kt42 - 1) - Kt41*Sp1_1 - Kt43*Sp2_1 - Kt42*Sp3_1;
-	Sp4_2=- Sp4_2*(Kt42 - 1) - Kt41*Sp1_2 - Kt43*Sp2_2 - Kt42*Sp3_2;
-	Sp4_3=- Sp4_3*(Kt42 - 1) - Kt41*Sp1_3 - Kt43*Sp2_3 - Kt42*Sp3_3;
-	Sp4_4=- Sp4_4*(Kt42 - 1) - Kt41*Sp1_4 - Kt43*Sp2_4 - Kt42*Sp3_4;
+	S1_1=- S1_1*(Kt11 - 1) - Kt13*S2_1 - Kt12*S3_1 - Kt12*S4_1;
+	S1_2=- S1_2*(Kt11 - 1) - Kt13*S2_2 - Kt12*S3_2 - Kt12*S4_2;
+	S1_3=- S1_3*(Kt11 - 1) - Kt13*S2_3 - Kt12*S3_3 - Kt12*S4_3;
+	S1_4=- S1_4*(Kt11 - 1) - Kt13*S2_4 - Kt12*S3_4 - Kt12*S4_4;
+	S2_1=- S2_1*(Kt23 - 1) - Kt21*S1_1 - Kt22*S3_1 - Kt22*S4_1;
+	S2_2=- S2_2*(Kt23 - 1) - Kt21*S1_2 - Kt22*S3_2 - Kt22*S4_2;
+	S2_3=- S2_3*(Kt23 - 1) - Kt21*S1_3 - Kt22*S3_3 - Kt22*S4_3;
+	S2_4=- S2_4*(Kt23 - 1) - Kt21*S1_4 - Kt22*S3_4 - Kt22*S4_4;
+	S3_1=- S3_1*(Kt32 - 1) - Kt31*S1_1 - Kt33*S2_1 - Kt32*S4_1;
+	S3_2=- S3_2*(Kt32 - 1) - Kt31*S1_2 - Kt33*S2_2 - Kt32*S4_2;
+	S3_3=- S3_3*(Kt32 - 1) - Kt31*S1_3 - Kt33*S2_3 - Kt32*S4_3;
+	S3_4=- S3_4*(Kt32 - 1) - Kt31*S1_4 - Kt33*S2_4 - Kt32*S4_4;
+	S4_1=- S4_1*(Kt42 - 1) - Kt41*S1_1 - Kt43*S2_1 - Kt42*S3_1;
+	S4_2=- S4_2*(Kt42 - 1) - Kt41*S1_2 - Kt43*S2_2 - Kt42*S3_2;
+	S4_3=- S4_3*(Kt42 - 1) - Kt41*S1_3 - Kt43*S2_3 - Kt42*S3_3;
+	S4_4=- S4_4*(Kt42 - 1) - Kt41*S1_4 - Kt43*S2_4 - Kt42*S3_4;
 
+	switch (axis) {
+		case x_axis:
+			x = pos;
+			vx = vel;
+			apx = a;
+			bax = b;
+
+			 Sp1_1x = S1_1;
+			 Sp1_2x = S1_2;
+			 Sp1_3x = S1_3 ;
+			 Sp1_4x = S1_4 ;
+			 Sp2_1x = S2_1 ;
+			 Sp2_2x = S2_2;
+			 Sp2_3x = S2_3 ;
+			 Sp2_4x = S2_4 ;
+			 Sp3_1x = S3_1 ;
+			 Sp3_2x = S3_2 ;
+			 Sp3_3x = S3_3 ;
+			 Sp3_4x = S3_4 ;
+			 Sp4_1x = S4_1;
+			 Sp4_2x = S4_2;
+			 Sp4_3x = S4_3 ;
+			 Sp4_4x = S4_4 ;
+			break;
+
+		case y_axis:
+			y = pos;
+			vy = vel;
+			apy = a;
+			bay = b;
+
+			 Sp1_1y = S1_1;
+			 Sp1_2y = S1_2;
+			 Sp1_3y = S1_3 ;
+			 Sp1_4y = S1_4 ;
+			 Sp2_1y = S2_1 ;
+			 Sp2_2y = S2_2;
+			 Sp2_3y = S2_3 ;
+			 Sp2_4y = S2_4 ;
+			 Sp3_1y = S3_1 ;
+			 Sp3_2y = S3_2 ;
+			 Sp3_3y = S3_3 ;
+			 Sp3_4y = S3_4 ;
+			 Sp4_1y = S4_1;
+			 Sp4_2y = S4_2;
+			 Sp4_3y = S4_3 ;
+			 Sp4_4y = S4_4 ;
+			break;
+
+	}
 
 }
 
 void Kalman_Filtresi::EKF_Pos() {
 
 	if(pos_ekf_counter == POS_EKF_RATE) { //50 Hz
-		accx = acc_pos_x_med/4;
+		accx = acc_pos_x;
+		accy = acc_pos_y;
 		acc_pos_x_med = 0;
 		pos_ekf_counter = 0;
 		gps_ekf_counter++;
 
-		if(	gps_ekf_counter == 20) {	//5 Hz
-		    NED2Body();
+		if(gps_fixed) {
 
-			gps_ekf_counter = 0;
-			Qgps = 4.0;
-			Qgps_v = 4.0;
+			if(	gps_ekf_counter == 20) {	//5 Hz
+				NED2Body();
+
+				gps_ekf_counter = 0;
+				Qgps = 4.0;
+				Qgps_v = 4.0;
+			}
+
+			else {
+				Qgps = 1.0e9;
+				Qgps_v = 1.0e9;
+			}
+
 		}
 
 		else {
-			Qgps = 1.0e9;
-			Qgps_v = 1.0e9;
-		}
+				Qgps = 1.0e9;
+				Qgps_v = 1.0e9;
+					}
 
-		PredictPos();
-		UpdatePos();
+		PredictUpdatePos(x_axis);
+		PredictUpdatePos(y_axis);
+
 
 	}
 
@@ -398,6 +516,7 @@ void Kalman_Filtresi::EKF_Alt() {
 	  S33_alt = - S33_alt*(Kt31 - 1) - S13_alt*(Kt31 + Kt32);
 }
 
+/*
 void Kalman_Filtresi::EKF_Cam() {
 	  //X Position Estimation
 	  //camx = cam_filt.Run(camx);
@@ -431,13 +550,13 @@ void Kalman_Filtresi::EKF_Cam() {
 
 
 }
-
+*/
 void Kalman_Filtresi::NED2Body() {
 	float deg2rad = M_PI/180.0;
 
 	float yaw   = -yaw_ekf*deg2rad;
-	float roll  = roll_ekf*deg2rad;
-	float pitch = pitch_ekf*deg2rad;
+	//float roll  = roll_ekf*deg2rad;
+	//float pitch = pitch_ekf*deg2rad;
 
 	float DCM11 = cos(yaw);
 	float DCM22 = DCM11;
@@ -449,6 +568,7 @@ void Kalman_Filtresi::NED2Body() {
 	ybody = DCM12*xned + DCM22*yned;
 
 	xgps = xbody;
+	ygps = ybody;
 
 }
 void Kalman_Filtresi::Run() {

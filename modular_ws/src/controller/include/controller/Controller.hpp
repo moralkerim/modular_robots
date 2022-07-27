@@ -33,7 +33,7 @@ class Controller {
         const float g = 9.81;
         const float F_max = 31.23;
         const float F_min = 0;
-        const float Kp_roll = 0.28; //0.3
+        const float Kp_roll = 0.24; //0.3
         const float Ki_roll = 0.07;  //0.008
         const float Kd_roll = 0.03; //0.007 0.01
 
@@ -44,7 +44,7 @@ class Controller {
         const float Kp_yaw = 5.0;// 1;
         const float Ki_yaw = 9;// 1;
 
-        const float Kp_angle = 6; //12
+        const float Kp_angle = 9; //12
         const float Ki_angle = 3;
         const float Kp_alt = 10; //30
         const float Ki_alt = 15;  //3
