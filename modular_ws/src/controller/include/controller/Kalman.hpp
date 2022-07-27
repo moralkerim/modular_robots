@@ -7,10 +7,8 @@
 #define LP_FILTER_CUT_FREQ 2*3.14*1
 //KALMAN
 
-//#define ROLL_OFFSET   -1.8 //2.0
-//#define PITCH_OFFSET  -6.6 //-4.95
 #define a 0.1
-
+#define POS_EKF_RATE 4 //100 Hz
 
 /*
 //COMP
@@ -28,6 +26,10 @@ typedef enum {
 class Kalman_Filtresi {
 
     private:
+		float  acc_pos_x_med;
+		unsigned int pos_ekf_counter,gps_ekf_counter;
+		float Qgps_v=0;
+		float pos_st = 0.02;
 		float roll, pitch, yaw;
 		float roll_rate, pitch_rate, yaw_rate;
 
@@ -73,24 +75,26 @@ class Kalman_Filtresi {
         float pitch_eski, roll_eski;
 
     public:
+        float acc_pos_x;
         struct state state;
         float xbody, ybody;
-
+        bool armed;
         float pitch_acc, roll_acc, yaw_acc;
         float roll_gyro, pitch_gyro;
         float pitch_comp, roll_comp;
         float roll_ekf, pitch_ekf, yaw_ekf;
         float gyro[3], acc[3];
         float pitch_bias, roll_bias, yaw_bias;
-        float sb = 1e-5  ;
-        float Qa = 5e4; //0.5 -- onceki deger.
+        float sb = 1e-6  ;
+        float Qa = 3; //0.5 -- onceki deger.
+        float Qay = 3; //0.5 -- onceki deger.
         float x,v,b,ap;
-        float Qap=1;
+        float Qap=2e1;
         float Qs = 0.25;
         float Qc = 2.7e-2;
-        float Qgps = 4;
+        float Qgps = 2.0;
         float sv = 1e-5;
-        float sx = 1e-3;
+        float sx = 1e-5;
         float sa_p = 1e0;
         float sb_p = 1e0;
 
@@ -99,13 +103,14 @@ class Kalman_Filtresi {
         float accXm, accYm;
         float camx;
         float xpos, vx;
-        float xgps, accx;
+        float xgps, accx,vgps;
         float GyroXh, GyroYh;
         float xned, yned;
+        float v_ground;
 
 
 
-        float PITCH_OFFSET=-2.98847938, ROLL_OFFSET=2.82364707;
+        float PITCH_OFFSET=-0.5, ROLL_OFFSET=-2.5;
 
         //lpf lpf_roll = lpf(0.8544, 0.07282, 0.07282);
         //lpf lpf_pitch = lpf(0.8544, 0.07282, 0.07282);

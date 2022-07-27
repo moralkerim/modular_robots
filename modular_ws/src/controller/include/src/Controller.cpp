@@ -81,8 +81,8 @@ void Controller::Run (void) {
 	float pd_roll_ff  = pid_roll.RateFF(roll_rate_des);
 	float pd_pitch_ff = pid_roll.RateFF(pitch_rate_des);
 
-	pd_roll  = pid_roll.PID_Rate2(roll_rate_des,roll_rate, roll, Kp_roll, Ki_roll, Kd_roll, Kp_angle) + pd_roll_ff;
-	pd_pitch = pid_pitch.PID_Rate2(pitch_rate_des,pitch_rate, pitch, Kp_pitch,Ki_pitch,Kd_pitch, Kp_angle) + pd_pitch_ff;
+	pd_roll  = pid_roll.PID_Rate2(roll_rate_des,roll_rate, roll, Kp_roll, Ki_roll, Kd_roll, Kp_angle);// + pd_roll_ff;
+	pd_pitch = pid_pitch.PID_Rate2(pitch_rate_des,pitch_rate, pitch, Kp_pitch,Ki_pitch,Kd_pitch, Kp_angle);// + pd_pitch_ff;
 	p_yaw    = pid_yaw.PD_Rate(yaw_rate_des,yaw_rate,Kp_yaw,Ki_yaw,0);
 
 
