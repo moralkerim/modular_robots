@@ -93,6 +93,29 @@ float PID::PID_Rate2(float alpha_dot_des, float alpha_dot, float alpha, float Kp
 	return pd;
 }
 
+float PID::PID_Pos(float pos_des, float pos, float Kp, float Ki, float Kd) {
+	_e_pos = e_pos;
+	e_pos = pos_des - pos;
+	float P = Kp * e_pos;
+
+	float e_pos_dot = (e_pos - _e_pos)/st_pos;
+	//alpha_dot_dot_des = alpha_dot_dot_des / st;
+	//alpha_dot_dot = d_filt.Run(alpha_dot_dot);
+
+	float D = Kd * e_pos_dot;
+
+	//D = d_filt.Run(D);
+
+	/*
+  	de_filt = N * (Kd * alpha_dot_des - de_int);
+  	de_int += de_filt*st;
+  	D = de_filt;
+*/
+
+	float pd = P + D;
+	return pd;
+}
+
 float PID::PD_Rate(float alpha_dot_des, float alpha_dot, float Kp, float Ki, float Kd) {
 
 	e_roll = alpha_dot_des - alpha_dot;

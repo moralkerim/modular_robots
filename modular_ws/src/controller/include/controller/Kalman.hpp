@@ -40,13 +40,13 @@ class Kalman_Filtresi {
 
 
         //float S11_m_pitch, S12_m_pitch, S21_m_pitch, S22_m_pitch;
-        float S11_pitch=0, S12_pitch=0, S21_pitch=0, S22_pitch;
+        float S11_pitch=0, S12_pitch=0, S21_pitch=0, S22_pitch=1e9;
         float S13_pitch, S23_pitch, S31_pitch, S32_pitch, S33_pitch;
-        float sa = 1e-6;  float sr=7e-1;
+        float sa = 1e-2;  float sr=7e-1;
         //double sa_p = 5e-1; double sb_p = 1e-1; double sr_p=1e-1;
 
         //float S11_m_roll, S12_m_roll, S21_m_roll, S22_m_roll;
-        float S11_roll=0, S12_roll=0, S21_roll=0, S22_roll;
+        float S11_roll=0, S12_roll=0, S21_roll=0, S22_roll=1e9;
         float S13_roll, S23_roll, S31_roll, S32_roll, S33_roll;
      //   float Kt11_roll, Kt21_roll;
 
@@ -85,6 +85,7 @@ class Kalman_Filtresi {
         float acc_pos_x,acc_pos_y;
         struct state state;
         float xbody, ybody;
+        float _xbody, _ybody;
         bool armed, gps_fixed;
         float pitch_acc, roll_acc, yaw_acc;
         float roll_gyro, pitch_gyro;
@@ -101,9 +102,9 @@ class Kalman_Filtresi {
         float Qs = 0.25;
         float Qc = 2.7e-2;
         float Qgps = 2.0;
-        float sv = 5e-6;
+        float sv = 5e5;
         float sx = 1e-5;
-        float sa_p = 1e0;
+        float sa_p = 1e-8;
         float sb_p = 1e0;
 
         float salt = 1;
@@ -111,21 +112,26 @@ class Kalman_Filtresi {
         float accXm, accYm;
         float camx;
         //float xpos, vx;
-        float xgps, accx,vgpsx;
-        float ygps, accy,vgpsy;
+        float xgps, accx,vgpsx,vgpsxned;
+        float ygps, accy,vgpsy,vgpsyned;
 
         float GyroXh, GyroYh;
         float xned, yned;
         float v_ground;
 
 
+        //FIRST DRONE
+        float PITCH_OFFSET=1, ROLL_OFFSET=0.0;
 
-        float PITCH_OFFSET=-0.5, ROLL_OFFSET=-4.5;
+        //SECOND DRONE
+        //float PITCH_OFFSET=3, ROLL_OFFSET=-5.0;
 
         //lpf lpf_roll = lpf(0.8544, 0.07282, 0.07282);
         //lpf lpf_pitch = lpf(0.8544, 0.07282, 0.07282);
         lpf lpf_yaw   = lpf(0.8544, 0.07282, 0.07282);
         lpf cam_filt  = lpf(0.9244, 0.03779, 0.03779);
+        lpf vel_gps_filt   = lpf(-0.8526, 0.9263, 0.9263);
+
 
         void EKF_Attitude(euler_angle euler_angle);
         void EKF_Alt(void);

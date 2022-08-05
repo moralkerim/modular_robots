@@ -8,7 +8,8 @@ Controller::Controller() {}
 void Controller::Run (void) {
         //printf("\ngyroX: %.2f",gyro[0]);
         //printf("\naccX: %.2f",acc[0]);
-        
+		vel_controller_counter++;
+
         roll  = state.angles[0];
         pitch = state.angles[1];
         yaw    = state.angles[2];
@@ -68,8 +69,24 @@ void Controller::Run (void) {
 
     	case LOITER:
     	{
+    	    thr = pid_roll.Sat(ch3, 1800, 1000);
+
     		//roll_des  = p_velx.PI_Vel(0, y, vy, Kp_vel, Ki_vel, ch1);
-    		pitch_des = p_velx.PI_Vel(0, x, vx, Kp_vel, Ki_vel, ch2);
+
+    	    if(vel_controller_counter >= 10) {
+    	    	//PID_Pos(float pos_des, float pos, float Kp, float Ki, float Kd)
+    	    	vel_controller_counter = 0;
+        		pitch_des = p_velx.PID_Pos(x0,x,Kp_velx,Ki_velx,Kd_velx);
+        		roll_des  = p_vely.PID_Pos(y0,y,Kp_vely,Ki_vely,Kd_vely);
+
+        		pitch_des = p_velx.Sat(pitch_des, 20, -20);
+        		roll_des = p_vely.Sat(roll_des, 20, -20);
+
+    	    }
+
+            yaw_rate_des = state_des.rates[2];
+            yaw_rate_des  	= yaw_des_filt.Run(yaw_rate_des);
+
     		break;
     	}
 
@@ -104,7 +121,7 @@ void Controller::Run (void) {
     pwm1 = 1000;
     pwm2 = 1000;
     pwm3 = 1000;
-    pwm4 = 1000;
+    pwm4 = 1200;
 */
     //Convert pwm to motor speed 
     /*

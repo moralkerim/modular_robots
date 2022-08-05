@@ -7,12 +7,17 @@ Kalman_Filtresi::Kalman_Filtresi()  {
 }
 void Kalman_Filtresi::PredictUpdatePos(pos_axis axis) {
 	float pos,vel,a,b,accm,pos_gps,vgps,S1_1,S1_2,S1_3,S1_4,S2_1,S2_2,S2_3,S2_4,S3_1,S3_2,S3_3,S3_4,S4_1, S4_2, S4_3, S4_4;
+	float angle;
+	float deg2rad = M_PI/180.0;
+
 	switch (axis) {
 		case x_axis:
 			pos = x;
 			a = apx;
 			vel = vx;
 			b = bax;
+
+			angle = -pitch_ekf*deg2rad;
 
 			pos_gps = xgps;
 			vgps   = vgpsx;
@@ -42,6 +47,8 @@ void Kalman_Filtresi::PredictUpdatePos(pos_axis axis) {
 			vel = vy;
 			b = bay;
 
+			angle = roll_ekf*deg2rad;
+
 			pos_gps = ygps;
 			vgps   = vgpsy;
 			accm		= accy;
@@ -65,11 +72,14 @@ void Kalman_Filtresi::PredictUpdatePos(pos_axis axis) {
 			break;
 
 	}
-	//float deg2rad = M_PI/180.0;
 	pos =(a*pos_st*pos_st)/2 + (vel)*pos_st + (pos);
 	vel =                   (vel) + pos_st*a;
-	//float g = 9.81;
-	//ap = -g*deg2rad*pitch_ekf;
+
+//	if(armed) {
+		//float g = 9.81;
+		//a = g*angle;
+//	}
+
 	//b =                                (b);
 
 	S1_1=S1_1 + sx + S1_2*pos_st + S2_1*pos_st + (S1_3*pos_st*pos_st)/2 + S2_2*pos_st*pos_st + (S2_3*pos_st*pos_st*pos_st)/2 + (S3_1*pos_st*pos_st)/2 + (S3_2*pos_st*pos_st*pos_st)/2 + (S3_3*pos_st*pos_st*pos_st*pos_st)/4;
@@ -192,12 +202,12 @@ void Kalman_Filtresi::EKF_Pos() {
 
 		if(gps_fixed) {
 
-			if(	gps_ekf_counter == 20) {	//5 Hz
+			if(	gps_ekf_counter >= 10) {	//5 Hz
 				NED2Body();
 
 				gps_ekf_counter = 0;
 				Qgps = 4.0;
-				Qgps_v = 4.0;
+				Qgps_v = 80;
 			}
 
 			else {
@@ -256,6 +266,7 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 
 			}
 			Qg = 1e1;
+			sb = 1e-3;
 
 			S11_angle = S11_roll;
 			S12_angle = S12_roll;
@@ -285,6 +296,7 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 
 			}
 			Qg = 1e1;
+			sb = 1e-3;
 
 			S11_angle = S11_pitch;
 			S12_angle = S12_pitch;
@@ -315,6 +327,7 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 
 			}
 			Qg = 1e1;
+			sb = 1e-4;
 
 			S11_angle = S11_yaw;
 			S12_angle = S12_yaw;
@@ -329,17 +342,17 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 
 	}
 
-    angle_ekf = (angle_ekf) + st*(angle_rate);
+    angle_ekf = (angle_ekf) + st*(angle_rate) - st*angle_bias;
 
-    S11_angle = S11_angle + sa + S31_angle*st + (st*st*(S13_angle + S33_angle*st))/st;
-    S12_angle = S12_angle + S32_angle*st;
-    S13_angle = S13_angle + S33_angle*st;
+    S11_angle = S11_angle + sa + S31_angle*st - st*st*(S12_angle - S22_angle*st + S32_angle*st)/st + (st*st*(S13_angle - S23_angle*st + S33_angle*st))/st;
+    S12_angle = S12_angle - S22_angle*st + S32_angle*st;
+    S13_angle = S13_angle - S23_angle*st + S33_angle*st;
 
-    S21_angle = S21_angle + S23_angle*(st);
+    S21_angle = S21_angle - S22_angle*st + S23_angle*(st);
     S22_angle = S22_angle + sb;
     //S23_angle = S23_angle;
 
-    S31_angle = S31_angle + S33_angle*(st);
+    S31_angle = S31_angle - S32_angle*st  + S33_angle*(st);
     //S32_angle = S32_angle;
     S33_angle = S33_angle + sr;
 
@@ -564,8 +577,27 @@ void Kalman_Filtresi::NED2Body() {
 	float DCM12 = sin(yaw);
 	float DCM21 = -DCM12;
 
+	_xbody = xbody;
+	_ybody = ybody;
+
 	xbody = DCM11*xned + DCM21*yned;
 	ybody = DCM12*xned + DCM22*yned;
+
+
+	//xbody = vel_gps_filt.Run(xbody);
+	//ybody = vel_gps_filt.Run(ybody);
+
+
+	/*
+	vgpsx = DCM11*vgpsxned + DCM21*vgpsyned;
+	vgpsy = DCM12*vgpsxned + DCM22*vgpsyned;
+	*/
+
+	vgpsx = (xbody - _xbody) / 0.2;
+	vgpsy = (ybody - _ybody) / 0.2;
+
+	//vgpsx = vel_gps_filt.Run(vgpsx);
+	//vgpsy = vel_gps_filt.Run(vgpsy);
 
 	xgps = xbody;
 	ygps = ybody;

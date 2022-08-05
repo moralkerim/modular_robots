@@ -9,8 +9,8 @@
 
 #define PWM_UPPER 2000
 #define PWM_LOWER 1100
-#define ROLL_TRIM 	-7
-#define PITCH_TRIM  17
+#define ROLL_TRIM 	13
+#define PITCH_TRIM  30
 
 
 
@@ -20,6 +20,8 @@ class Controller {
         float pitch_bias, roll_bias, yaw_bias;
         float roll, pitch, yaw;
         float roll_rate, pitch_rate, yaw_rate;
+
+        unsigned int vel_controller_counter;
 
         float w1, w2, w3, w4; //Motor hizlari
         float pwm_trim = 1550;
@@ -33,8 +35,8 @@ class Controller {
         const float g = 9.81;
         const float F_max = 31.23;
         const float F_min = 0;
-        const float Kp_roll = 0.24; //0.3
-        const float Ki_roll = 0.07;  //0.008
+        const float Kp_roll = 0.25; //0.3
+        const float Ki_roll = 0.05;  //0.008
         const float Kd_roll = 0.03; //0.007 0.01
 
         const float Kp_pitch = Kp_roll;	//0.8
@@ -44,13 +46,18 @@ class Controller {
         const float Kp_yaw = 5.0;// 1;
         const float Ki_yaw = 9;// 1;
 
-        const float Kp_angle = 9; //12
+        const float Kp_angle = 12; //12
         const float Ki_angle = 3;
         const float Kp_alt = 10; //30
         const float Ki_alt = 15;  //3
 
-        const float Kp_vel = -1; //30
-        const float Ki_vel = -1;  //3
+        const float Kp_velx = -4; //30
+        const float Ki_velx = -0;  //3
+        const float Kd_velx = 0;
+
+        const float Kp_vely = 4; //30
+        const float Ki_vely = 0;  //3
+        const float Kd_vely = 0;
 
         lpf roll_des_filt  = lpf(0.9244, 0.03779, 0.03779);
         lpf pitch_des_filt = lpf(0.9244, 0.03779, 0.03779);
@@ -68,6 +75,7 @@ class Controller {
         struct state state_des;
         float z_vel, z0,  z,  ch3;
         float vx, x0,  x,  ch2;
+        float vy, y0,  y,  ch1;
         Mode mod;
 
         float roll_des, pitch_des, yaw_rate_des;

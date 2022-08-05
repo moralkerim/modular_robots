@@ -6,7 +6,8 @@
 class PID {
 
     private:
-
+		float _e_pos,e_pos;
+		float st_pos = 0.05;
         const float imax=120, imin=-120;
         const int f = 200;
         const float st = 1/(float)f;
@@ -36,6 +37,7 @@ class PID {
     public:
         PID();
         float RateFF(float rate_des);
+        float PID_Pos(float pos_des, float pos, float Kp, float Ki, float Kd);
         float P_Angle(float alpha_des, float alpha, float Kp_angle, float Ki_angle);
         float P_Sqrt(float alpha_des, float alpha, float Kp_angle);
         float PD_Rate(float alpha_dot_des, float alpha_dot, float Kp, float Ki, float Kd);
