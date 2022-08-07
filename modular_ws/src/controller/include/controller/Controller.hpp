@@ -35,7 +35,10 @@ class Controller {
         const float g = 9.81;
         const float F_max = 31.23;
         const float F_min = 0;
-        const float Kp_roll = 0.25; //0.3
+
+        //SINGLE UAV
+
+        const float Kp_roll = 0.22; //0.3
         const float Ki_roll = 0.05;  //0.008
         const float Kd_roll = 0.03; //0.007 0.01
 
@@ -46,6 +49,20 @@ class Controller {
         const float Kp_yaw = 5.0;// 1;
         const float Ki_yaw = 9;// 1;
 
+        //TWO UAVS
+
+        /*
+        const float Kp_roll = 0.7; //0.3
+        const float Ki_roll = 0.05;  //0.008
+        const float Kd_roll = 0.02; //0.007 0.01
+
+        const float Kp_pitch = Kp_roll;	//0.8
+        const float Ki_pitch = Ki_roll;
+        const float Kd_pitch = Kd_roll;
+
+        const float Kp_yaw = 5.0;// 1;
+        const float Ki_yaw = 9;// 1;
+*/
         const float Kp_angle = 12; //12
         const float Ki_angle = 3;
         const float Kp_alt = 10; //30
@@ -68,6 +85,7 @@ class Controller {
         Controller();
         void Run (void);
         int controller_output_pwm[4];
+        int controller_output_pwm2[4];
         float pd_roll, pd_pitch, p_yaw;
         float roll_rate_des, pitch_rate_des;
         float F;

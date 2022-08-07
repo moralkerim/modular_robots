@@ -121,10 +121,10 @@ class Kalman_Filtresi {
 
 
         //FIRST DRONE
-        float PITCH_OFFSET=1, ROLL_OFFSET=0.0;
+        //float PITCH_OFFSET=1, ROLL_OFFSET=0.0;
 
         //SECOND DRONE
-        //float PITCH_OFFSET=3, ROLL_OFFSET=-5.0;
+        float PITCH_OFFSET=5.7, ROLL_OFFSET=-6.0;
 
         //lpf lpf_roll = lpf(0.8544, 0.07282, 0.07282);
         //lpf lpf_pitch = lpf(0.8544, 0.07282, 0.07282);

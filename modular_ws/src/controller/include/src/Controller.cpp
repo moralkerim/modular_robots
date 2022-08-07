@@ -116,6 +116,25 @@ void Controller::Run (void) {
     pwm3 = (int)pid_roll.Sat(pwm3,PWM_UPPER,PWM_LOWER,thr);
     pwm4 = (int)pid_roll.Sat(pwm4,PWM_UPPER,PWM_LOWER,thr);
 
+    //SECOND DRONE
+    /*
+    controller_output_pwm2[0] = thr + pd_pitch - pd_roll  + p_yaw;
+    controller_output_pwm2[1] = thr - pd_pitch + pd_roll  + p_yaw;
+    controller_output_pwm2[2] = thr + pd_pitch + pd_roll  - p_yaw;
+    controller_output_pwm2[3] = thr - pd_pitch - pd_roll  - p_yaw;
+    */
+
+    controller_output_pwm2[0] = thr;
+    controller_output_pwm2[1] = thr;
+    controller_output_pwm2[2] = thr;
+    controller_output_pwm2[3] = thr;
+
+    //Saturate pwm values
+    controller_output_pwm2[0] = (int)pid_roll.Sat(controller_output_pwm2[0],PWM_UPPER,PWM_LOWER,thr);
+    controller_output_pwm2[1] = (int)pid_roll.Sat(controller_output_pwm2[1],PWM_UPPER,PWM_LOWER,thr);
+    controller_output_pwm2[2] = (int)pid_roll.Sat(controller_output_pwm2[2],PWM_UPPER,PWM_LOWER,thr);
+    controller_output_pwm2[3] = (int)pid_roll.Sat(controller_output_pwm2[3],PWM_UPPER,PWM_LOWER,thr);
+
     // MOTOR TEST
 /*
     pwm1 = 1000;
