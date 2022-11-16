@@ -247,7 +247,21 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 
 	float angle_ekf, angle_rate, angle_bias, angle_acc, gyro;
 	float S11_angle, S12_angle, S13_angle, S21_angle, S22_angle, S23_angle, S31_angle, S32_angle, S33_angle ;
-    //ANGLE PREDICTION
+
+	if(!armed) {
+	    Qa = 3;
+	    Qg = 1e-2;
+
+	}
+
+	else {
+	    Qa = 2e2;
+	    Qg = 3e1;
+
+	}
+
+
+	//ANGLE PREDICTION
 	switch(euler_angle) {
 		case ROLL:
 			angle_ekf = roll_ekf;
@@ -255,18 +269,6 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 			angle_bias = roll_bias;
 			angle_acc = roll_acc;
 			gyro = gyroX;
-			sa = 1e-2;
-			if(!armed) {
-				Qa = 3;
-
-			}
-
-			else {
-				Qa = 5e6;
-
-			}
-			Qg = 1e1;
-			sb = 1e-2;
 
 			S11_angle = S11_roll;
 			S12_angle = S12_roll;
@@ -277,6 +279,9 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 			S31_angle = S31_roll;
 			S32_angle = S32_roll;
 			S33_angle = S33_roll;
+			if(armed) {
+				roll_int = roll_int + roll_rate*st;
+			}
 			break;
 
 		case PITCH:
@@ -285,18 +290,6 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 			angle_bias = pitch_bias;
 			angle_acc = pitch_acc;
 			gyro = gyroY;
-			sa = 1e-2;
-			if(!armed) {
-				Qa = 3;
-
-			}
-
-			else {
-				Qa = 5e6;
-
-			}
-			Qg = 1e1;
-			sb = 1e-2;
 
 			S11_angle = S11_pitch;
 			S12_angle = S12_pitch;
@@ -315,19 +308,7 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 			angle_bias = yaw_bias;
 			angle_acc = yaw_acc;
 			gyro = gyroZ;
-			sa = 5e2;
 
-			if(!armed) {
-				Qa = 3;
-
-			}
-
-			else {
-				Qa = 5e10;
-
-			}
-			Qg = 1e1;
-			sb = 1e-4;
 
 			S11_angle = S11_yaw;
 			S12_angle = S12_yaw;
@@ -342,63 +323,56 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 
 	}
 
-    angle_ekf = (angle_ekf) + st*(angle_rate) - st*angle_bias;
+    angle_ekf = (angle_ekf) + st*(angle_rate);
 
-    S11_angle = S11_angle + sa + S31_angle*st - st*st*(S12_angle - S22_angle*st + S32_angle*st)/st + (st*st*(S13_angle - S23_angle*st + S33_angle*st))/st;
-    S12_angle = S12_angle - S22_angle*st + S32_angle*st;
-    S13_angle = S13_angle - S23_angle*st + S33_angle*st;
+    float CS_m11 = S13_angle + S33_angle*st;
 
-    S21_angle = S21_angle - S22_angle*st + S23_angle*(st);
+    S11_angle = S11_angle + sa + CS_m11*st + S31_angle*st;
+    S12_angle = S12_angle + S32_angle*st;
+    S13_angle = CS_m11;
+    S21_angle = S21_angle + S23_angle*st;
     S22_angle = S22_angle + sb;
-    //S23_angle = S23_angle;
-
-    S31_angle = S31_angle - S32_angle*st  + S33_angle*(st);
-    //S32_angle = S32_angle;
+    S23_angle = S23_angle;
+    S31_angle = S31_angle + S33_angle*st;
+    S32_angle = S32_angle;
     S33_angle = S33_angle + sr;
 
     //ANGLE CORRECTION
-    float A = (Qa*Qg + Qa*S22_angle + Qa*S23_angle + Qa*S32_angle + Qa*S33_angle + Qg*S11_angle + S11_angle*S22_angle - S12_angle*S21_angle + S11_angle*S23_angle - S13_angle*S21_angle + S11_angle*S32_angle - S12_angle*S31_angle + S11_angle*S33_angle - S13_angle*S31_angle);
-    float Kt11_att = 1 - (Qa*(Qg + S22_angle + S23_angle + S32_angle + S33_angle))/A;
-    float Kt12_att = (Qa*(S12_angle + S13_angle))/A;
-    float Kt21_att = (Qg*S21_angle + S21_angle*S32_angle - S22_angle*S31_angle + S21_angle*S33_angle - S23_angle*S31_angle)/A;
-    float Kt22_att = (Qa*S22_angle + Qa*S23_angle + S11_angle*S22_angle - S12_angle*S21_angle + S11_angle*S23_angle - S13_angle*S21_angle)/A;
-    float Kt31_att = (Qg*S31_angle - S21_angle*S32_angle + S22_angle*S31_angle - S21_angle*S33_angle + S23_angle*S31_angle)/A;
-    float Kt32_att = (Qa*S32_angle + Qa*S33_angle + S11_angle*S32_angle - S12_angle*S31_angle + S11_angle*S33_angle - S13_angle*S31_angle)/A;
+    float CK11 = 1/(Qa*Qg + Qa*S22_angle + Qa*S23_angle + Qa*S32_angle + Qa*S33_angle + Qg*S11_angle + S11_angle*S22_angle - S12_angle*S21_angle + S11_angle*S23_angle - S13_angle*S21_angle + S11_angle*S32_angle - S12_angle*S31_angle + S11_angle*S33_angle - S13_angle*S31_angle);
+    float CK12 = Qg + S22_angle + S23_angle + S32_angle + S33_angle;
+    float CK13 = S12_angle + S13_angle;
+    float CK14 = S21_angle + S31_angle;
+    float CK15 = Qa + S11_angle;
+    float CK16 = S32_angle + S33_angle;
+    float CK17 = S22_angle + S23_angle;
 
-    angle_ekf = (angle_ekf) + Kt11_att*((angle_acc) - (angle_ekf)) - Kt12_att*((angle_bias) - (gyro) + (angle_rate));
+    float Kt11 = CK11*CK12*S11_angle - CK11*CK13*CK14;
+    float Kt12 = CK11*CK13*CK15 - CK11*CK13*S11_angle;
+    float Kt21 = CK11*CK12*S21_angle - CK11*CK14*CK17;
+    float Kt22 = CK11*CK15*CK17 - CK11*CK13*S21_angle;
+    float Kt31 = CK11*CK12*S31_angle - CK11*CK14*CK16;
+    float Kt32 = CK11*CK15*CK16 - CK11*CK13*S31_angle;
 
+    float Cx11 = angle_bias - gyro + angle_rate;
+    float Cx12 = angle_acc - angle_ekf;
 
-    angle_bias = (angle_bias) + Kt21_att*((angle_acc) - (angle_ekf)) - Kt22_att*((angle_bias) - (gyro) + (angle_rate));
+    angle_ekf = angle_ekf - Cx11*Kt12 + Cx12*Kt11;
+    angle_bias = angle_bias - Cx11*Kt22 + Cx12*Kt21;
+    angle_rate = angle_rate - Cx11*Kt32 + Cx12*Kt31;
 
+    float CS11 = Kt32 - 1;
+    float CS12 = Kt22 - 1;
+    float CS13 = Kt11 - 1;
 
-    angle_rate = (angle_rate) + Kt31_att*((angle_acc) - (angle_ekf)) - Kt32_att*((angle_bias) - (gyro) + (angle_rate));
-
-
-    S11_angle = - S11_angle*(Kt11_att - 1) - Kt12_att*S21_angle - Kt12_att*S31_angle;
-
-
-    S12_angle = - S12_angle*(Kt11_att - 1) - Kt12_att*S22_angle - Kt12_att*S32_angle;
-
-
-    S13_angle = - S13_angle*(Kt11_att - 1) - Kt12_att*S23_angle - Kt12_att*S33_angle;
-
-
-    S21_angle = - S21_angle*(Kt22_att - 1) - Kt21_att*S11_angle - Kt22_att*S31_angle;
-
-
-    S22_angle = - S22_angle*(Kt22_att - 1) - Kt21_att*S12_angle - Kt22_att*S32_angle;
-
-
-    S23_angle = - S23_angle*(Kt22_att - 1) - Kt21_att*S13_angle - Kt22_att*S33_angle;
-
-
-    S31_angle = - S31_angle*(Kt32_att - 1) - Kt31_att*S11_angle - Kt32_att*S21_angle;
-
-
-    S32_angle = - S32_angle*(Kt32_att - 1) - Kt31_att*S12_angle - Kt32_att*S22_angle;
-
-
-    S33_angle = - S33_angle*(Kt32_att - 1) - Kt31_att*S13_angle - Kt32_att*S23_angle;
+    S11_angle = - CS13*S11_angle - Kt12*S21_angle - Kt12*S31_angle;
+    S12_angle = - CS13*S12_angle - Kt12*S22_angle - Kt12*S32_angle;
+    S13_angle = - CS13*S13_angle - Kt12*S23_angle - Kt12*S33_angle;
+    S21_angle = - CS12*S21_angle - Kt21*S11_angle - Kt22*S31_angle;
+    S22_angle = - CS12*S22_angle - Kt21*S12_angle - Kt22*S32_angle;
+    S23_angle = - CS12*S23_angle - Kt21*S13_angle - Kt22*S33_angle;
+    S31_angle = - CS11*S31_angle - Kt31*S11_angle - Kt32*S21_angle;
+    S32_angle = - CS11*S32_angle - Kt31*S12_angle - Kt32*S22_angle;
+    S33_angle = - CS11*S33_angle - Kt31*S13_angle - Kt32*S23_angle;
 
     switch(euler_angle) {
     		case ROLL:
@@ -621,7 +595,7 @@ void Kalman_Filtresi::Run() {
     EKF_Attitude(YAW);
 
     //EKF_Alt();
-    EKF_Pos();
+    //EKF_Pos();
 
     //EKF_Cam();
 
@@ -629,7 +603,7 @@ void Kalman_Filtresi::Run() {
 
 
     else {
-/*
+
     	for(int i=0; i<2000; i++) {
     		  float acctop=sqrt(accX*accX+accY*accY+accZ*accZ);
 
@@ -642,7 +616,7 @@ void Kalman_Filtresi::Run() {
 
     	ROLL_OFFSET  = -1*  ROLL_OFFSET  / 2000;
     	PITCH_OFFSET = -1 * PITCH_OFFSET / 2000;
-    	*/
+
     	gyro_ready = true;
     }
 

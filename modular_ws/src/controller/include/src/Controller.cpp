@@ -2,7 +2,6 @@
 
 
 
-
 Controller::Controller() {}
 
 void Controller::Run (void) {
@@ -24,9 +23,34 @@ void Controller::Run (void) {
         pitch_bias = state.bias[1];
         yaw_bias = state.bias[2];
         
+    if(!swarm) {
+         Kp_roll = 0.28; //0.3
+         Ki_roll = 0.02;  //0.008
+         Kd_roll = 0.03; //0.007 0.01
 
+         Kp_pitch = Kp_roll;	//0.8
+         Ki_pitch = Ki_roll;
+         Kd_pitch = Kd_roll;
+
+         Kp_yaw = 5.0;// 1;
+         Ki_yaw = 12;// 1;
+    }
+
+    else {
+        Kp_roll = 0.9; //0.3
+        Ki_roll = 0.00;  //0.008
+        Kd_roll = 0.03; //0.007 0.01
+
+        Kp_pitch = Kp_roll;	//0.8
+        Ki_pitch = Ki_roll;
+        Kd_pitch = Kd_roll;
+
+        Kp_yaw = 5.0;// 1;
+        Ki_yaw = 12;// 1;
+    }
 
     int thr;
+    int thr2 = pid_roll.Sat(ch3, 2000, 1000);
 
     switch(mod) {
     	case STABILIZE:
@@ -103,12 +127,25 @@ void Controller::Run (void) {
 	p_yaw    = pid_yaw.PD_Rate(yaw_rate_des,yaw_rate,Kp_yaw,Ki_yaw,0);
 
 
+#ifdef UAV1
+
 
     int pwm1 = thr + pd_pitch - pd_roll  - p_yaw + PITCH_TRIM - ROLL_TRIM;
     int pwm2 = thr - pd_pitch + pd_roll  - p_yaw - PITCH_TRIM + ROLL_TRIM;
     int pwm3 = thr + pd_pitch + pd_roll  + p_yaw + PITCH_TRIM + ROLL_TRIM;
     int pwm4 = thr - pd_pitch - pd_roll  + p_yaw - PITCH_TRIM - ROLL_TRIM;
 
+#endif
+
+#ifdef UAV2
+
+
+    int pwm1 = thr + pd_pitch - pd_roll  - p_yaw + PITCH_TRIM - ROLL_TRIM;
+    int pwm2 = thr - pd_pitch + pd_roll  - p_yaw - PITCH_TRIM + ROLL_TRIM;
+    int pwm3 = thr + pd_pitch + pd_roll  + p_yaw + PITCH_TRIM + ROLL_TRIM;
+    int pwm4 = thr - pd_pitch - pd_roll  + p_yaw - PITCH_TRIM - ROLL_TRIM;
+
+#endif
 
     //Saturate pwm values
     pwm1 = (int)pid_roll.Sat(pwm1,PWM_UPPER,PWM_LOWER,thr);
@@ -124,16 +161,27 @@ void Controller::Run (void) {
     controller_output_pwm2[3] = thr - pd_pitch - pd_roll  - p_yaw;
     */
 
-    controller_output_pwm2[0] = thr;
-    controller_output_pwm2[1] = thr;
-    controller_output_pwm2[2] = thr;
-    controller_output_pwm2[3] = thr;
+    if(swarm) {
+        controller_output_pwm2[0] = thr2;
+        controller_output_pwm2[1] = thr2;
+        controller_output_pwm2[2] = thr2;
+        controller_output_pwm2[3] = thr2;
+    }
+
+    else {
+        controller_output_pwm2[0] = 1000;
+        controller_output_pwm2[1] = 1000;
+        controller_output_pwm2[2] = 1000;
+        controller_output_pwm2[3] = 1000;
+    }
+
+
 
     //Saturate pwm values
-    controller_output_pwm2[0] = (int)pid_roll.Sat(controller_output_pwm2[0],PWM_UPPER,PWM_LOWER,thr);
-    controller_output_pwm2[1] = (int)pid_roll.Sat(controller_output_pwm2[1],PWM_UPPER,PWM_LOWER,thr);
-    controller_output_pwm2[2] = (int)pid_roll.Sat(controller_output_pwm2[2],PWM_UPPER,PWM_LOWER,thr);
-    controller_output_pwm2[3] = (int)pid_roll.Sat(controller_output_pwm2[3],PWM_UPPER,PWM_LOWER,thr);
+    controller_output_pwm2[0] = (int)pid_roll.Sat(controller_output_pwm2[0],PWM_UPPER,1000,thr);
+    controller_output_pwm2[1] = (int)pid_roll.Sat(controller_output_pwm2[1],PWM_UPPER,1000,thr);
+    controller_output_pwm2[2] = (int)pid_roll.Sat(controller_output_pwm2[2],PWM_UPPER,1000,thr);
+    controller_output_pwm2[3] = (int)pid_roll.Sat(controller_output_pwm2[3],PWM_UPPER,1000,thr);
 
     // MOTOR TEST
 /*
