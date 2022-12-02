@@ -24,19 +24,26 @@ void Controller::Run (void) {
         yaw_bias = state.bias[2];
         
     if(!swarm) {
-         Kp_roll = 0.28; //0.3
-         Ki_roll = 0.02;  //0.008
-         Kd_roll = 0.03; //0.007 0.01
+    	  //bench settings
+//        Kp_roll = 0.2; //0.3
+//        Ki_roll = 0.1;  //0.008
+//        Kd_roll = 0.05; //0.015
+
+         Kp_roll = 0.24; //0.3
+         Ki_roll = 0.05;  //0.008
+         Kd_roll = 0.02; //0.015
 
          Kp_pitch = Kp_roll;	//0.8
          Ki_pitch = Ki_roll;
          Kd_pitch = Kd_roll;
 
-         Kp_yaw = 5.0;// 1;
-         Ki_yaw = 12;// 1;
+         Kp_yaw = 10;// 1;
+         Ki_yaw = 0.0;// 1;
     }
 
     else {
+
+
         Kp_roll = 0.9; //0.3
         Ki_roll = 0.00;  //0.008
         Kd_roll = 0.03; //0.007 0.01
@@ -46,7 +53,7 @@ void Controller::Run (void) {
         Kd_pitch = Kd_roll;
 
         Kp_yaw = 5.0;// 1;
-        Ki_yaw = 12;// 1;
+        Ki_yaw = 10;// 1;
     }
 
     int thr;
@@ -116,8 +123,13 @@ void Controller::Run (void) {
 
     }
 
-	roll_rate_des = pid_roll.P_Angle(roll_des,roll, Kp_angle,Ki_angle) + roll_des;
-	pitch_rate_des = pid_pitch.P_Angle(pitch_des,pitch, Kp_angle,Ki_angle) + pitch_des;
+    if(angle_loop_counter = 4) {
+    	roll_rate_des = pid_roll.P_Angle(roll_des,roll, Kp_angle,Ki_angle);
+    	pitch_rate_des = pid_pitch.P_Angle(pitch_des,pitch, Kp_angle,Ki_angle);
+    	angle_loop_counter = 1;
+    }
+
+
 
 	float pd_roll_ff  = pid_roll.RateFF(roll_rate_des);
 	float pd_pitch_ff = pid_roll.RateFF(pitch_rate_des);
@@ -125,7 +137,7 @@ void Controller::Run (void) {
 	pd_roll  = pid_roll.PID_Rate2(roll_rate_des,roll_rate, roll, Kp_roll, Ki_roll, Kd_roll, Kp_angle);// + pd_roll_ff;
 	pd_pitch = pid_pitch.PID_Rate2(pitch_rate_des,pitch_rate, pitch, Kp_pitch,Ki_pitch,Kd_pitch, Kp_angle);// + pd_pitch_ff;
 	p_yaw    = pid_yaw.PD_Rate(yaw_rate_des,yaw_rate,Kp_yaw,Ki_yaw,0);
-
+	angle_loop_counter++;
 
 #ifdef UAV1
 
@@ -134,6 +146,13 @@ void Controller::Run (void) {
     int pwm2 = thr - pd_pitch + pd_roll  - p_yaw - PITCH_TRIM + ROLL_TRIM;
     int pwm3 = thr + pd_pitch + pd_roll  + p_yaw + PITCH_TRIM + ROLL_TRIM;
     int pwm4 = thr - pd_pitch - pd_roll  + p_yaw - PITCH_TRIM - ROLL_TRIM;
+
+//    //Test bench
+//    int pwm1 = thr - pd_roll  - ROLL_TRIM;
+//    int pwm2 = thr + pd_roll  + ROLL_TRIM;
+//    int pwm3 = thr + pd_roll  + ROLL_TRIM;
+//    int pwm4 = thr - pd_roll  - ROLL_TRIM;
+
 
 #endif
 
@@ -162,10 +181,10 @@ void Controller::Run (void) {
     */
 
     if(swarm) {
-        controller_output_pwm2[0] = thr2;
-        controller_output_pwm2[1] = thr2;
-        controller_output_pwm2[2] = thr2;
-        controller_output_pwm2[3] = thr2;
+        controller_output_pwm2[0] = pwm1;
+        controller_output_pwm2[1] = pwm2;
+        controller_output_pwm2[2] = pwm3;
+        controller_output_pwm2[3] = pwm4;
     }
 
     else {

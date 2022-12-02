@@ -78,11 +78,11 @@ float PID::PID_Rate2(float alpha_dot_des, float alpha_dot, float alpha, float Kp
 
 	//D = d_filt.Run(D);
 
-	/*
-  	de_filt = N * (Kd * alpha_dot_des - de_int);
-  	de_int += de_filt*st;
-  	D = de_filt;
-*/
+
+//  	de_filt = N * (Kd * alpha_dot_des - de_int);
+//  	de_int += de_filt*st;
+//  	D = de_filt;
+
 
 	pd = P + I + D;
   	pd_roll_buf = pd;

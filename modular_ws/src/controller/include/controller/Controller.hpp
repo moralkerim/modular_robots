@@ -7,7 +7,7 @@
 #include "Modes.h"
 #include "state.h"
 
-#define UAV2
+#define UAV1
 
 #define PWM_UPPER 2000
 #define PWM_LOWER 1100
@@ -40,9 +40,9 @@ class Controller {
 
         //SINGLE UAV
 
-        float Kp_roll = 0.22; //0.3
-        float Ki_roll = 0.05;  //0.008
-        float Kd_roll = 0.03; //0.007 0.01
+        float Kp_roll = 0.20; //0.22
+        float Ki_roll = 0.00;  //0.008
+        float Kd_roll = 0.00; //0.007 0.01
 
         float Kp_pitch = Kp_roll;	//0.8
         float Ki_pitch = Ki_roll;
@@ -66,7 +66,7 @@ class Controller {
         const float Ki_yaw = 9;// 1;
 */
         const float Kp_angle = 12; //12
-        const float Ki_angle = 3;
+        const float Ki_angle = 0;
         const float Kp_alt = 10; //30
         const float Ki_alt = 15;  //3
 
@@ -81,6 +81,8 @@ class Controller {
         lpf roll_des_filt  = lpf(0.9244, 0.03779, 0.03779);
         lpf pitch_des_filt = lpf(0.9244, 0.03779, 0.03779);
         lpf yaw_des_filt   = lpf(0.9244, 0.03779, 0.03779);
+
+        uint8_t angle_loop_counter;
 
 
     public:
