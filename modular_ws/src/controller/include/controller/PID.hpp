@@ -40,6 +40,7 @@ class PID {
         float PID_Pos(float pos_des, float pos, float Kp, float Ki, float Kd);
         float P_Angle(float alpha_des, float alpha, float Kp_angle, float Ki_angle);
         float P_Sqrt(float alpha_des, float alpha, float Kp_angle);
+        float sqrt_controller(float alpha_des, float _alpha_des, uint8_t angle_counter,float Kff);
         float PD_Rate(float alpha_dot_des, float alpha_dot, float Kp, float Ki, float Kd);
         float PID_Rate2(float alpha_dot_des, float alpha_dot, float alpha, float Kp, float Ki, float Kd, float Kp_angle);
         float P_Rate_Yaw(float alpha_dot_des, float alpha_dot, float Kp);

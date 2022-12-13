@@ -22,6 +22,17 @@ float PID::P_Sqrt(float alpha_des, float alpha, float Kp_angle) {
 	return P;
 }
 
+float PID::sqrt_controller(float alpha_des, float _alpha_des, uint8_t angle_counter, float Kff) {
+	float e_angle = alpha_des - _alpha_des;
+	e_angle = e_angle/((angle_counter+1)*st);
+	float abs_e = abs(e_angle);
+	uint8_t sign_e = sgn(e_angle);
+	float sqrt_e = sqrt((int)(100*abs_e));
+	float P = Kff * sqrt_e/10;
+	P = P * sign_e;
+	return e_angle;
+}
+
 float PID::PI_Vel(float z0, float z, float v, float Kp_alt, float Ki_alt, unsigned int ch) {
 	float P;
 	float I;

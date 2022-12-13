@@ -253,8 +253,9 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 	float S11_angle, S12_angle, S13_angle, S21_angle, S22_angle, S23_angle, S31_angle, S32_angle, S33_angle ;
 
 	if(!armed) {
-	    Qa = 1;
-	    Qg = 1e-2;
+	    Qa = 9e-2;
+	    Qg = 1;
+	    sb = 1e-11;
 
 	    roll_comp = roll_acc;
 	    pitch_comp = pitch_acc;
@@ -265,19 +266,20 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 		switch(euler_angle) {
 		default:
 		    Qa = 5e4;
-		    Qg = 200;
+		    Qg = 150;
+		    sb = 1e-3;
 
 			break;
 
 		case YAW:
 			Qa = 5e8;
-			Qg = 100;
+			Qg = 150;
 			break;
 
 		}
 
-	    pitch_comp=(pitch_gyro_comp+pitch_eski)*0.995+pitch_acc*0.005;	//Tümleyen filtre
-	    roll_comp =(roll_gyro_comp+roll_eski)*0.995+roll_acc*0.005;		//Tümleyen filtre
+	    pitch_comp=(pitch_gyro_comp+pitch_eski)*0.98+pitch_acc*0.02;	//Tümleyen filtre
+	    roll_comp =(roll_gyro_comp+roll_eski)*0.98+roll_acc*0.02;		//Tümleyen filtre
 //
 //	    Qa = 3e1;
 //	    Qg = 1e1;

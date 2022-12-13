@@ -41,7 +41,7 @@ class Kalman_Filtresi {
 		float roll, pitch, yaw;
 		float roll_rate, pitch_rate, yaw_rate;
 
-        float sa = 3e-1; float sb = 5e-2; float sr=20;
+        float sa = 6e-8; float sb = 1e-3; float sr=20;
 
         float S11_alt, S12_alt, S21_alt, S22_alt, S13_alt, S23_alt, S31_alt, S32_alt, S33_alt=10000;
         float S11_x, S12_x, S21_x, S22_x ;
@@ -73,14 +73,14 @@ class Kalman_Filtresi {
         //double sa_p = 5e-1; double sb_p = 1e-1; double sr_p=1e-1;
 
         //float S11_m_roll, S12_m_roll, S21_m_roll, S22_m_roll;
-        float S11_roll=0, S12_roll=0, S21_roll=0, S22_roll=1e-8;
-        float S13_roll, S23_roll, S31_roll, S32_roll, S33_roll;
+        float S11_roll=1e9, S12_roll=0, S21_roll=0, S22_roll=1e-8;
+        float S13_roll, S23_roll, S31_roll, S32_roll, S33_roll=0;
 
-        float S11_pitch=0, S12_pitch=0, S21_pitch=0, S22_pitch=1e-8;
-        float S13_pitch, S23_pitch, S31_pitch, S32_pitch, S33_pitch;
+        float S11_pitch=1e9, S12_pitch=0, S21_pitch=0, S22_pitch=1e-8;
+        float S13_pitch, S23_pitch, S31_pitch, S32_pitch, S33_pitch=0;
 
-        float S11_yaw=1e5, S12_yaw=0, S21_yaw=0, S22_yaw=1e-8;
-        float S13_yaw, S23_yaw, S31_yaw, S32_yaw, S33_yaw;
+        float S11_yaw=1e9, S12_yaw=0, S21_yaw=0, S22_yaw=1e-8;
+        float S13_yaw, S23_yaw, S31_yaw, S32_yaw, S33_yaw=0;
 
 
         float acc_pos_x,acc_pos_y;
@@ -93,7 +93,7 @@ class Kalman_Filtresi {
         float pitch_comp, roll_comp;
         float roll_ekf, pitch_ekf, yaw_ekf;
         float gyro[3], acc[3];
-        float pitch_bias=-0.0636225641, roll_bias=0.0172730256, yaw_bias=0.00919421483;
+        float pitch_bias=-0.0636225641, roll_bias=-0.0472730256, yaw_bias=0.00919421483;
         float Qa = 3; //0.5 -- onceki deger.
         float Qay = 3; //0.5 -- onceki deger.
         float x,vx,bax,apx;
@@ -124,7 +124,7 @@ class Kalman_Filtresi {
         //float PITCH_OFFSET=5.3, ROLL_OFFSET=-6.7;
 
         //SECOND DRONE
-         float PITCH_OFFSET=1.5-2.6, ROLL_OFFSET=-7+2.3;
+         float PITCH_OFFSET=1.5-2.6+2, ROLL_OFFSET=-7;
 
         //lpf lpf_roll = lpf(0.8544, 0.07282, 0.07282);
         //lpf lpf_pitch = lpf(0.8544, 0.07282, 0.07282);

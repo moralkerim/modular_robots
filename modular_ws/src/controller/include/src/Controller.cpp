@@ -29,7 +29,7 @@ void Controller::Run (void) {
 //        Ki_roll = 0.1;  //0.008
 //        Kd_roll = 0.05; //0.015
 
-         Kp_roll = 0.24; //0.3
+         Kp_roll = 0.18; //0.3
          Ki_roll = 0.05;  //0.008
          Kd_roll = 0.02; //0.015
 
@@ -38,7 +38,7 @@ void Controller::Run (void) {
          Kd_pitch = Kd_roll;
 
          Kp_yaw = 10;// 1;
-         Ki_yaw = 0.0;// 1;
+         Ki_yaw = 10;// 1;
     }
 
     else {
@@ -123,16 +123,21 @@ void Controller::Run (void) {
 
     }
 
-    if(angle_loop_counter = 4) {
-    	roll_rate_des = pid_roll.P_Angle(roll_des,roll, Kp_angle,Ki_angle);
-    	pitch_rate_des = pid_pitch.P_Angle(pitch_des,pitch, Kp_angle,Ki_angle);
-    	angle_loop_counter = 1;
+    if(angle_loop_counter == 3) {
+    	//float sqrt_controller(float alpha_des, float _alpha_des, uint8_t angle_counter,float Kff);
+    	angle_ff_roll  = pid_roll.sqrt_controller(roll_des, _roll_des, angle_loop_counter,Kff);
+    	angle_ff_pitch = pid_pitch.sqrt_controller(pitch_des, _pitch_des, angle_loop_counter,Kff);
+    	roll_rate_des = pid_roll.P_Angle(roll_des,roll, Kp_angle,Ki_angle) + angle_ff_roll;
+    	pitch_rate_des = pid_pitch.P_Angle(pitch_des,pitch, Kp_angle,Ki_angle) + angle_ff_pitch ;
+    	_roll_des  = roll_des;
+    	_pitch_des = pitch_des;
+    	angle_loop_counter = 0;
     }
 
 
 
-	float pd_roll_ff  = pid_roll.RateFF(roll_rate_des);
-	float pd_pitch_ff = pid_roll.RateFF(pitch_rate_des);
+//	float pd_roll_ff  = pid_roll.RateFF(roll_rate_des);
+//	float pd_pitch_ff = pid_roll.RateFF(pitch_rate_des);
 
 	pd_roll  = pid_roll.PID_Rate2(roll_rate_des,roll_rate, roll, Kp_roll, Ki_roll, Kd_roll, Kp_angle);// + pd_roll_ff;
 	pd_pitch = pid_pitch.PID_Rate2(pitch_rate_des,pitch_rate, pitch, Kp_pitch,Ki_pitch,Kd_pitch, Kp_angle);// + pd_pitch_ff;
@@ -142,16 +147,16 @@ void Controller::Run (void) {
 #ifdef UAV1
 
 
-    int pwm1 = thr + pd_pitch - pd_roll  - p_yaw + PITCH_TRIM - ROLL_TRIM;
-    int pwm2 = thr - pd_pitch + pd_roll  - p_yaw - PITCH_TRIM + ROLL_TRIM;
-    int pwm3 = thr + pd_pitch + pd_roll  + p_yaw + PITCH_TRIM + ROLL_TRIM;
-    int pwm4 = thr - pd_pitch - pd_roll  + p_yaw - PITCH_TRIM - ROLL_TRIM;
+//    int pwm1 = thr + pd_pitch - pd_roll  - p_yaw + PITCH_TRIM - ROLL_TRIM;
+//    int pwm2 = thr - pd_pitch + pd_roll  - p_yaw - PITCH_TRIM + ROLL_TRIM;
+//    int pwm3 = thr + pd_pitch + pd_roll  + p_yaw + PITCH_TRIM + ROLL_TRIM;
+//    int pwm4 = thr - pd_pitch - pd_roll  + p_yaw - PITCH_TRIM - ROLL_TRIM;
 
 //    //Test bench
-//    int pwm1 = thr - pd_roll  - ROLL_TRIM;
-//    int pwm2 = thr + pd_roll  + ROLL_TRIM;
-//    int pwm3 = thr + pd_roll  + ROLL_TRIM;
-//    int pwm4 = thr - pd_roll  - ROLL_TRIM;
+    int pwm1 = thr - pd_roll  - ROLL_TRIM;
+    int pwm2 = thr + pd_roll  + ROLL_TRIM;
+    int pwm3 = thr + pd_roll  + ROLL_TRIM;
+    int pwm4 = thr - pd_roll  - ROLL_TRIM;
 
 
 #endif

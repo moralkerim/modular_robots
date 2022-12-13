@@ -51,6 +51,8 @@ class Controller {
         float Kp_yaw = 5.0;// 1;
         float Ki_yaw = 9;// 1;
 
+        float Kff = 1.3;
+
         //TWO UAVS
 
         /*
@@ -102,6 +104,8 @@ class Controller {
         bool swarm;
 
         float roll_des, pitch_des, yaw_rate_des;
+        float _roll_des, _pitch_des, _yaw_rate_des;
+        float angle_ff_roll, angle_ff_pitch;
 
         PID pid_roll;
         PID pid_pitch;
