@@ -241,6 +241,8 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 	  float gyroY = gyro[1];
 	  float gyroZ = gyro[2];
 
+	  //gyroZ = lpf_yaw.Run(gyroZ);
+
 	  float acctop=sqrt(accX*accX+accY*accY+accZ*accZ);
 
 	  pitch_acc =  asin(accX/acctop)*rad2deg + PITCH_OFFSET;
@@ -253,9 +255,8 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 	float S11_angle, S12_angle, S13_angle, S21_angle, S22_angle, S23_angle, S31_angle, S32_angle, S33_angle ;
 
 	if(!armed) {
-	    Qa = 9e-2;
-	    Qg = 1;
-	    sb = 1e-11;
+	    Qa = 500;
+	    Qg = 10;
 
 	    roll_comp = roll_acc;
 	    pitch_comp = pitch_acc;
@@ -265,21 +266,19 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 	else {
 		switch(euler_angle) {
 		default:
-		    Qa = 5e4;
+		    Qa = 1e5;
 		    Qg = 150;
-		    sb = 1e-3;
-
 			break;
 
 		case YAW:
-			Qa = 5e8;
+			Qa = 1e5;
 			Qg = 150;
 			break;
 
 		}
 
-	    pitch_comp=(pitch_gyro_comp+pitch_eski)*0.98+pitch_acc*0.02;	//Tümleyen filtre
-	    roll_comp =(roll_gyro_comp+roll_eski)*0.98+roll_acc*0.02;		//Tümleyen filtre
+	    pitch_comp=(pitch_gyro_comp+pitch_eski)*0.998+pitch_acc*0.002;	//Tümleyen filtre
+	    roll_comp =(roll_gyro_comp+roll_eski)*0.998+roll_acc*0.002;		//Tümleyen filtre
 //
 //	    Qa = 3e1;
 //	    Qg = 1e1;
@@ -298,13 +297,8 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 
 			S11_angle = S11_roll;
 			S12_angle = S12_roll;
-			S13_angle = S13_roll;
 			S21_angle = S21_roll;
 			S22_angle = S22_roll;
-			S23_angle = S23_roll;
-			S31_angle = S31_roll;
-			S32_angle = S32_roll;
-			S33_angle = S33_roll;
 			if(armed) {
 				roll_int = roll_int + roll_rate*st;
 			}
@@ -319,13 +313,8 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 
 			S11_angle = S11_pitch;
 			S12_angle = S12_pitch;
-			S13_angle = S13_pitch;
 			S21_angle = S21_pitch;
 			S22_angle = S22_pitch;
-			S23_angle = S23_pitch;
-			S31_angle = S31_pitch;
-			S32_angle = S32_pitch;
-			S33_angle = S33_pitch;
 			break;
 
 		case YAW:
@@ -338,67 +327,40 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 
 			S11_angle = S11_yaw;
 			S12_angle = S12_yaw;
-			S13_angle = S13_yaw;
 			S21_angle = S21_yaw;
 			S22_angle = S22_yaw;
-			S23_angle = S23_yaw;
-			S31_angle = S31_yaw;
-			S32_angle = S32_yaw;
-			S33_angle = S33_yaw;
 			break;
 
 	}
 
-    angle_ekf = (angle_ekf) + st*(angle_rate);
+    angle_ekf = angle_ekf - angle_bias*st + gyro*st;
 
-    float CS_m11 = S13_angle + S33_angle*st;
+    float CS11 = -S22_angle*st;
+    float CS12 = CS11 + S12_angle;
 
-    S11_angle = S11_angle + sa + CS_m11*st + S31_angle*st;
-    S12_angle = S12_angle + S32_angle*st;
-    S13_angle = CS_m11;
-    S21_angle = S21_angle + S23_angle*st;
+    S11_angle = S11_angle + sa - CS12*st - S21_angle*st;
+    S12_angle = CS12;
+    S21_angle = CS11 + S21_angle;
     S22_angle = S22_angle + sb;
-    S23_angle = S23_angle;
-    S31_angle = S31_angle + S33_angle*st;
-    S32_angle = S32_angle;
-    S33_angle = S33_angle + sr;
 
     //ANGLE CORRECTION
-    float CK11 = 1/(Qa*Qg + Qa*S22_angle + Qa*S23_angle + Qa*S32_angle + Qa*S33_angle + Qg*S11_angle + S11_angle*S22_angle - S12_angle*S21_angle + S11_angle*S23_angle - S13_angle*S21_angle + S11_angle*S32_angle - S12_angle*S31_angle + S11_angle*S33_angle - S13_angle*S31_angle);
-    float CK12 = Qg + S22_angle + S23_angle + S32_angle + S33_angle;
-    float CK13 = S12_angle + S13_angle;
-    float CK14 = S21_angle + S31_angle;
-    float CK15 = Qa + S11_angle;
-    float CK16 = S32_angle + S33_angle;
-    float CK17 = S22_angle + S23_angle;
+    float CK = 1/(Qa + S11_angle);
 
-    float Kt11 = CK11*CK12*S11_angle - CK11*CK13*CK14;
-    float Kt12 = CK11*CK13*CK15 - CK11*CK13*S11_angle;
-    float Kt21 = CK11*CK12*S21_angle - CK11*CK14*CK17;
-    float Kt22 = CK11*CK15*CK17 - CK11*CK13*S21_angle;
-    float Kt31 = CK11*CK12*S31_angle - CK11*CK14*CK16;
-    float Kt32 = CK11*CK15*CK16 - CK11*CK13*S31_angle;
+    float Kt11 = CK*S11_angle;
+    float Kt21 = CK*S21_angle;
 
-    float Cx11 = angle_bias - gyro + angle_rate;
-    float Cx12 = angle_acc - angle_ekf;
+	float Cx11 = angle_acc - angle_ekf;
 
-    angle_ekf = angle_ekf - Cx11*Kt12 + Cx12*Kt11;
-    angle_bias = angle_bias - Cx11*Kt22 + Cx12*Kt21;
-    angle_rate = angle_rate - Cx11*Kt32 + Cx12*Kt31;
+	angle_ekf  = angle_ekf  + Cx11*Kt11;
+	angle_bias = angle_bias + Cx11*Kt21;
+	angle_rate = gyro - angle_bias;
 
-    float CS11 = Kt32 - 1;
-    float CS12 = Kt22 - 1;
-    float CS13 = Kt11 - 1;
+	CS11 = Kt11 - 1;
 
-    S11_angle = - CS13*S11_angle - Kt12*S21_angle - Kt12*S31_angle;
-    S12_angle = - CS13*S12_angle - Kt12*S22_angle - Kt12*S32_angle;
-    S13_angle = - CS13*S13_angle - Kt12*S23_angle - Kt12*S33_angle;
-    S21_angle = - CS12*S21_angle - Kt21*S11_angle - Kt22*S31_angle;
-    S22_angle = - CS12*S22_angle - Kt21*S12_angle - Kt22*S32_angle;
-    S23_angle = - CS12*S23_angle - Kt21*S13_angle - Kt22*S33_angle;
-    S31_angle = - CS11*S31_angle - Kt31*S11_angle - Kt32*S21_angle;
-    S32_angle = - CS11*S32_angle - Kt31*S12_angle - Kt32*S22_angle;
-    S33_angle = - CS11*S33_angle - Kt31*S13_angle - Kt32*S23_angle;
+	S11_angle = -CS11*S11_angle;
+	S12_angle = -CS11*S12_angle;
+	S21_angle = S21_angle - Kt21*S11_angle;
+	S22_angle = S22_angle - Kt21*S12_angle;
 
     switch(euler_angle) {
     		case ROLL:
@@ -409,13 +371,9 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 
     			 S11_roll = S11_angle;
     			 S12_roll = S12_angle;
-    			 S13_roll = S13_angle;
     			 S21_roll = S21_angle;
     			 S22_roll = S22_angle;
-    			 S23_roll = S23_angle;
-    			 S31_roll = S31_angle;
-    			 S32_roll = S32_angle;
-    			 S33_roll = S33_angle;
+
     			break;
 
     		case PITCH:
@@ -426,30 +384,22 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 
     			 S11_pitch = S11_angle;
     			 S12_pitch = S12_angle;
-    			 S13_pitch = S13_angle;
     			 S21_pitch = S21_angle;
     			 S22_pitch = S22_angle;
-    			 S23_pitch = S23_angle;
-    			 S31_pitch = S31_angle;
-    			 S32_pitch = S32_angle;
-    			 S33_pitch = S33_angle;
+
     			break;
 
     		case YAW:
     			 yaw_ekf = angle_ekf ;
-    			 yaw_rate = angle_rate;
+    			 //yaw_rate = angle_rate;
+    			 yaw_rate = gyroZ;
     			 yaw_bias = angle_bias;
     			 yaw_acc = angle_acc ;
 
     			 S11_yaw = S11_angle;
     			 S12_yaw = S12_angle;
-    			 S13_yaw = S13_angle;
     			 S21_yaw = S21_angle;
     			 S22_yaw = S22_angle;
-    			 S23_yaw = S23_angle;
-    			 S31_yaw = S31_angle;
-    			 S32_yaw = S32_angle;
-    			 S33_yaw = S33_angle;
     			break;
 
     }

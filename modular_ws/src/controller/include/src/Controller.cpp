@@ -29,16 +29,16 @@ void Controller::Run (void) {
 //        Ki_roll = 0.1;  //0.008
 //        Kd_roll = 0.05; //0.015
 
-         Kp_roll = 0.18; //0.3
-         Ki_roll = 0.05;  //0.008
-         Kd_roll = 0.02; //0.015
+         Kp_roll = 0.16; //0.3
+         Ki_roll = 0.08;  //0.008
+         Kd_roll = 0.015; //0.015
 
          Kp_pitch = Kp_roll;	//0.8
          Ki_pitch = Ki_roll;
          Kd_pitch = Kd_roll;
 
-         Kp_yaw = 10;// 1;
-         Ki_yaw = 10;// 1;
+         Kp_yaw = 5.0;// 1;
+         Ki_yaw = 0.5;// 1;
     }
 
     else {
@@ -52,8 +52,8 @@ void Controller::Run (void) {
         Ki_pitch = Ki_roll;
         Kd_pitch = Kd_roll;
 
-        Kp_yaw = 5.0;// 1;
-        Ki_yaw = 10;// 1;
+        Kp_yaw = 10.0;// 1;
+        Ki_yaw = 0;// 1;
     }
 
     int thr;
@@ -147,16 +147,16 @@ void Controller::Run (void) {
 #ifdef UAV1
 
 
-//    int pwm1 = thr + pd_pitch - pd_roll  - p_yaw + PITCH_TRIM - ROLL_TRIM;
-//    int pwm2 = thr - pd_pitch + pd_roll  - p_yaw - PITCH_TRIM + ROLL_TRIM;
-//    int pwm3 = thr + pd_pitch + pd_roll  + p_yaw + PITCH_TRIM + ROLL_TRIM;
-//    int pwm4 = thr - pd_pitch - pd_roll  + p_yaw - PITCH_TRIM - ROLL_TRIM;
+    int pwm1 = thr + pd_pitch - pd_roll  - p_yaw + PITCH_TRIM - ROLL_TRIM - YAW_TRIM;
+    int pwm2 = thr - pd_pitch + pd_roll  - p_yaw - PITCH_TRIM + ROLL_TRIM - YAW_TRIM;
+    int pwm3 = thr + pd_pitch + pd_roll  + p_yaw + PITCH_TRIM + ROLL_TRIM + YAW_TRIM;
+    int pwm4 = thr - pd_pitch - pd_roll  + p_yaw - PITCH_TRIM - ROLL_TRIM + YAW_TRIM;
 
 //    //Test bench
-    int pwm1 = thr - pd_roll  - ROLL_TRIM;
-    int pwm2 = thr + pd_roll  + ROLL_TRIM;
-    int pwm3 = thr + pd_roll  + ROLL_TRIM;
-    int pwm4 = thr - pd_roll  - ROLL_TRIM;
+//    int pwm1 = thr - pd_roll  - ROLL_TRIM;
+//    int pwm2 = thr + pd_roll  + ROLL_TRIM;
+//    int pwm3 = thr + pd_roll  + ROLL_TRIM;
+//    int pwm4 = thr - pd_roll  - ROLL_TRIM;
 
 
 #endif

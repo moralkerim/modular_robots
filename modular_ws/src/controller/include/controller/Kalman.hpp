@@ -41,7 +41,8 @@ class Kalman_Filtresi {
 		float roll, pitch, yaw;
 		float roll_rate, pitch_rate, yaw_rate;
 
-        float sa = 6e-8; float sb = 1e-3; float sr=20;
+        //float sa =1; float sb = 1e-3; float sr=20;
+		float sa = 1e-3; float sb = 1e-3; float sr=20;
 
         float S11_alt, S12_alt, S21_alt, S22_alt, S13_alt, S23_alt, S31_alt, S32_alt, S33_alt=10000;
         float S11_x, S12_x, S21_x, S22_x ;
@@ -73,10 +74,10 @@ class Kalman_Filtresi {
         //double sa_p = 5e-1; double sb_p = 1e-1; double sr_p=1e-1;
 
         //float S11_m_roll, S12_m_roll, S21_m_roll, S22_m_roll;
-        float S11_roll=1e9, S12_roll=0, S21_roll=0, S22_roll=1e-8;
+        float S11_roll=1e9, S12_roll=0, S21_roll=0, S22_roll=1e8;
         float S13_roll, S23_roll, S31_roll, S32_roll, S33_roll=0;
 
-        float S11_pitch=1e9, S12_pitch=0, S21_pitch=0, S22_pitch=1e-8;
+        float S11_pitch=1e9, S12_pitch=0, S21_pitch=0, S22_pitch=1e8;
         float S13_pitch, S23_pitch, S31_pitch, S32_pitch, S33_pitch=0;
 
         float S11_yaw=1e9, S12_yaw=0, S21_yaw=0, S22_yaw=1e-8;

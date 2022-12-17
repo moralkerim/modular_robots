@@ -154,7 +154,7 @@ float PID::PD_Rate(float alpha_dot_des, float alpha_dot, float Kp, float Ki, flo
 	//D = lpf.update(D);
 	pd = P + I + D;
   	pd_roll_buf = pd;
-	pd  = Sat(pd,  300, -300);
+	pd  = Sat(pd,  200, -200);
 	pd_roll_sat_buf = pd;
     return pd;
 

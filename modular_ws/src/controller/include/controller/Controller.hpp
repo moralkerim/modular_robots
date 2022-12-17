@@ -13,7 +13,7 @@
 #define PWM_LOWER 1100
 #define ROLL_TRIM 	13
 #define PITCH_TRIM  30
-
+#define YAW_TRIM    -100
 
 
 class Controller {
@@ -48,10 +48,10 @@ class Controller {
         float Ki_pitch = Ki_roll;
         float Kd_pitch = Kd_roll;
 
-        float Kp_yaw = 5.0;// 1;
-        float Ki_yaw = 9;// 1;
+        float Kp_yaw = 9.0;// 1;
+        float Ki_yaw = 0;// 1;
 
-        float Kff = 1.3;
+        float Kff = 0;
 
         //TWO UAVS
 
