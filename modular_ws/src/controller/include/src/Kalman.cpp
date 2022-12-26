@@ -1,4 +1,4 @@
-#include <Kalman.hpp>
+#include "Kalman.hpp"
 #include <math.h>
 
 
@@ -231,183 +231,7 @@ void Kalman_Filtresi::EKF_Pos() {
 
 }
 
-
 void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
-	  float accX = acc[0];
-	  float accY = acc[1];
-	  float accZ = acc[2];
-
-	  float gyroX = gyro[0];
-	  float gyroY = gyro[1];
-	  float gyroZ = gyro[2];
-
-	  //gyroZ = lpf_yaw.Run(gyroZ);
-
-	  float acctop=sqrt(accX*accX+accY*accY+accZ*accZ);
-
-	  pitch_acc =  asin(accX/acctop)*rad2deg + PITCH_OFFSET;
-	  roll_acc  =  asin(accY/acctop)*rad2deg + ROLL_OFFSET;
-
-	  roll_gyro_comp  = gyro[0] * st;
-	  pitch_gyro_comp = gyro[1] * st;
-
-	float angle_ekf, angle_rate, angle_bias, angle_acc, gyro;
-	float S11_angle, S12_angle, S13_angle, S21_angle, S22_angle, S23_angle, S31_angle, S32_angle, S33_angle ;
-
-	if(!armed) {
-	    Qa = 500;
-	    Qg = 10;
-
-	    roll_comp = roll_acc;
-	    pitch_comp = pitch_acc;
-
-	}
-
-	else {
-		switch(euler_angle) {
-		default:
-		    Qa = 1e5;
-		    Qg = 150;
-			break;
-
-		case YAW:
-			Qa = 1e5;
-			Qg = 150;
-			break;
-
-		}
-
-	    pitch_comp=(pitch_gyro_comp+pitch_eski)*0.998+pitch_acc*0.002;	//Tümleyen filtre
-	    roll_comp =(roll_gyro_comp+roll_eski)*0.998+roll_acc*0.002;		//Tümleyen filtre
-//
-//	    Qa = 3e1;
-//	    Qg = 1e1;
-
-	}
-
-
-	//ANGLE PREDICTION
-	switch(euler_angle) {
-		case ROLL:
-			angle_ekf = roll_ekf;
-			angle_rate = roll_rate;
-			angle_bias = roll_bias;
-			angle_acc = roll_acc;
-			gyro = gyroX;
-
-			S11_angle = S11_roll;
-			S12_angle = S12_roll;
-			S21_angle = S21_roll;
-			S22_angle = S22_roll;
-			if(armed) {
-				roll_int = roll_int + roll_rate*st;
-			}
-			break;
-
-		case PITCH:
-			angle_ekf = pitch_ekf;
-			angle_rate = pitch_rate;
-			angle_bias = pitch_bias;
-			angle_acc = pitch_acc;
-			gyro = gyroY;
-
-			S11_angle = S11_pitch;
-			S12_angle = S12_pitch;
-			S21_angle = S21_pitch;
-			S22_angle = S22_pitch;
-			break;
-
-		case YAW:
-			angle_ekf = yaw_ekf;
-			angle_rate = yaw_rate;
-			angle_bias = yaw_bias;
-			angle_acc = yaw_acc;
-			gyro = gyroZ;
-
-
-			S11_angle = S11_yaw;
-			S12_angle = S12_yaw;
-			S21_angle = S21_yaw;
-			S22_angle = S22_yaw;
-			break;
-
-	}
-
-    angle_ekf = angle_ekf - angle_bias*st + gyro*st;
-
-    float CS11 = -S22_angle*st;
-    float CS12 = CS11 + S12_angle;
-
-    S11_angle = S11_angle + sa - CS12*st - S21_angle*st;
-    S12_angle = CS12;
-    S21_angle = CS11 + S21_angle;
-    S22_angle = S22_angle + sb;
-
-    //ANGLE CORRECTION
-    float CK = 1/(Qa + S11_angle);
-
-    float Kt11 = CK*S11_angle;
-    float Kt21 = CK*S21_angle;
-
-	float Cx11 = angle_acc - angle_ekf;
-
-	angle_ekf  = angle_ekf  + Cx11*Kt11;
-	angle_bias = angle_bias + Cx11*Kt21;
-	angle_rate = gyro - angle_bias;
-
-	CS11 = Kt11 - 1;
-
-	S11_angle = -CS11*S11_angle;
-	S12_angle = -CS11*S12_angle;
-	S21_angle = S21_angle - Kt21*S11_angle;
-	S22_angle = S22_angle - Kt21*S12_angle;
-
-    switch(euler_angle) {
-    		case ROLL:
-    			 roll_ekf = angle_ekf ;
-    			 roll_rate = angle_rate;
-    			 roll_bias = angle_bias;
-    			 roll_acc = angle_acc ;
-
-    			 S11_roll = S11_angle;
-    			 S12_roll = S12_angle;
-    			 S21_roll = S21_angle;
-    			 S22_roll = S22_angle;
-
-    			break;
-
-    		case PITCH:
-    			 pitch_ekf = angle_ekf ;
-    			 pitch_rate = angle_rate;
-    			 pitch_bias = angle_bias;
-    			 pitch_acc = angle_acc ;
-
-    			 S11_pitch = S11_angle;
-    			 S12_pitch = S12_angle;
-    			 S21_pitch = S21_angle;
-    			 S22_pitch = S22_angle;
-
-    			break;
-
-    		case YAW:
-    			 yaw_ekf = angle_ekf ;
-    			 //yaw_rate = angle_rate;
-    			 yaw_rate = gyroZ;
-    			 yaw_bias = angle_bias;
-    			 yaw_acc = angle_acc ;
-
-    			 S11_yaw = S11_angle;
-    			 S12_yaw = S12_angle;
-    			 S21_yaw = S21_angle;
-    			 S22_yaw = S22_angle;
-    			break;
-
-    }
-}
-
-
-
-/*void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 	  float accX = acc[0];
 	  float accY = acc[1];
 	  float accZ = acc[2];
@@ -443,7 +267,6 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 			}
 			Qg = 1e1;
 			sb = 1e-2;
-			sr = 7e-2;
 
 			S11_angle = S11_roll;
 			S12_angle = S12_roll;
@@ -463,7 +286,6 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 			angle_acc = pitch_acc;
 			gyro = gyroY;
 			sa = 1e-2;
-			sr = 7e-2;
 			if(!armed) {
 				Qa = 3;
 
@@ -475,7 +297,6 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 			}
 			Qg = 1e1;
 			sb = 1e-2;
-			sr = 7e-2;
 
 			S11_angle = S11_pitch;
 			S12_angle = S12_pitch;
@@ -502,12 +323,11 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
 			}
 
 			else {
-				Qa = 5e10;
+				Qa = 5e9;
 
 			}
 			Qg = 1e1;
-			sb = 1e-4;
-			sr = 7e-2;
+			sb = 1e-2;
 
 			S11_angle = S11_yaw;
 			S12_angle = S12_yaw;
@@ -635,7 +455,6 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle) {
     }
 }
 
-*/
 void Kalman_Filtresi::EKF_Alt() {
     float u = acc_vert;
 
@@ -794,44 +613,42 @@ void Kalman_Filtresi::Run() {
 
 
 
-//    if(gyro_ready) {
+    if(gyro_ready) {
 
     pos_ekf_counter++;
     EKF_Attitude(ROLL);
     EKF_Attitude(PITCH);
     EKF_Attitude(YAW);
 
-
-
     //EKF_Alt();
-    //EKF_Pos();
+    EKF_Pos();
 
     //EKF_Cam();
 
-//    }
+    }
 
 
-//    else {
-//    	uint16_t SAMPLE_NUMBER = 5000;
-//    	for(int i=0; i<SAMPLE_NUMBER; i++) {
-//    		  float acctop=sqrt(accX*accX+accY*accY+accZ*accZ);
-//
-//    		  float pitch_acc =  asin(accX/acctop)*rad2deg;
-//    		  float roll_acc  =  asin(accY/acctop)*rad2deg ;
-//
-//        	ROLL_OFFSET += roll_acc;
-//        	PITCH_OFFSET += pitch_acc;
-//    	}
-//
-//    	ROLL_OFFSET  = -1*  ROLL_OFFSET  / SAMPLE_NUMBER;
-//    	PITCH_OFFSET = -1 * PITCH_OFFSET / SAMPLE_NUMBER;
-//
-//    	gyro_ready = true;
-//    }
+    else {
+/*
+    	for(int i=0; i<2000; i++) {
+    		  float acctop=sqrt(accX*accX+accY*accY+accZ*accZ);
+
+    		  float pitch_acc =  asin(accX/acctop)*rad2deg;
+    		  float roll_acc  =  asin(accY/acctop)*rad2deg ;
+
+        	ROLL_OFFSET += roll_acc;
+        	PITCH_OFFSET += pitch_acc;
+    	}
+
+    	ROLL_OFFSET  = -1*  ROLL_OFFSET  / 2000;
+    	PITCH_OFFSET = -1 * PITCH_OFFSET / 2000;
+    	*/
+    	gyro_ready = true;
+    }
 
 
-	pitch_eski=pitch_comp;
-	roll_eski=roll_comp;
+	//pitch_eski=pitch_comp;
+	//roll_eski=roll_comp;
 
     state.angles[0] = roll_ekf;
     state.angles[1] = pitch_ekf;

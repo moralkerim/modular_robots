@@ -29,16 +29,16 @@ void Controller::Run (void) {
 //        Ki_roll = 0.1;  //0.008
 //        Kd_roll = 0.05; //0.015
 
-         Kp_roll = 0.16; //0.3
+         Kp_roll = 0.22; //0.3
          Ki_roll = 0.08;  //0.008
-         Kd_roll = 0.015; //0.015
+         Kd_roll = 0.02; //0.015
 
          Kp_pitch = Kp_roll;	//0.8
          Ki_pitch = Ki_roll;
          Kd_pitch = Kd_roll;
 
          Kp_yaw = 5.0;// 1;
-         Ki_yaw = 0.5;// 1;
+         Ki_yaw = 5;// 1;
     }
 
     else {
@@ -123,7 +123,7 @@ void Controller::Run (void) {
 
     }
 
-    if(angle_loop_counter == 3) {
+    //if(angle_loop_counter == 3) {
     	//float sqrt_controller(float alpha_des, float _alpha_des, uint8_t angle_counter,float Kff);
     	angle_ff_roll  = pid_roll.sqrt_controller(roll_des, _roll_des, angle_loop_counter,Kff);
     	angle_ff_pitch = pid_pitch.sqrt_controller(pitch_des, _pitch_des, angle_loop_counter,Kff);
@@ -132,7 +132,7 @@ void Controller::Run (void) {
     	_roll_des  = roll_des;
     	_pitch_des = pitch_des;
     	angle_loop_counter = 0;
-    }
+    //}
 
 
 

@@ -13,7 +13,7 @@
 #define PWM_LOWER 1100
 #define ROLL_TRIM 	13
 #define PITCH_TRIM  30
-#define YAW_TRIM    -100
+#define YAW_TRIM    0
 
 
 class Controller {
@@ -67,7 +67,7 @@ class Controller {
         const float Kp_yaw = 5.0;// 1;
         const float Ki_yaw = 9;// 1;
 */
-        const float Kp_angle = 12; //12
+        const float Kp_angle = 10; //12
         const float Ki_angle = 0;
         const float Kp_alt = 10; //30
         const float Ki_alt = 15;  //3
