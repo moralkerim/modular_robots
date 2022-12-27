@@ -82,6 +82,8 @@ class Kalman_Filtresi {
         float pitch_eski, roll_eski;
 
     public:
+        float kalman_acc_thres = 0.3;
+        bool yaw_update_enable, ekf_update;
         float acc_pos_x,acc_pos_y;
         struct state state;
         float xbody, ybody;
@@ -133,7 +135,7 @@ class Kalman_Filtresi {
         lpf vel_gps_filt   = lpf(-0.8526, 0.9263, 0.9263);
 
 
-        void EKF_Attitude(euler_angle euler_angle);
+        void EKF_Attitude(euler_angle euler_angle, bool update_enable);
         void EKF_Alt(void);
         void EKF_Cam(void);
         void NED2Body(void);
