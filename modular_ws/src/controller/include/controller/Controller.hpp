@@ -7,7 +7,7 @@
 #include "Modes.h"
 #include "state.h"
 
-#define UAV1
+#define UAV2
 
 #define PWM_UPPER 2000
 #define PWM_LOWER 1100

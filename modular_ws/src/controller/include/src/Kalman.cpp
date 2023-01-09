@@ -266,7 +266,6 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle, bool update_enable) 
 
 			}
 			Qg = 1e1;
-			sb = 1e-2;
 
 			S11_angle = S11_roll;
 			S12_angle = S12_roll;
@@ -297,7 +296,7 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle, bool update_enable) 
 
 			}
 			Qg = 1e1;
-			sb = 1e-2;
+
 
 			S11_angle = S11_pitch;
 			S12_angle = S12_pitch;
@@ -324,11 +323,10 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle, bool update_enable) 
 			}
 
 			else {
-				Qa = 5e9;
+				Qa = 5e8;
 
 			}
 			Qg = 1e1;
-			sb = 1e-2;
 
 			S11_angle = S11_yaw;
 			S12_angle = S12_yaw;
