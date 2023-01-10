@@ -22,42 +22,18 @@ void Controller::Run (void) {
         roll_bias = state.bias[0];
         pitch_bias = state.bias[1];
         yaw_bias = state.bias[2];
-        
-    if(!swarm) {
-    	  //bench settings
-//        Kp_roll = 0.2; //0.3
-//        Ki_roll = 0.1;  //0.008
-//        Kd_roll = 0.05; //0.015
-
-         Kp_roll = 0.22; //0.3
-         Ki_roll = 0.08;  //0.008
-         Kd_roll = 0.02; //0.015
-
-         Kp_pitch = Kp_roll;	//0.8
-         Ki_pitch = Ki_roll;
-         Kd_pitch = Kd_roll;
-
-         Kp_yaw = 5.0;// 1;
-         Ki_yaw = 5;// 1;
-    }
-
-    else {
-
-
-        Kp_roll = 0.9; //0.3
-        Ki_roll = 0.00;  //0.008
-        Kd_roll = 0.03; //0.007 0.01
-
-        Kp_pitch = Kp_roll;	//0.8
-        Ki_pitch = Ki_roll;
-        Kd_pitch = Kd_roll;
-
-        Kp_yaw = 10.0;// 1;
-        Ki_yaw = 0;// 1;
-    }
 
     int thr;
     int thr2 = pid_roll.Sat(ch3, 2000, 1000);
+    float K_swarm;
+
+    if(swarm) {
+    	K_swarm = 3;
+    }
+
+    else {
+    	K_swarm = 1;
+    }
 
     switch(mod) {
     	case STABILIZE:
@@ -147,10 +123,10 @@ void Controller::Run (void) {
 #ifdef UAV1
 
 
-    int pwm1 = thr + pd_pitch - pd_roll  - p_yaw + PITCH_TRIM - ROLL_TRIM - YAW_TRIM;
-    int pwm2 = thr - pd_pitch + pd_roll  - p_yaw - PITCH_TRIM + ROLL_TRIM - YAW_TRIM;
-    int pwm3 = thr + pd_pitch + pd_roll  + p_yaw + PITCH_TRIM + ROLL_TRIM + YAW_TRIM;
-    int pwm4 = thr - pd_pitch - pd_roll  + p_yaw - PITCH_TRIM - ROLL_TRIM + YAW_TRIM;
+    int pwm1 = thr + K_swarm*(+ pd_pitch - pd_roll)  - p_yaw + PITCH_TRIM - ROLL_TRIM - YAW_TRIM;
+    int pwm2 = thr + K_swarm*(- pd_pitch + pd_roll)  - p_yaw - PITCH_TRIM + ROLL_TRIM - YAW_TRIM;
+    int pwm3 = thr + K_swarm*(+ pd_pitch + pd_roll)  + p_yaw + PITCH_TRIM + ROLL_TRIM + YAW_TRIM;
+    int pwm4 = thr + K_swarm*(- pd_pitch - pd_roll)  + p_yaw - PITCH_TRIM - ROLL_TRIM + YAW_TRIM;
 
 //    //Test bench
 //    int pwm1 = thr - pd_roll  - ROLL_TRIM;
@@ -178,18 +154,12 @@ void Controller::Run (void) {
     pwm4 = (int)pid_roll.Sat(pwm4,PWM_UPPER,PWM_LOWER,thr);
 
     //SECOND DRONE
-    /*
-    controller_output_pwm2[0] = thr + pd_pitch - pd_roll  + p_yaw;
-    controller_output_pwm2[1] = thr - pd_pitch + pd_roll  + p_yaw;
-    controller_output_pwm2[2] = thr + pd_pitch + pd_roll  - p_yaw;
-    controller_output_pwm2[3] = thr - pd_pitch - pd_roll  - p_yaw;
-    */
-
     if(swarm) {
-        controller_output_pwm2[0] = pwm1;
-        controller_output_pwm2[1] = pwm2;
-        controller_output_pwm2[2] = pwm3;
-        controller_output_pwm2[3] = pwm4;
+		controller_output_pwm2[0] = thr + K_swarm*(+ pd_pitch - pd_roll) + p_yaw;
+		controller_output_pwm2[1] = thr + K_swarm*(- pd_pitch + pd_roll) + p_yaw;
+		controller_output_pwm2[2] = thr + K_swarm*(+ pd_pitch + pd_roll) - p_yaw;
+		controller_output_pwm2[3] = thr + K_swarm*(- pd_pitch - pd_roll) - p_yaw;
+
     }
 
     else {
