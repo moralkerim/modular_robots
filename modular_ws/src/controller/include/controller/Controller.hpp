@@ -11,10 +11,15 @@
 
 #define PWM_UPPER 2000
 #define PWM_LOWER 1100
-#define ROLL_TRIM 	13
-#define PITCH_TRIM  30
-#define YAW_TRIM    0
+//FIRST UAV
+//#define ROLL_TRIM 	-5
+//#define PITCH_TRIM  0
+//#define YAW_TRIM    -50
 
+//SECOND UAV
+#define ROLL_TRIM 	15
+#define PITCH_TRIM  11.59
+#define YAW_TRIM    -50
 
 class Controller {
 
@@ -40,22 +45,22 @@ class Controller {
 
         //SINGLE UAV
 
-        float Kp_roll = 0.22; //0.3
+        float Kp_roll = 0.35; //0.3
         float Ki_roll = 0.08;  //0.008
-        float Kd_roll = 0.02; //0.015
+        float Kd_roll = 0.01; //0.015
 
         float Kp_pitch = Kp_roll;	//0.8
         float Ki_pitch = Ki_roll;
         float Kd_pitch = Kd_roll;
 
-        float Kp_yaw = 5.0;// 1;
-        float Ki_yaw = 9;// 1;
+        float Kp_yaw = 8.0;// 1;
+        float Ki_yaw = 0;// 1;
 
         float Kff = 0;
 
         //TWO UAVS
 
-        const float Kp_angle = 10; //12
+        const float Kp_angle = 4.5; //12
         const float Ki_angle = 0;
         const float Kp_alt = 10; //30
         const float Ki_alt = 15;  //3

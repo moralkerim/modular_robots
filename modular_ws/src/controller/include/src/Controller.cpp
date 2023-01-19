@@ -99,16 +99,16 @@ void Controller::Run (void) {
 
     }
 
-    //if(angle_loop_counter == 3) {
+    if(angle_loop_counter == 3) {
     	//float sqrt_controller(float alpha_des, float _alpha_des, uint8_t angle_counter,float Kff);
     	angle_ff_roll  = pid_roll.sqrt_controller(roll_des, _roll_des, angle_loop_counter,Kff);
     	angle_ff_pitch = pid_pitch.sqrt_controller(pitch_des, _pitch_des, angle_loop_counter,Kff);
-    	roll_rate_des = pid_roll.P_Angle(roll_des,roll, Kp_angle,Ki_angle) + angle_ff_roll;
-    	pitch_rate_des = pid_pitch.P_Angle(pitch_des,pitch, Kp_angle,Ki_angle) + angle_ff_pitch ;
+    	roll_rate_des = pid_roll.P_Angle(roll_des,roll, Kp_angle,Ki_angle);// + angle_ff_roll;
+    	pitch_rate_des = pid_pitch.P_Angle(pitch_des,pitch, Kp_angle,Ki_angle);// + angle_ff_pitch ;
     	_roll_des  = roll_des;
     	_pitch_des = pitch_des;
     	angle_loop_counter = 0;
-    //}
+    }
 
 
 

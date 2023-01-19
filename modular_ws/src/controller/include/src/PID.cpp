@@ -30,7 +30,7 @@ float PID::sqrt_controller(float alpha_des, float _alpha_des, uint8_t angle_coun
 	float sqrt_e = sqrt((int)(100*abs_e));
 	float P = Kff * sqrt_e/10;
 	P = P * sign_e;
-	return e_angle;
+	return P;
 }
 
 float PID::PI_Vel(float z0, float z, float v, float Kp_alt, float Ki_alt, unsigned int ch) {
