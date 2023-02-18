@@ -42,7 +42,7 @@ class Kalman_Filtresi {
         //float S11_m_pitch, S12_m_pitch, S21_m_pitch, S22_m_pitch;
         float S11_pitch=0, S12_pitch=0, S21_pitch=0, S22_pitch=1e9;
         float S13_pitch, S23_pitch, S31_pitch, S32_pitch, S33_pitch;
-        float sa = 1e-2;  float sr=7e-1; float sb = 1e-2;
+        float sa = 1;  float sr=7e-1; float sb = 1e-2;
         //double sa_p = 5e-1; double sb_p = 1e-1; double sr_p=1e-1;
 
         //float S11_m_roll, S12_m_roll, S21_m_roll, S22_m_roll;
@@ -73,8 +73,9 @@ class Kalman_Filtresi {
         const float spx  = 1;
 
 
-        const float rad2deg = 180/3.14;
-
+        const float rad2deg = 180/M_PI;
+        const float deg2rad = M_PI/180;
+        const float g = 9.81;
         const int f = 200;
         const double st = 1/(float)f;
         bool gyro_ready;
@@ -95,7 +96,7 @@ class Kalman_Filtresi {
         float roll_ekf, pitch_ekf, yaw_ekf;
         float gyro[3], acc[3];
         float pitch_bias, roll_bias, yaw_bias;
-        float Qa = 3; //0.5 -- onceki deger.
+        float Qa = 5e5; //0.5 -- onceki deger.
         float Qay = 3; //0.5 -- onceki deger.
         float x,vx,bax,apx;
         float y,vy,bay,apy;
@@ -125,7 +126,7 @@ class Kalman_Filtresi {
         //float PITCH_OFFSET=1, ROLL_OFFSET=0.0;
 
         //SECOND DRONE
-        float PITCH_OFFSET=-3.5, ROLL_OFFSET=-6.0;
+        float PITCH_OFFSET=0, ROLL_OFFSET=-2.5;
 
         //lpf lpf_roll = lpf(0.8544, 0.07282, 0.07282);
         //lpf lpf_pitch = lpf(0.8544, 0.07282, 0.07282);

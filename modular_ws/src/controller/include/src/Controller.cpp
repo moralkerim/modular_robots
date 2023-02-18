@@ -45,7 +45,7 @@ void Controller::Run (void) {
 
             roll_des 	  	= roll_des_filt.Run(roll_des);
             pitch_des 		= pitch_des_filt.Run(pitch_des);
-            yaw_rate_des  	= yaw_des_filt.Run(yaw_rate_des);
+            //yaw_rate_des  	= yaw_des_filt.Run(yaw_rate_des);
     	    break;
     	}
 
@@ -70,7 +70,7 @@ void Controller::Run (void) {
 
             roll_des 	  	= roll_des_filt.Run(roll_des);
             pitch_des 		= pitch_des_filt.Run(pitch_des);
-            yaw_rate_des  	= yaw_des_filt.Run(yaw_rate_des);
+            //yaw_rate_des  	= yaw_des_filt.Run(yaw_rate_des);
 			break;
     	}
 
@@ -92,7 +92,7 @@ void Controller::Run (void) {
     	    }
 
             yaw_rate_des = state_des.rates[2];
-            yaw_rate_des  	= yaw_des_filt.Run(yaw_rate_des);
+            //yaw_rate_des  	= yaw_des_filt.Run(yaw_rate_des);
 
     		break;
     	}

@@ -1,4 +1,4 @@
-#include "Kalman.hpp"
+#include <Kalman.hpp>
 #include <math.h>
 
 
@@ -231,23 +231,43 @@ void Kalman_Filtresi::EKF_Pos() {
 
 }
 
+
 void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle, bool update_enable) {
 	  float accX = acc[0];
 	  float accY = acc[1];
 	  float accZ = acc[2];
 
-	  float gyroX = gyro[0];
-	  float gyroY = gyro[1];
-	  float gyroZ = gyro[2];
+	  float gyroX = gyro[0]*deg2rad;
+	  float gyroY = gyro[1]*deg2rad;
+	  float gyroZ = gyro[2]*deg2rad;
+
+	  //gyroZ = lpf_yaw.Run(gyroZ);
 
 	  float acctop=sqrt(accX*accX+accY*accY+accZ*accZ);
 
-	  pitch_acc =  asin(accX/acctop)*rad2deg + PITCH_OFFSET;
-	  roll_acc  =  asin(accY/acctop)*rad2deg + ROLL_OFFSET;
+	  pitch_acc =  asin(accX/g) + PITCH_OFFSET*deg2rad;
+	  roll_acc  =  asin(accY/g) + ROLL_OFFSET*deg2rad;
+
+	 // roll_gyro_comp  = gyro[0] * st;
+	 // pitch_gyro_comp = gyro[1] * st;
 
 	float angle_ekf, angle_rate, angle_bias, angle_acc, gyro;
 	float S11_angle, S12_angle, S13_angle, S21_angle, S22_angle, S23_angle, S31_angle, S32_angle, S33_angle ;
-    //ANGLE PREDICTION
+
+
+	switch(euler_angle) {
+	default:
+		Qa = 5e8;
+		break;
+
+	case YAW:
+		Qa = 5e8;
+		break;
+
+	}
+
+
+	//ANGLE PREDICTION
 	switch(euler_angle) {
 		case ROLL:
 			angle_ekf = roll_ekf;
@@ -255,27 +275,11 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle, bool update_enable) 
 			angle_bias = roll_bias;
 			angle_acc = roll_acc;
 			gyro = gyroX;
-			sa = 1e-2;
-			if(!armed) {
-				Qa = 3;
-
-			}
-
-			else {
-				Qa = 5e6;
-
-			}
-			Qg = 1e1;
 
 			S11_angle = S11_roll;
 			S12_angle = S12_roll;
-			S13_angle = S13_roll;
 			S21_angle = S21_roll;
 			S22_angle = S22_roll;
-			S23_angle = S23_roll;
-			S31_angle = S31_roll;
-			S32_angle = S32_roll;
-			S33_angle = S33_roll;
 			break;
 
 		case PITCH:
@@ -284,119 +288,60 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle, bool update_enable) 
 			angle_bias = pitch_bias;
 			angle_acc = pitch_acc;
 			gyro = gyroY;
-			sa = 1e-2;
-
-			if(!armed) {
-				Qa = 3;
-
-			}
-
-			else {
-				Qa = 5e6;
-
-			}
-			Qg = 1e1;
-
 
 			S11_angle = S11_pitch;
 			S12_angle = S12_pitch;
-			S13_angle = S13_pitch;
 			S21_angle = S21_pitch;
 			S22_angle = S22_pitch;
-			S23_angle = S23_pitch;
-			S31_angle = S31_pitch;
-			S32_angle = S32_pitch;
-			S33_angle = S33_pitch;
 			break;
 
 		case YAW:
 			angle_ekf = yaw_ekf;
 			angle_rate = yaw_rate;
 			angle_bias = yaw_bias;
-			angle_acc = yaw_acc;
+			angle_acc = yaw_acc*deg2rad;
 			gyro = gyroZ;
-			sa = 5e2;
 
-			if(!armed) {
-				Qa = 3;
-
-			}
-
-			else {
-				Qa = 5e8;
-
-			}
-			Qg = 1e1;
 
 			S11_angle = S11_yaw;
 			S12_angle = S12_yaw;
-			S13_angle = S13_yaw;
 			S21_angle = S21_yaw;
 			S22_angle = S22_yaw;
-			S23_angle = S23_yaw;
-			S31_angle = S31_yaw;
-			S32_angle = S32_yaw;
-			S33_angle = S33_yaw;
 			break;
 
 	}
-	angle_ekf = angle_ekf + angle_rate*st;
+
+    angle_ekf = angle_ekf - angle_bias*st + gyro*st;
 
     if(update_enable) {
 
-    	float CS11_angle_est = S13_angle + S33_angle*st;
+		float CS11 = -S22_angle*st;
+		float CS12 = CS11 + S12_angle;
 
-    	S11_angle = S11_angle + sa + CS11_angle_est*st + S31_angle*st;
-    	S12_angle = S12_angle + S32_angle*st;
-    	S13_angle = CS11_angle_est;
-    	S21_angle = S21_angle + S23_angle*st;
-    	S22_angle = S22_angle + sb;
-    	S23_angle = S23_angle;
-    	S31_angle = S31_angle + S33_angle*st;
-    	S32_angle = S32_angle;
-    	S33_angle = S33_angle + sr;
+		S11_angle = S11_angle + sa - CS12*st - S21_angle*st;
+		S12_angle = CS12;
+		S21_angle = CS11 + S21_angle;
+		S22_angle = S22_angle + sb;
 
 		//ANGLE CORRECTION
-    	float CK11 = 1/(Qa*Qg + Qa*S22_angle + Qa*S23_angle + Qa*S32_angle + Qa*S33_angle + Qg*S11_angle + S11_angle*S22_angle - S12_angle*S21_angle + S11_angle*S23_angle - S13_angle*S21_angle + S11_angle*S32_angle - S12_angle*S31_angle + S11_angle*S33_angle - S13_angle*S31_angle);
-    	float CK12 = Qg + S22_angle + S23_angle + S32_angle + S33_angle;
-    	float CK13 = S12_angle + S13_angle;
-    	float CK14 = S21_angle + S31_angle;
-    	float CK15 = Qa + S11_angle;
-    	float CK16 = S32_angle + S33_angle;
-    	float CK17 = S22_angle + S23_angle;
+		float CK = 1/(Qa + S11_angle);
 
-    	float Kt11 = CK11*CK12*S11_angle - CK11*CK13*CK14;
-    	float Kt12 = CK11*CK13*CK15 - CK11*CK13*S11_angle;
-    	float Kt21 = CK11*CK12*S21_angle - CK11*CK14*CK17;
-    	float Kt22 = CK11*CK15*CK17 - CK11*CK13*S21_angle;
-    	float Kt31 = CK11*CK12*S31_angle - CK11*CK14*CK16;
-    	float Kt32 = CK11*CK15*CK16 - CK11*CK13*S31_angle;
+		float Kt11 = CK*S11_angle;
+		float Kt21 = CK*S21_angle;
 
+		float Cx11 = angle_acc - angle_ekf;
 
-    	float Cx11 = angle_rate + angle_bias - gyro;
-    	float Cx12 = angle_acc - angle_ekf;
+		angle_ekf  = angle_ekf  + Cx11*Kt11;
+		angle_bias = angle_bias + Cx11*Kt21;
+		angle_rate = gyro - angle_bias;
 
-    	angle_ekf = angle_ekf - Cx11*Kt12 + Cx12*Kt11;
-    	angle_bias = angle_bias - Cx11*Kt22 + Cx12*Kt21;
-    	angle_rate = angle_rate - Cx11*Kt32 + Cx12*Kt31;
+		CS11 = Kt11 - 1;
 
-    	float CS11_angle = Kt32 - 1;
-    	float CS12_angle = Kt22 - 1;
-    	float CS13_angle = Kt11 - 1;
-
-    	S11_angle = - CS13_angle*S11_angle - Kt12*S21_angle - Kt12*S31_angle;
-    	S12_angle = - CS13_angle*S12_angle - Kt12*S22_angle - Kt12*S32_angle;
-    	S13_angle = - CS13_angle*S13_angle - Kt12*S23_angle - Kt12*S33_angle;
-    	S21_angle = - CS12_angle*S21_angle - Kt21*S11_angle - Kt22*S31_angle;
-    	S22_angle = - CS12_angle*S22_angle - Kt21*S12_angle - Kt22*S32_angle;
-    	S23_angle = - CS12_angle*S23_angle - Kt21*S13_angle - Kt22*S33_angle;
-    	S31_angle = - CS11_angle*S31_angle - Kt31*S11_angle - Kt32*S21_angle;
-    	S32_angle = - CS11_angle*S32_angle - Kt31*S12_angle - Kt32*S22_angle;
-    	S33_angle = - CS11_angle*S33_angle - Kt31*S13_angle - Kt32*S23_angle;
-
-
+		S11_angle = -CS11*S11_angle;
+		S12_angle = -CS11*S12_angle;
+		S21_angle = S21_angle - Kt21*S11_angle;
+		S22_angle = S22_angle - Kt21*S12_angle;
     }
-
     switch(euler_angle) {
     		case ROLL:
     			 roll_ekf = angle_ekf ;
@@ -404,18 +349,10 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle, bool update_enable) 
     			 roll_bias = angle_bias;
     			 roll_acc = angle_acc ;
 
-    			 if(update_enable)
-    			 {
-					 S11_roll = S11_angle;
-					 S12_roll = S12_angle;
-					 S13_roll = S13_angle;
-					 S21_roll = S21_angle;
-					 S22_roll = S22_angle;
-					 S23_roll = S23_angle;
-					 S31_roll = S31_angle;
-					 S32_roll = S32_angle;
-					 S33_roll = S33_angle;
-    			 }
+    			 S11_roll = S11_angle;
+    			 S12_roll = S12_angle;
+    			 S21_roll = S21_angle;
+    			 S22_roll = S22_angle;
     			break;
 
     		case PITCH:
@@ -424,41 +361,28 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle, bool update_enable) 
     			 pitch_bias = angle_bias;
     			 pitch_acc = angle_acc ;
 
-    			 if(update_enable)
-    			 {
-					 S11_pitch = S11_angle;
-					 S12_pitch = S12_angle;
-					 S13_pitch = S13_angle;
-					 S21_pitch = S21_angle;
-					 S22_pitch = S22_angle;
-					 S23_pitch = S23_angle;
-					 S31_pitch = S31_angle;
-					 S32_pitch = S32_angle;
-					 S33_pitch = S33_angle;
-    			 }
+    			 S11_pitch = S11_angle;
+    			 S12_pitch = S12_angle;
+    			 S21_pitch = S21_angle;
+    			 S22_pitch = S22_angle;
     			break;
 
     		case YAW:
     			 yaw_ekf = angle_ekf ;
-    			 yaw_rate = angle_rate;
+    			 //yaw_rate = angle_rate;
+    			 yaw_rate = gyroZ;
     			 yaw_bias = angle_bias;
     			 yaw_acc = angle_acc ;
-    			 if(update_enable)
-    			 {
-					 S11_yaw = S11_angle;
-					 S12_yaw = S12_angle;
-					 S13_yaw = S13_angle;
-					 S21_yaw = S21_angle;
-					 S22_yaw = S22_angle;
-					 S23_yaw = S23_angle;
-					 S31_yaw = S31_angle;
-					 S32_yaw = S32_angle;
-					 S33_yaw = S33_angle;
-    			 }
+
+    			 S11_yaw = S11_angle;
+    			 S12_yaw = S12_angle;
+    			 S21_yaw = S21_angle;
+    			 S22_yaw = S22_angle;
     			break;
 
     }
 }
+
 
 void Kalman_Filtresi::EKF_Alt() {
     float u = acc_vert;
@@ -611,57 +535,59 @@ void Kalman_Filtresi::NED2Body() {
 void Kalman_Filtresi::Run() {
 
   acc_pos_x_med += acc_pos_x;
-//  float accX = acc[0];
-//  float accY = acc[1];
-//  float accZ = acc[2];
+  float accX = acc[0];
+  float accY = acc[1];
+  float accZ = acc[2];
 
 
 
 
-    if(gyro_ready) {
+//    if(gyro_ready) {
 
     pos_ekf_counter++;
-    EKF_Attitude(ROLL,true);
-    EKF_Attitude(PITCH,true);
-    EKF_Attitude(YAW,true);
+    EKF_Attitude(ROLL, ekf_update);
+    EKF_Attitude(PITCH, ekf_update);
+    EKF_Attitude(YAW, ekf_update);
+
+
 
     //EKF_Alt();
     //EKF_Pos();
 
     //EKF_Cam();
 
-    }
+//    }
 
 
-    else {
-/*
-    	for(int i=0; i<2000; i++) {
-    		  float acctop=sqrt(accX*accX+accY*accY+accZ*accZ);
+//    else {
+//    	uint16_t SAMPLE_NUMBER = 5000;
+//    	for(int i=0; i<SAMPLE_NUMBER; i++) {
+//    		  float acctop=sqrt(accX*accX+accY*accY+accZ*accZ);
+//
+//    		  float pitch_acc =  asin(accX/acctop)*rad2deg;
+//    		  float roll_acc  =  asin(accY/acctop)*rad2deg ;
+//
+//        	ROLL_OFFSET += roll_acc;
+//        	PITCH_OFFSET += pitch_acc;
+//    	}
+//
+//    	ROLL_OFFSET  = -1*  ROLL_OFFSET  / SAMPLE_NUMBER;
+//    	PITCH_OFFSET = -1 * PITCH_OFFSET / SAMPLE_NUMBER;
+//
+//    	gyro_ready = true;
+//    }
 
-    		  float pitch_acc =  asin(accX/acctop)*rad2deg;
-    		  float roll_acc  =  asin(accY/acctop)*rad2deg ;
 
-        	ROLL_OFFSET += roll_acc;
-        	PITCH_OFFSET += pitch_acc;
-    	}
+	pitch_eski=pitch_comp;
+	roll_eski=roll_comp;
 
-    	ROLL_OFFSET  = -1*  ROLL_OFFSET  / 2000;
-    	PITCH_OFFSET = -1 * PITCH_OFFSET / 2000;
-    	*/
-    	gyro_ready = true;
-    }
+    state.angles[0] = roll_ekf*rad2deg;
+    state.angles[1] = pitch_ekf*rad2deg;
+    state.angles[2] = -1*yaw_ekf*rad2deg;
 
-
-	//pitch_eski=pitch_comp;
-	//roll_eski=roll_comp;
-
-    state.angles[0] = roll_ekf;
-    state.angles[1] = pitch_ekf;
-    state.angles[2] = -1*yaw_ekf;
-
-    state.rates[0] = roll_rate;
-    state.rates[1] = pitch_rate;
-    state.rates[2] = yaw_rate;
+    state.rates[0] = roll_rate*rad2deg;
+    state.rates[1] = pitch_rate*rad2deg;
+    state.rates[2] = yaw_rate*rad2deg;
 
     state.bias[0] = roll_bias;
     state.bias[1] = pitch_bias;
