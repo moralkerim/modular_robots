@@ -133,6 +133,9 @@ class Kalman_Filtresi {
         lpf lpf_yaw   = lpf(0.8544, 0.07282, 0.07282);
         lpf cam_filt  = lpf(0.9244, 0.03779, 0.03779);
         lpf vel_gps_filt   = lpf(-0.8526, 0.9263, 0.9263);
+        lpf accx_lpf = lpf(0.5219, 0.2391, 0.2391);
+        lpf accy_lpf = lpf(0.5219, 0.2391, 0.2391);
+        lpf accz_lpf = lpf(0.5219, 0.2391, 0.2391);
 
 
         void EKF_Attitude(euler_angle euler_angle, bool update_enable);

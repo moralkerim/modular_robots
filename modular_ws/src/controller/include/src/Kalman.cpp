@@ -245,8 +245,10 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle, bool update_enable) 
 
 	  float acctop=sqrt(accX*accX+accY*accY+accZ*accZ);
 
+
+
 	  pitch_acc =  asin(accX/g) + PITCH_OFFSET*deg2rad;
-	  roll_acc  =  asin(accY/g) + ROLL_OFFSET*deg2rad;
+	  roll_acc  =  atan(accY/accZ) + ROLL_OFFSET*deg2rad;
 
 	 // roll_gyro_comp  = gyro[0] * st;
 	 // pitch_gyro_comp = gyro[1] * st;
@@ -257,7 +259,7 @@ void Kalman_Filtresi::EKF_Attitude(euler_angle euler_angle, bool update_enable) 
 
 	switch(euler_angle) {
 	default:
-		Qa = 5e8;
+		Qa = 5e4;
 		break;
 
 	case YAW:
