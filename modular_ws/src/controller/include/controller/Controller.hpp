@@ -45,8 +45,8 @@ class Controller {
 
         //SINGLE UAV
 
-        float Kp_roll = 0.35; //0.3
-        float Ki_roll = 0.08;  //0.008
+        float Kp_roll = 0.45; //0.3
+        float Ki_roll = 0.08;  //0.08
         float Kd_roll = 0.008; //0.015
 
         float Kp_pitch = Kp_roll;	//0.8

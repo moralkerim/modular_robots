@@ -28,7 +28,7 @@ void Controller::Run (void) {
     float K_swarm;
 
     if(swarm) {
-    	K_swarm = 3;
+    	K_swarm = 2;
     }
 
     else {
